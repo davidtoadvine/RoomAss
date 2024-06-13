@@ -1,0 +1,105 @@
+{% extends "base_generic.html" %} {% block content %}
+<h1>Available Rooms</h1>
+
+<form method="post" action="{% url 'home' %}" id="dateRangeForm">
+  {% csrf_token %}
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label for="start_date">Start Date (@ Noon)</label>
+      <input
+        type="date"
+        class="form-control"
+        id="start_date"
+        name="start_date"
+        value="{{ start_date }}"
+      />
+    </div>
+    <div class="form-group col-md-4">
+      <label for="end_date">End Date (@ Noon)</label>
+      <input
+        type="date"
+        class="form-control"
+        id="end_date"
+        name="end_date"
+        value="{{ end_date }}"
+      />
+    </div>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Building / Section</th>
+      <th scope="col">Owner</th>
+      <th scope="col">Available Until Noon on...</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for room, availability_date in available_rooms_info %}
+    <tr>
+      <td>{{ room.section.building.name }} / {{ room.section.name }}</td>
+      <td>
+        {% if room.owner %} {{ room.owner.name }} {% else %} None {% endif %}
+      </td>
+      <td>
+        {% if availability_date %} {{ availability_date|date:"m-d-Y" }} {%else%}
+        N/A {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  var startDateInput = document.getElementById("start_date");
+  var endDateInput = document.getElementById("end_date");
+  var previousStartDate = startDateInput.value;
+  var previousEndDate = endDateInput.value;
+
+  startDateInput.addEventListener("change", function () {
+    if (startDateInput.value >= endDateInput.value) {
+      var startDateObj = new Date(startDateInput.value);
+      var endDateObj = new Date(startDateObj);
+      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+      endDateInput.value = endDateObj.toISOString().split("T")[0];
+    }
+    if (!validateAndSubmit()) {
+      startDateInput.value = previousStartDate;
+    } else {
+      previousStartDate = startDateInput.value;
+    }
+  });
+
+  endDateInput.addEventListener("change", function () {
+    if (!validateAndSubmit()) {
+      endDateInput.value = previousEndDate;
+    } else {
+      previousEndDate = endDateInput.value;
+    }
+  });
+
+  function validateAndSubmit() {
+    var startDate = startDateInput.value;
+    var endDate = endDateInput.value;
+    var now = new Date();
+
+    if (startDate && endDate) {
+      var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
+      var endDateObj = new Date(endDate + "T11:59:59"); // Set time to end of the day
+
+      if (startDateObj < now) {
+        alert("Start date cannot be in the past.");
+        return false;
+      } else if (startDateObj > endDateObj) {
+        alert("Invalid date range.");
+        return false;
+      } else {
+        document.getElementById("dateRangeForm").submit();
+        return true;
+      }
+    }
+    return true;
+  }
+</script>
+{% endblock %}
