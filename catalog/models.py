@@ -49,8 +49,8 @@ class Room(models.Model):
         # Otherwise an occupancy ending on at 11:59am would make room unavailable for new afternoon occupancy.
         # Likewise occupancy beginning on an afternoon would make whole day unavailable.
         # Unsure why comparisons would not work as intended.
-        # start_date = start_date + timedelta(days=1)
-        # end_date = end_date - timedelta(days=1)
+        #start_date = start_date + timedelta(days=1)
+        #end_date = end_date - timedelta(days=1)
 
         # Convert dates to UTC for accurate comparisons
         if timezone.is_naive(start_date):
@@ -61,20 +61,23 @@ class Room(models.Model):
         # start_date_utc = start_date.astimezone(pytz.utc)
         # end_date_utc = end_date.astimezone(pytz.utc)
       
-        
+        print(self.__str__)
         occupancy_events = CustomEvent.objects.filter(
             calendar=self.calendar,
             event_type='occupancy',
             start__lt=end_date,
             end__gt=start_date
         )
+        print(occupancy_events.exists())
 
         availability_events = CustomEvent.objects.filter(
-            calendar=self.calendar,
-            event_type='availability',
-            start__lte=end_date,
-            end__gt=start_date
-        )
+    calendar=self.calendar,
+    event_type='availability',
+    start__lte=end_date,
+    end__gte=end_date  # Ensure availability end is after or equal to booking end date
+)
+        print(availability_events.exists())
+
         # Detailed debugging output
         # print(f"Start Date UTC: {start_date_utc}, End Date UTC: {end_date_utc}")
         # print(f"Occupancy Events: {occupancy_events}")
@@ -122,6 +125,7 @@ class Room(models.Model):
         ).first()
 
         if not current_availability:
+            print("No Current Availability")
             return None
 
         # Fetch next occupancy event within the availability window
@@ -135,6 +139,7 @@ class Room(models.Model):
         if next_occupancy:
             return min(current_availability.end, next_occupancy.start)
         else:
+            print("returning current availability.end")
             return current_availability.end
 
   def save(self, *args, **kwargs):

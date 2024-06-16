@@ -44,7 +44,7 @@
       </td>
       <td>
         {% if availability_date %} {{ availability_date|date:"m-d-Y" }} {%else%}
-        N/A {% endif %}
+        No Further Availability {% endif %}
       </td>
       <td>
         <form
@@ -115,7 +115,7 @@
 
     if (startDate && endDate) {
       var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
-      var endDateObj = new Date(endDate + "T11:59:59"); // Set time to end of the day
+      var endDateObj = new Date(endDate + "T11:59:59"); // Set time to just before noon
 
       if (startDateObj < now) {
         alert("Start date cannot be in the past.");
