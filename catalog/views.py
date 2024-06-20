@@ -23,16 +23,7 @@ def room_detail(request, room_id):
     return render(request, 'catalog/room_detail.html', {'room': room})
 
 def home(request):
-    if request.method == "GET":
-        print("GETGETGETGET")
-    if request.method == "POST":
-        print("POSTPOSTPOST")
-
     rooms = Room.objects.all()
-        # Get the current local date and the next day's date
-    local_now = timezone.localtime(timezone.now())
-    today = local_now.date()
-    tomorrow = today + timedelta(days=1)
 
     # Get start and end date from the request
     start_date_str = request.POST.get('start_date')
@@ -44,7 +35,10 @@ def home(request):
     start_time = time(23, 59)  # 11:59 PM
     end_time = time(11, 59)   # 11:59 AM
 
-
+    # Get the current local date and the next day's date
+    local_now = timezone.localtime(timezone.now())
+    today = local_now.date()
+    tomorrow = today + timedelta(days=1)
 
     default_start_date = today
     default_end_date = tomorrow
@@ -130,6 +124,8 @@ def create_booking(request):
             room_id = form.cleaned_data['room_id']
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
+            guest = form.cleaned_data['guest_name']
+            host = form.cleaned_data['host_name']
             room = Room.objects.get(id=room_id)
 
             # Convert dates to datetime objects with specific time (noon)
@@ -148,7 +144,7 @@ def create_booking(request):
                     event_type='occupancy',
                     start=start_date,
                     end=end_date,
-                    title="Booking: Guest by Host",
+                    title= f"Booking: {guest} by {host}",
                     description = "Meaningful Description"
                 )
                 booking_event.save()

@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from .views import home, create_booking
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('', views.home, name='home'),  # Home page
     path('buildings/', views.building_list, name='building_list'),
@@ -9,5 +11,7 @@ urlpatterns = [
     path('rooms/<int:room_id>/', views.room_detail, name='room_detail'),
     path('persons/<int:person_id>/', views.person_detail, name='person_detail'),
     path('create_booking/', create_booking, name='create_booking'),
-
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

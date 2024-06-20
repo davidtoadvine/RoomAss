@@ -40,7 +40,8 @@
     <tr>
       <td>{{ room.section.building.name }} / {{ room.section.name }}</td>
       <td>
-        {% if room.owner %} {{ room.owner.name }} {% else %} None {% endif %}
+        {% if room.owner %} {{ room.owner.name }} {% else %} Unassigned
+        {%endif%}
       </td>
       <td>
         {% if availability_date %} {{ availability_date|date:"m-d-Y" }} {%else%}
@@ -66,7 +67,10 @@
         <button
           type="submit"
           class="btn btn-primary"
-          onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}', '{{ room.section.name }}', '{{ start_date }}', '{{ end_date }}')"
+          onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}',
+          '{{ room.section.name }}', '{{ start_date }}', '{{ end_date }}',
+          '{{ room.image.url }}'
+          )"
         >
           Book Room
         </button>
@@ -86,6 +90,7 @@
   </tbody>
 </table>
 <!-- Booking Modal -->
+{% load static %}
 <div
   class="modal fade"
   id="bookingModal"
@@ -110,32 +115,56 @@
           </button>
         </div>
         <div class="modal-body">
-          <input type="hidden" name="room_id" id="bookingRoomId" />
-          <div class="form-group">
-            <label for="guestName">Guest Name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="guestName"
-              name="guest_name"
-              required
-            />
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type="hidden" name="room_id" id="bookingRoomId" />
+
+              <input
+                type="hidden"
+                name="start_date"
+                id="bookingStartDateHidden"
+              />
+              <input type="hidden" name="end_date" id="bookingEndDateHidden" />
+              <div class="form-group">
+                <label for="guestName">Guest Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="guestName"
+                  name="guest_name"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="hostName">Host Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="hostName"
+                  name="host_name"
+                  required
+                />
+              </div>
+              <p>Room Number: <span id="bookingRoomNumber"></span></p>
+              <p>Building: <span id="bookingBuildingName"></span></p>
+              <p>Section: <span id="bookingSectionName"></span></p>
+              <p>Start Date: <span id="bookingStartDate"></span></p>
+              <p>End Date: <span id="bookingEndDate"></span></p>
+            </div>
+            <!-- Image Column -->
+
+            <div class="col-md-6">
+              <!-- Image Column -->
+              <img
+                id="bookingRoomImage"
+                src=""
+                alt="Room Image"
+                class="img-fluid"
+                style="max-width: 200px; max-height: 400px"
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <label for="hostName">Host Name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="hostName"
-              name="host_name"
-              required
-            />
-          </div>
-          <p>Room Number: <span id="bookingRoomNumber"></span></p>
-          <p>Building: <span id="bookingBuildingName"></span></p>
-          <p>Section: <span id="bookingSectionName"></span></p>
-          <p>Start Date: <span id="bookingStartDate"></span></p>
-          <p>End Date: <span id="bookingEndDate"></span></p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -207,45 +236,45 @@
     return true;
   }
 
-  function confirmBooking(event) {
-    event.preventDefault(); // Prevent the form from submitting immediately
+  // function confirmBooking(event) {
+  //   event.preventDefault(); // Prevent the form from submitting immediately
 
-    let startDate = event.target.querySelector(
-      'input[name="start_date"]'
-    ).value;
-    startDate =
-      startDate.substring(5, startDate.length) +
-      "-" +
-      startDate.substring(0, 4);
-    let endDate = event.target.querySelector('input[name="end_date"]').value;
-    endDate =
-      endDate.substring(5, endDate.length) + "-" + endDate.substring(0, 4);
+  //   let startDate = event.target.querySelector(
+  //     'input[name="start_date"]'
+  //   ).value;
+  //   startDate =
+  //     startDate.substring(5, startDate.length) +
+  //     "-" +
+  //     startDate.substring(0, 4);
+  //   let endDate = event.target.querySelector('input[name="end_date"]').value;
+  //   endDate =
+  //     endDate.substring(5, endDate.length) + "-" + endDate.substring(0, 4);
 
-    let roomOwner = event.target.querySelector(
-      'input[name="room_owner"]'
-    ).value;
-    if (roomOwner == "None") {
-      const confirmation = confirm(
-        `Confirm booking for: \n
-        Unassigned room \n
-          START = 12:01pm on ${startDate} \n
-             END = 11:59am on ${endDate}`
-      );
-      if (confirmation) {
-        event.target.submit(); // Submit the form if the user confirms
-      }
-    } else {
-      const confirmation = confirm(
-        `Confirm booking for: \n
-        ${roomOwner}'s room \n
-          START = 12:01pm on ${startDate} \n
-             END = 11:59am on ${endDate}`
-      );
-      if (confirmation) {
-        event.target.submit(); // Submit the form if the user confirms
-      }
-    }
-  }
+  //   let roomOwner = event.target.querySelector(
+  //     'input[name="room_owner"]'
+  //   ).value;
+  //   if (roomOwner == "Unassigned") {
+  //     const confirmation = confirm(
+  //       `Confirm booking for: \n
+  //       Unassigned room \n
+  //         START = 12:01pm on ${startDate} \n
+  //            END = 11:59am on ${endDate}`
+  //     );
+  //     if (confirmation) {
+  //       event.target.submit(); // Submit the form if the user confirms
+  //     }
+  //   } else {
+  //     const confirmation = confirm(
+  //       `Confirm booking for: \n
+  //       ${roomOwner}'s room \n
+  //         START = 12:01pm on ${startDate} \n
+  //            END = 11:59am on ${endDate}`
+  //     );
+  //     if (confirmation) {
+  //       event.target.submit(); // Submit the form if the user confirms
+  //     }
+  //   }
+  // }
 </script>
 <script>
   function showBookingForm(
@@ -255,12 +284,15 @@
     buildingName,
     sectionName,
     startDate,
-    endDate
+    endDate,
+    roomImageUrl
   ) {
     event.preventDefault();
     console.log(startDate);
     console.log(endDate);
     // Set the form values
+    $("#bookingStartDateHidden").val(startDate);
+    $("#bookingEndDateHidden").val(endDate);
     $("#bookingRoomId").val(roomId);
     $("#bookingRoomNumber").text(roomNumber);
     $("#bookingBuildingName").text(buildingName);
@@ -268,6 +300,12 @@
     $("#bookingStartDate").text(startDate);
     $("#bookingEndDate").text(endDate);
 
+    // Set the room image
+    if (roomImageUrl) {
+      $("#bookingRoomImage").attr("src", roomImageUrl).show();
+    } else {
+      $("#bookingRoomImage").hide();
+    }
     // Show the modal
     $("#bookingModal").modal("show");
   }

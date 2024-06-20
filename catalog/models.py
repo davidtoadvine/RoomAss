@@ -26,6 +26,7 @@ class Room(models.Model):
   #available = models.BooleanField()
   calendar = models.OneToOneField(Calendar, on_delete=models.CASCADE, null=True, blank=True, related_name='room_calendar')
   owner = models.OneToOneField('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='room_owner')
+  image = models.ImageField(upload_to='room_images/', null=True, blank=True)
   
   @staticmethod
   def create_room_calendar(room):
@@ -68,7 +69,6 @@ class Room(models.Model):
             start__lt=end_date,
             end__gt=start_date
         )
-        print(occupancy_events.exists())
 
         availability_events = CustomEvent.objects.filter(
     calendar=self.calendar,
@@ -76,18 +76,7 @@ class Room(models.Model):
     start__lte=end_date,
     end__gte=end_date  # Ensure availability end is after or equal to booking end date
 )
-        print(availability_events.exists())
 
-        # Detailed debugging output
-        # print(f"Start Date UTC: {start_date_utc}, End Date UTC: {end_date_utc}")
-        # print(f"Occupancy Events: {occupancy_events}")
-        # print(f"Availability Events: {availability_events}")
-
-        # Print details of fetched events for debugging
-        # for event in occupancy_events:
-        #     print(f"Occupancy Event - Start: {event.start}, End: {event.end}")
-        # for event in availability_events:
-        #     print(f"Availability Event - Start: {event.start}, End: {event.end}")
 
     
         # Check for available and not occupied
@@ -97,24 +86,10 @@ class Room(models.Model):
         if not self.calendar:
             print('no calendar')
             return None
-
-        # Ensure start_date is timezone-aware and convert to UTC for consistent comparison
-        start_date = start_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            
         if timezone.is_naive(start_date):
             start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
         start_date_utc = start_date.astimezone(pytz.utc)
-
-        # print(f"start_date_utc: {start_date_utc}")
-
-        # Fetch and print all availability events for debugging
-        # all_availabilities = CustomEvent.objects.filter(
-        #     calendar=self.calendar,
-        #     event_type='availability'
-        # )
-        # for availability in all_availabilities:
-        #     availability_start_utc = availability.start.astimezone(pytz.utc)
-        #     availability_end_utc = availability.end.astimezone(pytz.utc)
-            # print(f"availability: start={availability_start_utc}, end={availability_end_utc}")
 
         # Fetch current availability event
         current_availability = CustomEvent.objects.filter(
@@ -125,7 +100,6 @@ class Room(models.Model):
         ).first()
 
         if not current_availability:
-            print("No Current Availability")
             return None
 
         # Fetch next occupancy event within the availability window
@@ -139,28 +113,31 @@ class Room(models.Model):
         if next_occupancy:
             return min(current_availability.end, next_occupancy.start)
         else:
-            print("returning current availability.end")
             return current_availability.end
 
   def save(self, *args, **kwargs):
+        old_owner = None
+        if self.pk:  # If the room already exists
+            old_owner = Room.objects.get(pk=self.pk).owner
         
         # Ensure the room has a calendar
         if not self.calendar:
             self.calendar = Calendar.objects.create()
 
         # Update the calendar name
-        if (self.owner):
-          self.calendar.name = f"{self.owner.name}'s Calendar"  # You can customize this as needed
+        if self.owner:
+            self.calendar.name = f"{self.owner.name}'s Calendar"  # You can customize this as needed
         else:
-          self.calendar.name = f"{self.__str__()}'s Calendar"
+            self.calendar.name = f"Room {self.number} in {self.section}"
         self.calendar.save()
 
         super().save(*args, **kwargs)
+
         # Create a specific datetime object far in the future
         never_date = datetime(2999, 4, 20, 12, 0, 0)  # April 20, 2999 at noon
-
         # Make it timezone-aware
         never_date = timezone.make_aware(never_date, timezone.get_current_timezone())
+
         if not self.owner:
             # Create or update a permanent availability event
             CustomEvent.objects.update_or_create(
@@ -168,16 +145,16 @@ class Room(models.Model):
                 event_type='availability',
                 defaults={
                     'start': timezone.now(),
-                    'end':   never_date
+                    'end': never_date
                 }
             )
         else:
-            # Ensure no availability event exists for this room if it has an owner
-            CustomEvent.objects.filter(
-                calendar=self.calendar,
-                event_type='availability'
-            ).delete()
-        
+            if old_owner != self.owner:
+                # Owner has changed, delete availability events
+                CustomEvent.objects.filter(
+                    calendar=self.calendar,
+                    event_type='availability'
+                ).delete()
       
   
   
@@ -201,6 +178,4 @@ class CustomEvent(Event):
         if timezone.is_naive(self.end):
             self.end = timezone.make_aware(self.end, timezone.get_current_timezone())
         super(CustomEvent, self).save(*args, **kwargs)
-
-#def create_booking(start_date,end_date):
     

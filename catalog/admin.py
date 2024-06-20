@@ -5,8 +5,6 @@ from .models import Building, Section, Room, Person, CustomEvent
 
 #admin.site.register(Building)
 admin.site.register(Section)
-#admin.site.register(Room)
-#admin.site.register(Person)
 
 
 class SectionInline(admin.TabularInline):
