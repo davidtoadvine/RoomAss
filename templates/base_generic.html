@@ -38,23 +38,26 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
+            
             <li class="nav-item">
-              <a class="nav-link" href="#">Home</a>
+              <a class="nav-link" href="{% url 'home' %}">Home</a>
+            </li>
+            {% if user.person.room%}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'my_room' %}">My Room{%if children%}s{%endif%}</a>
+            </li>
+            {%endif%}
+            <li class="nav-item">
+              <a class="nav-link" href="#">Test</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Rooms</a>
+              <a class="nav-link" href="#">Test</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Buildings</a>
+              <a class="nav-link" href="#">Test</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Sections</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Owners</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Contact</a>
+              <a class="nav-link" href="#">Test</a>
             </li>
           </ul>
           <ul class="navbar-nav ml-auto">

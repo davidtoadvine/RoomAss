@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 # Create your views here.
-from .models import Room, Building,Section, Person
+from .models import Room, Building, Section, Person
+
 from datetime import timedelta, time
 from django.utils import timezone
 import pytz
@@ -18,14 +19,39 @@ def section_detail(request, section_id):
     section = get_object_or_404(Section, pk=section_id)
     return render(request, 'catalog/section_detail.html', {'section': section})
 
-def room_detail(request, room_id):
-    room = get_object_or_404(Room, pk=room_id)
-    return render(request, 'catalog/room_detail.html', {'room': room})
+def my_room(request):
+    person = request.user.person
+    room = person.room
+    calendar = room.calendar
+
+    availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability')
+    occupancy_events = CustomEvent.objects.filter(calendar = calendar, event_type = 'occupancy')
+
+    # Get events for each child
+    children = person.children.all()
+
+    children_events = {}
+    for child in children:
+        child_calendar = Room.objects.filter(owner=child).first().calendar
+        child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability')
+        child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy')
+        children_events[child] = {
+            'availability': child_availability_events,
+            'occupancy': child_occupancy_events
+        }
+
+    context = {
+        'room': room,
+        'availability_events': availability_events,
+        'occupancy_events': occupancy_events,
+        'children_events': children_events,
+        'children': children
+    }
+    return render(request, 'catalog/my_room.html', context)
 
 def home(request):
-    rooms = Room.objects.all()
-
-    # Get start and end date from the request
+    rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
+        # Get start and end date from the request
     start_date_str = request.POST.get('start_date')
     end_date_str = request.POST.get('end_date')
 
@@ -125,8 +151,9 @@ def create_booking(request):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             guest = form.cleaned_data['guest_name']
-            host = form.cleaned_data['host_name']
+            host_name = form.cleaned_data['host_name']
             room = Room.objects.get(id=room_id)
+            host_object = request.user
 
             # Convert dates to datetime objects with specific time (noon)
             start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
@@ -144,8 +171,9 @@ def create_booking(request):
                     event_type='occupancy',
                     start=start_date,
                     end=end_date,
-                    title= f"Booking: {guest} by {host}",
-                    description = "Meaningful Description"
+                    title= f"Booking: {guest} hosted by {host_name}",
+                    description = "Meaningful Description",
+                    creator = host_object
                 )
                 booking_event.save()
                 return redirect('home')

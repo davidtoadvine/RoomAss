@@ -4,6 +4,7 @@ from django.utils import timezone
 import pytz
 from datetime import datetime
 from datetime import timedelta
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Building(models.Model):
@@ -25,7 +26,7 @@ class Room(models.Model):
   number = models.IntegerField()
   #available = models.BooleanField()
   calendar = models.OneToOneField(Calendar, on_delete=models.CASCADE, null=True, blank=True, related_name='room_calendar')
-  owner = models.OneToOneField('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='room_owner')
+  owner = models.OneToOneField('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
   image = models.ImageField(upload_to='room_images/', null=True, blank=True)
   
   @staticmethod
@@ -162,6 +163,9 @@ class Room(models.Model):
 class Person(models.Model):
   name = models.CharField(max_length=255)
   contact_email = models.EmailField(null=True, blank=True)
+  user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
+  parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+
   def __str__(self):
     return self.name
 

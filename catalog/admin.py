@@ -5,8 +5,8 @@ from .models import Building, Section, Room, Person, CustomEvent
 
 #admin.site.register(Building)
 admin.site.register(Section)
-
-
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 class SectionInline(admin.TabularInline):
     model = Section
     extra = 1  # Number of empty sections to displa
@@ -35,3 +35,17 @@ class PersonAdmin(admin.ModelAdmin):
 class CustomEventAdmin(admin.ModelAdmin):
     pass
 
+# Define an inline admin descriptor for Person model
+# which acts a bit like a singleton
+class PersonInline(admin.StackedInline):
+    model = Person
+    can_delete = False
+    verbose_name_plural = 'person'
+
+# Define a new User admin
+class UserAdmin(BaseUserAdmin):
+    inlines = (PersonInline,)
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)

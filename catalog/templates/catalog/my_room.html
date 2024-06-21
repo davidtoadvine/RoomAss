@@ -1,0 +1,59 @@
+{% extends "base_generic.html" %} {% block content %}
+<h1>{{room.owner}}'s Room{%if children%}s{%endif%}</h1>
+
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">{{ room.owner }}'s Room Availability</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a_event in availability_events %}
+      <tr>
+        <td colspan="2"><strong>Available:</strong> {{ a_event.start }} - {{ a_event.end }}</td>
+        <td>Edit</td>
+      </tr>
+      {% for o_event in occupancy_events %}
+        {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
+          <tr>
+            <td style="padding-left: 50px;" colspan="2">Occupied: {{ o_event.start }} to {{ o_event.end }} /// {{ o_event.title|slice:"9:" }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+      <tr>
+        <td colspan="3">+ Create new availability</td>
+      </tr>
+    {% endfor %}
+    {% for child, events in children_events.items %}
+      <tr>
+        <td colspan="2"><strong>{{ child.name }}'s Room Availability</strong></td>
+      </tr>
+      {% for a_event in events.availability %}
+        <tr>
+          <td style="padding-left: 20px;"><strong>Available:</strong> {{ a_event.start }} - {{ a_event.end }}</td>
+          <td>Edit</td>
+        </tr>
+      {% endfor %}
+      {% for o_event in events.occupancy %}
+        {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
+          <tr>
+            <td style="padding-left: 70px;" colspan="2">
+              Occupancy: {{ o_event.start }} to {{ o_event.end }} - {{ o_event.title|slice:":20" }}{% if o_event.title|length > 20 %}...{% endif %}
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+      <tr>
+        <td colspan="3">+ Create new availability</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+        
+    
+
+
+
+
+{% endblock %}
