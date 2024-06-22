@@ -5,7 +5,7 @@ from .models import Room, Building, Section, Person
 from datetime import timedelta, time
 from django.utils import timezone
 import pytz
-from .forms import BookingForm
+from .forms import BookingForm, AvailabilityForm
 
 
 def building_list(request):
@@ -21,16 +21,37 @@ def section_detail(request, section_id):
     return render(request, 'catalog/section_detail.html', {'section': section})
 
 def create_availability(request):
-    room = request.user.person.room
-    children = request.user.person.children.all()
+      if request.method == 'POST':
+        form = AvailabilityForm(request.POST)
+        if form.is_valid():
+            # Process the form data
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            room_id = form.cleaned_data['room_id']
+            room = get_object_or_404(Room, id=room_id)
 
+            # Convert dates to datetime objects with specific time (noon)
+            start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
+            end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
 
-    context = {
-    'room' : room,
-    'children' : children
-    }
+            # Ensure dates are timezone-aware
+            if timezone.is_naive(start_date):
+                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
+            if timezone.is_naive(end_date):
+                end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
 
-    return render(request, 'catalog/create_availability.html', context)
+            availability_event = CustomEvent(
+                    calendar=room.calendar,
+                    event_type='availability',
+                    start=start_date,
+                    end=end_date,
+                    title= f"Availability: Meaningful Title from My Room Form",
+                    description = "Meaningful Description",
+                    creator = room.owner.user
+                )
+            availability_event.save()
+            
+            return redirect('my_room')
 
 def my_room(request):
     person = request.user.person

@@ -2,7 +2,7 @@
 <h1>{{room.owner}}'s Room{%if children%}s{%endif%}</h1>
 {%load static%}
 
-
+{% load custom_filters %}
 <table class="table">
   <tbody>
     <tr>
@@ -11,31 +11,31 @@
         <button>Preferences</button>
       </div></th>
     </tr>
-  
+    
     {% for a_event in availability_events %}
       <tr>
         <td ><div class="flex-container">
-          <span>Available: {{ a_event.start }} - {{ a_event.end }}</span>
+          <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
           <button>Edit</button>
         </div></td>
       </tr>
 
-      {% if occupancy_events|length != 0%}
       {% for o_event in occupancy_events %}
         {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
           <tr>
-            <td style="padding-left: 50px;" >Booked: [{{ o_event.start }}] to [{{ o_event.end }}] /// {{ o_event.title|slice:"9:" }}</td>
+            <td style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
           </tr>
+          
+          
+
         {% endif %}
         {% endfor %}
-        {%else%}
-     <tr>
+        {% if found_occupancy is False %}
+            <tr>
           <td style="padding-left: 50px;" >Not Booked</td>
         </tr> 
-    
-{%endif%}
-       
-      
+        {%endif%}
+
     {% endfor %}
     
       <tr>
@@ -59,28 +59,20 @@
       {% for a_event in events.availability %}
         <tr>
           <td ><div class="flex-container">
-            <span>Available: {{ a_event.start }} - {{ a_event.end }}</span>
+            <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
             <button >Edit</button>
           </div></td>
         </tr>
       
-      {% if events.occupancy|length != 0%}
 
       {% for o_event in events.occupancy %}
         {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
           <tr>
-            <td style="padding-left: 70px;">
-              Occupancy: {{ o_event.start }} to {{ o_event.end }} - {{ o_event.title|slice:":20" }}{% if o_event.title|length > 20 %}...{% endif %}
-            </td>
+              <td style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+            
           </tr>
           {%endif%}
           {%endfor%}
-
-          {%else%}
-          <td style="padding-left: 50px;">Not Booked</td>
-
-
-        {% endif %}
       {% endfor %}
       
       <tr>
@@ -133,6 +125,9 @@
     
     // Show the modal
     $('#availabilityModal').modal('show');
+  }
+  function submitAvailabilityForm() {
+    $("#availabilityForm").submit();
   }
 </script>
 
