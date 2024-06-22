@@ -7,6 +7,7 @@ from django.utils import timezone
 import pytz
 from .forms import BookingForm
 
+
 def building_list(request):
     buildings = Building.objects.all()
     return render(request, 'catalog/building_list.html', {'buildings': buildings})
@@ -18,6 +19,18 @@ def building_detail(request, building_id):
 def section_detail(request, section_id):
     section = get_object_or_404(Section, pk=section_id)
     return render(request, 'catalog/section_detail.html', {'section': section})
+
+def create_availability(request):
+    room = request.user.person.room
+    children = request.user.person.children.all()
+
+
+    context = {
+    'room' : room,
+    'children' : children
+    }
+
+    return render(request, 'catalog/create_availability.html', context)
 
 def my_room(request):
     person = request.user.person

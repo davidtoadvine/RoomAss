@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import home, create_booking
+from .views import home, create_booking, create_availability
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
@@ -11,6 +11,7 @@ urlpatterns = [
     path('my_room/', views.my_room, name='my_room'),
     path('persons/<int:person_id>/', views.person_detail, name='person_detail'),
     path('create_booking/', create_booking, name='create_booking'),
+    path('create_availability', create_availability, name = 'create_availability'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

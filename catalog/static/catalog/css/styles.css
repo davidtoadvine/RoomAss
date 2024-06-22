@@ -8,13 +8,15 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom:25px;
+  margin-top: 25px;
+
 }
 
 .table th, .table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-  
 }
 
 .table th {
@@ -27,7 +29,7 @@
 
 .btn {
   padding: 5px 10px;
-  background-color: #007bff;
+  background-color: grey;
   color: white;
   border: none;
   border-radius: 3px;
@@ -36,4 +38,12 @@
 
 .btn:hover {
   background-color: #0056b3;
+}
+
+
+/* Flexbox container for aligning items within a table cell */
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

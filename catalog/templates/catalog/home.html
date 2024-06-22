@@ -47,27 +47,12 @@
         {% if availability_date %} {{ availability_date|date:"m-d-Y" }} {%else%}
         No Further Availability {% endif %}
       </td>
+      {% if user.is_authenticated %}
+
       <td>
-        <!-- <form
-          method="post"
-          action="{% url 'create_booking' %}"
-          onsubmit="confirmBooking(event)"
-        >
-          {% csrf_token %}
-          <input type="hidden" name="room_id" value="{{ room.id }}" />
-          <input type="hidden" name="start_date" value="{{ start_date }}" />
-          <input type="hidden" name="end_date" value="{{ end_date }}" />
-          <input type="hidden" name="room_owner" value="{{room.owner}}" />
-          <input type="hidden" name="building_name" value="{{room.building}}" />
-          <input
-            type="hidden"
-            name="room_location"
-            value="{{room.building.name}}"
-          /> -->
-        {% if user.is_authenticated %}
+        
         <button
           type="submit"
-          class="btn btn-primary"
           onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}',
           '{{ room.section.name }}', '{{ start_date }}', '{{ end_date }}',
           '{{ room.image.url }}'
@@ -91,8 +76,9 @@
     {% endfor %}
   </tbody>
 </table>
+
+{% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
 <!-- Booking Modal -->
-{% load static %}
 <div
   class="modal fade"
   id="bookingModal"
@@ -184,9 +170,11 @@
           </button>
         </div>
       </form>
+{% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
     </div>
   </div>
 </div>
+
 <script>
   // gathering date information
   var startDateInput = document.getElementById("start_date");
@@ -241,47 +229,6 @@
     return true;
   }
 
-  // function confirmBooking(event) {
-  //   event.preventDefault(); // Prevent the form from submitting immediately
-
-  //   let startDate = event.target.querySelector(
-  //     'input[name="start_date"]'
-  //   ).value;
-  //   startDate =
-  //     startDate.substring(5, startDate.length) +
-  //     "-" +
-  //     startDate.substring(0, 4);
-  //   let endDate = event.target.querySelector('input[name="end_date"]').value;
-  //   endDate =
-  //     endDate.substring(5, endDate.length) + "-" + endDate.substring(0, 4);
-
-  //   let roomOwner = event.target.querySelector(
-  //     'input[name="room_owner"]'
-  //   ).value;
-  //   if (roomOwner == "Unassigned") {
-  //     const confirmation = confirm(
-  //       `Confirm booking for: \n
-  //       Unassigned room \n
-  //         START = 12:01pm on ${startDate} \n
-  //            END = 11:59am on ${endDate}`
-  //     );
-  //     if (confirmation) {
-  //       event.target.submit(); // Submit the form if the user confirms
-  //     }
-  //   } else {
-  //     const confirmation = confirm(
-  //       `Confirm booking for: \n
-  //       ${roomOwner}'s room \n
-  //         START = 12:01pm on ${startDate} \n
-  //            END = 11:59am on ${endDate}`
-  //     );
-  //     if (confirmation) {
-  //       event.target.submit(); // Submit the form if the user confirms
-  //     }
-  //   }
-  // }
-</script>
-<script>
   function showBookingForm(
     event,
     roomId,
