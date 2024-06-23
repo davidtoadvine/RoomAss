@@ -101,15 +101,15 @@
             <div class="col-md-6">
               <input type="hidden" name="room_id" id="availabilityRoomId" />
               <label for="startDate">Start Date:</label>
-              <input type="date" name="start_date" id="startDate" class="form-control" />
+              <input type="date" name="start_date" id="startDate" class="form-control" value = {{start_date}} />
               <label for="endDate">End Date:</label>
-              <input type="date" name="end_date" id="endDate" class="form-control" />
+              <input type="date" name="end_date" id="endDate" class="form-control" value = {{end_date}} />
             </div> 
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Confirm Availability</button>
+          <button type="submit" class="btn btn-primary" onclick = "validateAndSubmitDate()">Confirm Availability</button>
         </div>
       </form>
     </div>
@@ -129,6 +129,59 @@
   function submitAvailabilityForm() {
     $("#availabilityForm").submit();
   }
+
+   // gathering date information
+   var startDateInput = document.getElementById("startDate");
+   var endDateInput = document.getElementById("endDate");
+   var previousStartDate = startDateInput.value;
+   var previousEndDate = endDateInput.value;
+ 
+   // listener for start date form
+   startDateInput.addEventListener("change", function () {
+     if (startDateInput.value >= endDateInput.value) {
+       var startDateObj = new Date(startDateInput.value);
+       var endDateObj = new Date(startDateObj);
+       endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+       endDateInput.value = endDateObj.toISOString().split("T")[0];
+     }
+     if (!validateAndSubmitDate()) {
+       startDateInput.value = previousStartDate;
+     } else {
+       previousStartDate = startDateInput.value;
+     }
+   });
+ 
+   // listener for end date form
+   endDateInput.addEventListener("change", function () {
+     if (!validateAndSubmitDate()) {
+       endDateInput.value = previousEndDate;
+     } else {
+       previousEndDate = endDateInput.value;
+     }
+   });
+ 
+   function validateAndSubmitDate() {
+     var startDate = startDateInput.value;
+     var endDate = endDateInput.value;
+     var now = new Date();
+ 
+     if (startDate && endDate) {
+       var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
+       var endDateObj = new Date(endDate + "T11:59:59"); // Set time to just before noon
+ 
+       if (startDateObj < now) {
+         alert("Start date cannot be in the past.");
+         return false;
+       } else if (startDateObj > endDateObj) {
+         alert("Invalid date range.");
+         return false;
+       } else {
+         document.getElementById("dateRangeForm").submit();
+         return true;
+       }
+     }
+     return true;
+   }
 </script>
 
 {% endblock %}

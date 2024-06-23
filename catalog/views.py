@@ -74,12 +74,22 @@ def my_room(request):
             'occupancy': child_occupancy_events
         }
 
+
+    # Get the current local date and the next day's date
+    local_now = timezone.localtime(timezone.now())
+    tomorrow = local_now.date() + timedelta(days=1)
+    dayafter = tomorrow + timedelta(days=1)
+
+
+
     context = {
         'room': room,
         'availability_events': availability_events,
         'occupancy_events': occupancy_events,
         'children_events': children_events,
-        'children': children
+        'children': children,
+        'start_date': tomorrow.strftime('%Y-%m-%d'),
+        'end_date': dayafter.strftime('%Y-%m-%d'),
     }
     return render(request, 'catalog/my_room.html', context)
 
