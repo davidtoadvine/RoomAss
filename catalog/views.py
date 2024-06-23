@@ -58,8 +58,8 @@ def my_room(request):
     room = person.room
     calendar = room.calendar
 
-    availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability')
-    occupancy_events = CustomEvent.objects.filter(calendar = calendar, event_type = 'occupancy')
+    availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
+    occupancy_events = CustomEvent.objects.filter(calendar = calendar, event_type = 'occupancy').order_by('start')
 
     # Get events for each child
     children = person.children.all()
@@ -67,8 +67,8 @@ def my_room(request):
     children_events = {}
     for child in children:
         child_calendar = Room.objects.filter(owner=child).first().calendar
-        child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability')
-        child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy')
+        child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
+        child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
         children_events[child] = {
             'availability': child_availability_events,
             'occupancy': child_occupancy_events
