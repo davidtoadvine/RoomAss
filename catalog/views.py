@@ -47,7 +47,7 @@ def create_availability(request):
                     event_type='availability',
                     start=start_date,
                     end=end_date,
-                    title= f"Availability: Meaningful Title from My Room Form",
+                    title= f"Availability, {request.user}",
                     description = "Meaningful Description",
                     creator = room.owner.user
                 )
@@ -85,7 +85,7 @@ def edit_availability(request):
             # Update the event with new dates
             event.start = start_date
             event.end = end_date
-            event.title = "Availability: Meaningful Title from My Room Form"
+            event.title = f"Availability, {request.user}"
             event.description = "Meaningful Description"
             event.creator = request.user  # Update creator if needed
 
@@ -286,7 +286,12 @@ def merge_overlapping_events(calendar):
             merged_events.append(event)
         else:
             last_event = merged_events[-1]
-            if event.start <= last_event.end:
+            
+            # Normalize times to 12:00 PM for comparison
+            normalized_last_end = normalize_time(last_event.end)
+            normalized_current_start = normalize_time(event.start)
+            
+            if normalized_current_start <= normalized_last_end:
                 # Overlapping or contiguous events
                 if event.end > last_event.end:
                     last_event.end = event.end
@@ -295,5 +300,10 @@ def merge_overlapping_events(calendar):
             else:
                 merged_events.append(event)
 
+
     for event in merged_events:
         event.save()
+
+
+def normalize_time(dt):
+    return dt.replace(hour=12, minute=0, second=0, microsecond=0)

@@ -9,8 +9,22 @@
     <tr>
       <th><div class="flex-container">
         <span>{{ room.owner }}'s Room</span>
-        <button>Preferences</button>
-      </div></th>
+
+        <div class="dropdown">
+
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          xxx
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="#">Anyone can stay here.</a>
+            <a class="dropdown-item" href="#">Only people well known to TO can stay here</a>
+            <a class="dropdown-item" href="#">Only TO members can stay here</a>
+          </div>
+
+        </div> 
+    
+       </div>
+      </th>
     </tr>
     
     {% for a_event in availability_events %}
@@ -57,8 +71,18 @@
       <tr>
         <th ><div class="flex-container">
           <span>{{ child.name }}'s Room</span>
-          <button>Preferences</button>
-        </div></th>
+          <div class="dropdown">
+
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            xxx
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#">Anyone can stay here.</a>
+              <a class="dropdown-item" href="#">Well known quantitites can stay here</a>
+              <a class="dropdown-item" href="#">Only TO members can stay here</a>
+            </div>
+  
+          </div>         </div></th>
       </tr>
       {% for a_event in events.availability %}
         <tr>
@@ -333,28 +357,25 @@
      }
    });
   
-   {% comment %} function validateDate() {
-     var startDate = startDateInput.value;
-     var endDate = endDateInput.value;
-     var now = new Date();
- 
-     if (startDate && endDate) {
-       var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
-       var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
- 
-       if (startDateObj < now) {
-         alert("Start date cannot be in the past.");
-         return false;
-       } else if (startDateObj > endDateObj) {
-         alert("Invalid date range.");
-         return false;
-       } else {
-         //document.getElementById("availabilityForm").submit(); 
-         return true;
-       }
-     }
-     return true;
-   } {% endcomment %}
+  
+
+
+
+
+   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.dropdown-item').forEach(function(item) {
+      item.addEventListener('click', function(event) {
+        var dropdownMenu = this.closest('.dropdown-menu');
+        var dropdownButton = dropdownMenu.previousElementSibling;
+
+        dropdownButton.textContent = this.textContent;
+
+        // Optionally, you can close the dropdown menu after selection
+        $(dropdownMenu).removeClass('show');
+        $(dropdownButton).dropdown('toggle');
+      });
+    });
+  });
 </script>
 
 {% endblock %}
