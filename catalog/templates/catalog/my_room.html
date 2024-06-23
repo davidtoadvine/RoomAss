@@ -1,8 +1,9 @@
 {% extends "base_generic.html" %} {% block content %}
 <h1>{{room.owner}}'s Room{%if children%}s{%endif%}</h1>
-{%load static%}
 
+{%load static%}
 {% load custom_filters %}
+
 <table class="table">
   <tbody>
     <tr>
@@ -14,10 +15,13 @@
     
     {% for a_event in availability_events %}
       <tr>
-        <td ><div class="flex-container">
+        <td >
+          <div class="flex-container">
           <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
-          <button>Edit</button>
-        </div></td>
+          <button type = "submit"
+          onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+        </div>
+      </td>
       </tr>
 
       {% for o_event in occupancy_events %}
@@ -43,7 +47,7 @@
       </tr>
   </tbody>
 </table>
-   
+
   
 
     {% for child, events in children_events.items %}
@@ -83,7 +87,7 @@
 {% endfor %}
 
 {% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
-<!-- Booking Modal -->
+<!-- Create Availability Modal -->
 <div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -109,7 +113,40 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary" onclick = "validateAndSubmitDate()">Confirm Availability</button>
+          <button type="submit" class="btn btn-primary" >Confirm Availability</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Availability Modal -->
+<div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' %}"> 
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" >Edit Availability</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type = "hidden" name = "event_id" id = "eventId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="editStartDate" class="form-control" />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="editEndDate" class="form-control" />
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Availability</button>
         </div>
       </form>
     </div>
@@ -117,6 +154,7 @@
 </div>
 
 <script>
+/////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////
   function showAvailabilityForm(event, roomId, name) {
     event.preventDefault();
     // Set the form values
@@ -126,25 +164,27 @@
     // Show the modal
     $('#availabilityModal').modal('show');
   }
+
   function submitAvailabilityForm() {
     $("#availabilityForm").submit();
   }
 
-   // gathering date information
-   var startDateInput = document.getElementById("startDate");
-   var endDateInput = document.getElementById("endDate");
-   var previousStartDate = startDateInput.value;
-   var previousEndDate = endDateInput.value;
- 
+////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+    // gathering date information
+  var startDateInput = document.getElementById("startDate");
+  var endDateInput = document.getElementById("endDate");
+  var previousStartDate = startDateInput.value;
+  var previousEndDate = endDateInput.value;
+
    // listener for start date form
-   startDateInput.addEventListener("change", function () {
-     if (startDateInput.value >= endDateInput.value) {
-       var startDateObj = new Date(startDateInput.value);
-       var endDateObj = new Date(startDateObj);
-       endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
-       endDateInput.value = endDateObj.toISOString().split("T")[0];
-     }
-     if (!validateAndSubmitDate()) {
+  startDateInput.addEventListener("change", function () {
+    if (startDateInput.value >= endDateInput.value) {
+      var startDateObj = new Date(startDateInput.value);
+      var endDateObj = new Date(startDateObj);
+      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+      endDateInput.value = endDateObj.toISOString().split("T")[0];
+    }
+    if (!validateDate()) {
        startDateInput.value = previousStartDate;
      } else {
        previousStartDate = startDateInput.value;
@@ -153,21 +193,21 @@
  
    // listener for end date form
    endDateInput.addEventListener("change", function () {
-     if (!validateAndSubmitDate()) {
+     if (!validateDate()) {
        endDateInput.value = previousEndDate;
      } else {
        previousEndDate = endDateInput.value;
      }
    });
- 
-   function validateAndSubmitDate() {
+  
+   function validateDate() {
      var startDate = startDateInput.value;
      var endDate = endDateInput.value;
      var now = new Date();
  
      if (startDate && endDate) {
-       var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
-       var endDateObj = new Date(endDate + "T11:59:59"); // Set time to just before noon
+       var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
+       var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
  
        if (startDateObj < now) {
          alert("Start date cannot be in the past.");
@@ -176,12 +216,145 @@
          alert("Invalid date range.");
          return false;
        } else {
-         document.getElementById("dateRangeForm").submit();
+         //document.getElementById("availabilityForm").submit(); 
          return true;
        }
      }
      return true;
    }
+   //////////////////////////////////////EDIT AVAILABILITY///////////////////////////////////////////////////////////////////////
+  function showEditAvailabilityForm(eventId, start, end) {
+    // Prevent default action if needed (e.g., if inside a form submission handler)
+    // event.preventDefault();
+    
+    // Use moment.js to parse the custom date format
+  const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+  const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+    
+    console.log(eventId)
+    console.log(start)
+    console.log(end)
+    
+    // Set the form values
+    $("#editStartDate").val(startDate);
+    $("#editEndDate").val(endDate);
+    $("#eventId").val(eventId);
+  
+    // Show the modal
+    $('#editAvailabilityModal').modal('show');
+  }
+  function submitEditAvailabilityForm(){
+    $("#editAvailabilityForm").submit();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+    // gathering date information
+  var startDateInput = document.getElementById("startDate");
+  var endDateInput = document.getElementById("endDate");
+  var previousStartDate = startDateInput.value;
+  var previousEndDate = endDateInput.value;
+
+   // listener for start date form
+  startDateInput.addEventListener("change", function () {
+    if (startDateInput.value >= endDateInput.value) {
+      var startDateObj = new Date(startDateInput.value);
+      var endDateObj = new Date(startDateObj);
+      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+      endDateInput.value = endDateObj.toISOString().split("T")[0];
+    }
+    if (!validateDate()) {
+       startDateInput.value = previousStartDate;
+     } else {
+       previousStartDate = startDateInput.value;
+     }
+   });
+ 
+   // listener for end date form
+   endDateInput.addEventListener("change", function () {
+     if (!validateDate()) {
+       endDateInput.value = previousEndDate;
+     } else {
+       previousEndDate = endDateInput.value;
+     }
+   });
+  
+   function validateDate() {
+     var startDate = startDateInput.value;
+     var endDate = endDateInput.value;
+     var now = new Date();
+ 
+     if (startDate && endDate) {
+       var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
+       var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+ 
+       if (startDateObj < now) {
+         alert("Start date cannot be in the past.");
+         return false;
+       } else if (startDateObj > endDateObj) {
+         alert("Invalid date range.");
+         return false;
+       } else {
+         //document.getElementById("availabilityForm").submit(); 
+         return true;
+       }
+     }
+     return true;
+   }
+
+   ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+    // gathering date information
+  var editStartDateInput = document.getElementById("editStartDate");
+  var editEndDateInput = document.getElementById("editEndDate");
+  var previousStartDate = editStartDateInput.value;
+  var previousEndDate = editEndDateInput.value;
+
+   // listener for start date form
+  editStartDateInput.addEventListener("change", function () {
+    if (editStartDateInput.value >= editEndDateInput.value) {
+      var startDateObj = new Date(editStartDateInput.value);
+      var endDateObj = new Date(startDateObj);
+      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+      editEndDateInput.value = endDateObj.toISOString().split("T")[0];
+    }
+    if (!validateDate()) {
+       editStartDateInput.value = previousStartDate;
+     } else {
+       previousStartDate = editStartDateInput.value;
+     }
+   });
+ 
+   // listener for end date form
+   editEndDateInput.addEventListener("change", function () {
+     if (!validateDate()) {
+       editEndDateInput.value = previousEndDate;
+     } else {
+       previousEndDate = editEndDateInput.value;
+     }
+   });
+  
+   {% comment %} function validateDate() {
+     var startDate = startDateInput.value;
+     var endDate = endDateInput.value;
+     var now = new Date();
+ 
+     if (startDate && endDate) {
+       var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
+       var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+ 
+       if (startDateObj < now) {
+         alert("Start date cannot be in the past.");
+         return false;
+       } else if (startDateObj > endDateObj) {
+         alert("Invalid date range.");
+         return false;
+       } else {
+         //document.getElementById("availabilityForm").submit(); 
+         return true;
+       }
+     }
+     return true;
+   } {% endcomment %}
 </script>
 
 {% endblock %}

@@ -29,3 +29,8 @@ class AvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     room_id = forms.IntegerField(widget=forms.HiddenInput())
+
+class EditAvailabilityForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    event_id = forms.IntegerField(widget=forms.HiddenInput())

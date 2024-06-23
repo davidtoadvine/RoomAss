@@ -12,6 +12,7 @@ urlpatterns = [
     path('persons/<int:person_id>/', views.person_detail, name='person_detail'),
     path('create_booking/', create_booking, name='create_booking'),
     path('create_availability', create_availability, name = 'create_availability'),
+    path('edit_availability', views.edit_availability, name = 'edit_availability')
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

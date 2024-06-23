@@ -5,7 +5,8 @@ from .models import Room, Building, Section, Person
 from datetime import timedelta, time
 from django.utils import timezone
 import pytz
-from .forms import BookingForm, AvailabilityForm
+from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm
+from django.http import HttpResponse
 
 
 def building_list(request):
@@ -23,6 +24,7 @@ def section_detail(request, section_id):
 def create_availability(request):
       if request.method == 'POST':
         form = AvailabilityForm(request.POST)
+
         if form.is_valid():
             # Process the form data
             start_date = form.cleaned_data['start_date']
@@ -50,9 +52,55 @@ def create_availability(request):
                     creator = room.owner.user
                 )
             availability_event.save()
-            
+            merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
+
+            return redirect('my_room')
+        
+        else:
             return redirect('my_room')
 
+def edit_availability(request):
+    if request.method == 'POST':
+        form = EditAvailabilityForm(request.POST)
+        
+        if form.is_valid():
+            # Process the form data
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            event_id = form.cleaned_data['event_id']
+
+            # Convert dates to datetime objects with specific time (noon)
+            start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
+            end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
+
+            # Ensure dates are timezone-aware
+            if timezone.is_naive(start_date):
+                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
+            if timezone.is_naive(end_date):
+                end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
+
+            # Fetch the existing event
+            event = get_object_or_404(CustomEvent, id=event_id)
+
+            # Update the event with new dates
+            event.start = start_date
+            event.end = end_date
+            event.title = "Availability: Meaningful Title from My Room Form"
+            event.description = "Meaningful Description"
+            event.creator = request.user  # Update creator if needed
+
+            event.save()
+            merge_overlapping_events(event.calendar)  # Call the function to handle overlaps
+            return redirect('my_room')  # Redirect to a relevant page after saving
+        else:
+            # Log form errors for debugging
+            print(form.errors)
+            return redirect('my_room')  # Redirect to a relevant page after saving
+
+            
+    
+    return HttpResponse("Invalid request method", status=405)
+        
 def my_room(request):
     person = request.user.person
     room = person.room
@@ -227,3 +275,25 @@ def create_booking(request):
             print(form.errors)  # Print form errors to the console for debugging
             return render(request, 'catalog/home.html', {'error': 'Form is invalid', 'form_errors': form.errors})
     return redirect('home')
+
+def merge_overlapping_events(calendar):
+    
+    events = CustomEvent.objects.filter(calendar = calendar, event_type='availability').order_by('start')
+    merged_events = []
+    
+    for event in events:
+        if not merged_events:
+            merged_events.append(event)
+        else:
+            last_event = merged_events[-1]
+            if event.start <= last_event.end:
+                # Overlapping or contiguous events
+                if event.end > last_event.end:
+                    last_event.end = event.end
+                last_event.save()
+                event.delete()
+            else:
+                merged_events.append(event)
+
+    for event in merged_events:
+        event.save()

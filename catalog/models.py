@@ -135,7 +135,7 @@ class Room(models.Model):
         super().save(*args, **kwargs)
 
         # Create a specific datetime object far in the future
-        never_date = datetime(2999, 4, 20, 12, 0, 0)  # April 20, 2999 at noon
+        never_date = datetime(2999, 12, 31, 12, 0, 0)  # April 20, 2999 at noon
         # Make it timezone-aware
         never_date = timezone.make_aware(never_date, timezone.get_current_timezone())
 

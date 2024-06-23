@@ -41,7 +41,7 @@
 }
 
 
-/* Flexbox container for aligning items within a table cell */
+/* Flexbox container for aligning items within a table cell */ 
 .flex-container {
   display: flex;
   justify-content: space-between;
