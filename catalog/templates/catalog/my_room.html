@@ -29,7 +29,7 @@
     
     {% for a_event in availability_events %}
       <tr>
-        <td >
+         <td class = "availability-cell">
           <div class="flex-container">
           <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
           <button type = "submit"
@@ -41,18 +41,14 @@
       {% for o_event in occupancy_events %}
         {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
           <tr>
-            <td style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+            <td class = "booked-cell" style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
           </tr>
           
           
 
         {% endif %}
         {% endfor %}
-        {% if found_occupancy is False %}
-            <tr>
-          <td style="padding-left: 50px;" >Not Booked</td>
-        </tr> 
-        {%endif%}
+        
 
     {% endfor %}
     
@@ -85,8 +81,8 @@
           </div>         </div></th>
       </tr>
       {% for a_event in events.availability %}
-        <tr>
-          <td ><div class="flex-container">
+        <tr >
+          <td class = "availability-cell" ><div class="flex-container">
             <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
             <button >Edit</button>
           </div></td>
@@ -96,7 +92,7 @@
       {% for o_event in events.occupancy %}
         {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
           <tr>
-              <td style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+              <td class = "booked-cell" style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
             
           </tr>
           {%endif%}

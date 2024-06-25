@@ -47,3 +47,10 @@
   justify-content: space-between;
   align-items: center;
 }
+
+.availability-cell {
+  background-color: lightblue;
+}
+.booked-cell {
+  background-color: lightcoral;
+}

@@ -7,6 +7,11 @@ from .models import Building, Section, Room, Person, CustomEvent
 admin.site.register(Section)
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
+
+# admin.site.register(PeriodicTask)
+# admin.site.register(CrontabSchedule)
 class SectionInline(admin.TabularInline):
     model = Section
     extra = 1  # Number of empty sections to displa
