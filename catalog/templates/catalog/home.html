@@ -33,6 +33,7 @@
       <th scope="col">Building / Section</th>
       <th scope="col">Owner</th>
       <th scope="col">Available Until Noon on...</th>
+      <th scope="col">Restrictions</th>
     </tr>
   </thead>
   <tbody>
@@ -46,6 +47,9 @@
       <td>
         {% if availability_date %} {{ availability_date|date:"m-d-Y" }} {%else%}
         No Further Availability {% endif %}
+      </td>
+      <td>
+        <p>{{room.owner.get_preference_display}}</p>
       </td>
       {% if user.is_authenticated %}
 
@@ -72,6 +76,7 @@
         </ul>
         {% endif %} {% endif %}
       </td>
+      
     </tr>
     {% endfor %}
   </tbody>

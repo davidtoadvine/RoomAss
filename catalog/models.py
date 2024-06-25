@@ -166,9 +166,9 @@ class Person(models.Model):
   parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
 
   PREFERENCE_CHOICES = [
-        ('preference_open', 'Open to any guest'),
-        ('preference_mid', 'Only known guests'),
-        ('preference_strict', 'Only members'),
+        ('preference_open', 'Open to anyone'),
+        ('preference_mid', 'Well known guests'),
+        ('preference_strict', 'Members only'),
     ]
 
     # Define the preferences field with a default choice
