@@ -1,6 +1,7 @@
 from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 import bleach
+from .models import Person
 
 class BookingForm(forms.Form):
     room_id = forms.IntegerField(widget=forms.HiddenInput())
@@ -34,3 +35,8 @@ class EditAvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
+
+class GuestPreferencesForm(forms.ModelForm):
+    class Meta:
+        model = Person
+        fields = ['preference']

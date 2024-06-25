@@ -10,19 +10,24 @@
       <th><div class="flex-container">
         <span>{{ room.owner }}'s Room</span>
 
-        <div class="dropdown">
-
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          xxx
-          </button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="#">Anyone can stay here.</a>
-            <a class="dropdown-item" href="#">Only people well known to TO can stay here</a>
-            <a class="dropdown-item" href="#">Only TO members can stay here</a>
+        <form id="preferenceForm-{{room.owner.id}}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
+          {% csrf_token %}
+          <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{room.owner.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {% if room.owner.preference %}
+                      {{ room.owner.get_preference_display }}
+                  {% else %}
+                      Select Preference
+                  {% endif %}
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{room.owner.id}}">
+                  {% for value, display in room.owner.PREFERENCE_CHOICES %}
+                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
+                  {% endfor %}
+              </div>
           </div>
-
-        </div> 
-    
+          <input type="hidden" name="preference" id="preferenceInput-{{room.owner.id}}">
+      </form>
        </div>
       </th>
     </tr>
@@ -67,18 +72,28 @@
       <tr>
         <th ><div class="flex-container">
           <span>{{ child.name }}'s Room</span>
-          <div class="dropdown">
 
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            xxx
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">Anyone can stay here.</a>
-              <a class="dropdown-item" href="#">Well known quantitites can stay here</a>
-              <a class="dropdown-item" href="#">Only TO members can stay here</a>
+          <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
+            {% csrf_token %}
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{child.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if child.preference %}
+                        {{ child.get_preference_display }}
+                    {% else %}
+                        Select Preference
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{child.id}}">
+                    {% for value, display in child.PREFERENCE_CHOICES %}
+                        <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
+                    {% endfor %}
+                </div>
             </div>
-  
-          </div>         </div></th>
+            <input type="hidden" name="preference" id="preferenceInput-{{child.id}}">
+        </form>
+
+        </div>
+      </th>
       </tr>
       {% for a_event in events.availability %}
         <tr >
@@ -357,21 +372,15 @@
 
 
 
-
-   document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.dropdown-item').forEach(function(item) {
-      item.addEventListener('click', function(event) {
-        var dropdownMenu = this.closest('.dropdown-menu');
-        var dropdownButton = dropdownMenu.previousElementSibling;
-
-        dropdownButton.textContent = this.textContent;
-
-        // Optionally, you can close the dropdown menu after selection
-        $(dropdownMenu).removeClass('show');
-        $(dropdownButton).dropdown('toggle');
-      });
+   $(document).ready(function() {
+    $('.dropdown-item').click(function(e) {
+        e.preventDefault();
+        var preference = $(this).data('value');
+        var formId = $(this).data('target');
+        $(formId + ' input[name="preference"]').val(preference);
+        $(formId).submit();
     });
-  });
+});
 </script>
 
 {% endblock %}

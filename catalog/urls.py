@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import home, create_booking, create_availability
+from .views import home, create_booking, create_availability, edit_guest_preferences
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
@@ -12,8 +12,8 @@ urlpatterns = [
     path('persons/<int:person_id>/', views.person_detail, name='person_detail'),
     path('create_booking/', create_booking, name='create_booking'),
     path('create_availability', create_availability, name = 'create_availability'),
-    path('edit_availability', views.edit_availability, name = 'edit_availability')
-]
+    path('edit_availability', views.edit_availability, name = 'edit_availability'),
+    path('edit_guest_preferences/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

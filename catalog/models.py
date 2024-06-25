@@ -165,6 +165,19 @@ class Person(models.Model):
   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
   parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
 
+  PREFERENCE_CHOICES = [
+        ('preference_open', 'Open to any guest'),
+        ('preference_mid', 'Only known guests'),
+        ('preference_strict', 'Only members'),
+    ]
+
+    # Define the preferences field with a default choice
+  preference = models.CharField(
+        max_length=20,
+        choices=PREFERENCE_CHOICES,
+        default='preference_open',  # Set the default choice here
+    )
+  
   def __str__(self):
     return self.name
 

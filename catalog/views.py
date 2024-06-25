@@ -5,7 +5,7 @@ from .models import Room, Building, Section, Person
 from datetime import timedelta, time
 from django.utils import timezone
 import pytz
-from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm
+from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm
 from django.http import HttpResponse
 
 
@@ -305,3 +305,19 @@ def merge_overlapping_events(calendar):
 
 def normalize_time(dt):
     return dt.replace(hour=12, minute=0, second=0, microsecond=0)
+
+def edit_guest_preferences(request, person_id):
+    print('view')
+    person = get_object_or_404(Person, id=person_id)  # Adjust the model accordingly
+
+    if request.method == 'POST':
+        print('post')
+        form = GuestPreferencesForm(request.POST, instance=person)
+        if form.is_valid():
+            print('valid')
+            form.save()
+            return redirect('my_room')  # Adjust to your actual redirect view
+    else:
+        form = GuestPreferencesForm(instance=person)
+    
+    return render(request, 'edit_guest_preferences.html', {'form': form, 'person': person})
