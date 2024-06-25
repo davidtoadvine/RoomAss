@@ -151,7 +151,7 @@ def home(request):
     # Specific times of day. Need booking start time to be 'in the future', so placing it at
     # the end of any given day ensures a room won't be prematurely excluded from
     # availability list. 
-    start_time = time(23, 59, 59, 999999)  # 11:59 PM
+    start_time = time(23, 59)  # 11:59 PM
     end_time = time(11, 59)   # 11:59 AM
 
     # Get the current local date and the next day's date
@@ -182,11 +182,15 @@ def home(request):
         start_date = timezone.make_aware(datetime.combine(default_start_date, start_time), timezone.get_current_timezone())
         end_date = timezone.make_aware(datetime.combine(default_end_date, end_time), timezone.get_current_timezone())
         
-
+    print("START DATE IS")
+    print(start_date)
     available_rooms_info = []
     for room in rooms:
         if room.is_available(start_date, end_date):
+            print(room.owner)
+            print("so room comes back available")
             potential_end_date = room.get_last_available_date(start_date)
+            print(potential_end_date)
             available_rooms_info.append((room, potential_end_date))
 
     context = {

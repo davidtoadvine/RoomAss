@@ -54,7 +54,6 @@ class Room(models.Model):
         if timezone.is_naive(end_date):
             end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
       
-        print(self.__str__)
         occupancy_events = CustomEvent.objects.filter(
             calendar=self.calendar,
             event_type='occupancy',
@@ -65,7 +64,7 @@ class Room(models.Model):
         availability_events = CustomEvent.objects.filter(
     calendar=self.calendar,
     event_type='availability',
-    start__lte=end_date,
+    start__lte=start_date,
     end__gte=end_date  # Ensure availability end is after or equal to booking end date
 )
 
@@ -80,14 +79,13 @@ class Room(models.Model):
             
         if timezone.is_naive(start_date):
             start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
-        start_date_utc = start_date.astimezone(pytz.utc)
 
         # Fetch current availability event
         current_availability = CustomEvent.objects.filter(
             calendar=self.calendar,
             event_type='availability',
-            start__lte=start_date_utc,
-            end__gte=start_date_utc
+            start__lte=start_date,
+            end__gte=start_date
         ).first()
 
         if not current_availability:
@@ -97,7 +95,7 @@ class Room(models.Model):
         next_occupancy = CustomEvent.objects.filter(
             calendar=self.calendar,
             event_type='occupancy',
-            start__gte=start_date_utc,
+            start__gte=start_date,
             start__lt=current_availability.end
         ).order_by('start').first()
 

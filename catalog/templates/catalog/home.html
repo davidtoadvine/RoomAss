@@ -45,11 +45,15 @@
         {%endif%}
       </td>
       <td>
-        {% if availability_date %} {{ availability_date|date:"m-d-Y" }} {%else%}
+        {% if availability_date %}
+        {{ availability_date|date:"m-d-Y" }}
+        {%else%}
         No Further Availability {% endif %}
       </td>
       <td>
+        {%if room.owner.preference == 'preference_mid' or room.owner.preference == 'preference_strict'%}
         <p>{{room.owner.get_preference_display}}</p>
+        {%endif%}
       </td>
       {% if user.is_authenticated %}
 
