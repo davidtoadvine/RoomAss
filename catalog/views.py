@@ -42,6 +42,7 @@ def create_availability(request):
             if timezone.is_naive(end_date):
                 end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
 
+
             availability_event = CustomEvent(
                     calendar=room.calendar,
                     event_type='availability',
@@ -150,7 +151,7 @@ def home(request):
     # Specific times of day. Need booking start time to be 'in the future', so placing it at
     # the end of any given day ensures a room won't be prematurely excluded from
     # availability list. 
-    start_time = time(23, 59)  # 11:59 PM
+    start_time = time(23, 59, 59, 999999)  # 11:59 PM
     end_time = time(11, 59)   # 11:59 AM
 
     # Get the current local date and the next day's date
@@ -170,20 +171,17 @@ def home(request):
             # Ensure the dates are timezone-aware and convert to UTC
             start_date = timezone.make_aware(datetime.combine(start_date, start_time), timezone.get_current_timezone())
             end_date = timezone.make_aware(datetime.combine(end_date, end_time), timezone.get_current_timezone())
-            start_date = start_date.astimezone(pytz.utc)
-            end_date = end_date.astimezone(pytz.utc)
+            
         except ValueError:
             # Use default dates if there's an error in parsing
             start_date = timezone.make_aware(datetime.combine(default_start_date, start_time), timezone.get_current_timezone())
             end_date = timezone.make_aware(datetime.combine(default_end_date, end_time), timezone.get_current_timezone())
-            start_date = start_date.astimezone(pytz.utc)
-            end_date = end_date.astimezone(pytz.utc)
+            
     else:
         # Use default dates if query parameters are not provided
         start_date = timezone.make_aware(datetime.combine(default_start_date, start_time), timezone.get_current_timezone())
         end_date = timezone.make_aware(datetime.combine(default_end_date, end_time), timezone.get_current_timezone())
-        start_date = start_date.astimezone(pytz.utc)
-        end_date = end_date.astimezone(pytz.utc)
+        
 
     available_rooms_info = []
     for room in rooms:
@@ -247,7 +245,7 @@ def create_booking(request):
             room = Room.objects.get(id=room_id)
             host_object = request.user
 
-            # Convert dates to datetime objects with specific time (noon)
+            # Convert dates to datetime objects with specific time (around noon)
             start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
             end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
 

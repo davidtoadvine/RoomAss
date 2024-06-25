@@ -5,6 +5,7 @@ import pytz
 from datetime import datetime
 from datetime import timedelta
 from django.contrib.auth.models import User
+from django.db import transaction
 
 # Create your models here.
 class Building(models.Model):
@@ -46,22 +47,12 @@ class Room(models.Model):
   def is_available(self, start_date, end_date):
         if not self.calendar:
             return True
-        
-        # Hacky feeling fix for requesting dates where occupancy event begins / ends.
-        # Otherwise an occupancy ending on at 11:59am would make room unavailable for new afternoon occupancy.
-        # Likewise occupancy beginning on an afternoon would make whole day unavailable.
-        # Unsure why comparisons would not work as intended.
-        #start_date = start_date + timedelta(days=1)
-        #end_date = end_date - timedelta(days=1)
 
-        # Convert dates to UTC for accurate comparisons
+        # Ensure dates are timezone aware
         if timezone.is_naive(start_date):
             start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
         if timezone.is_naive(end_date):
             end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
-
-        # start_date_utc = start_date.astimezone(pytz.utc)
-        # end_date_utc = end_date.astimezone(pytz.utc)
       
         print(self.__str__)
         occupancy_events = CustomEvent.objects.filter(
@@ -85,7 +76,6 @@ class Room(models.Model):
   
   def get_last_available_date(self, start_date):
         if not self.calendar:
-            print('no calendar')
             return None
             
         if timezone.is_naive(start_date):
@@ -118,6 +108,8 @@ class Room(models.Model):
 
   def save(self, *args, **kwargs):
         old_owner = None
+        print('saving')
+
         if self.pk:  # If the room already exists
             old_owner = Room.objects.get(pk=self.pk).owner
         
@@ -140,15 +132,22 @@ class Room(models.Model):
         never_date = timezone.make_aware(never_date, timezone.get_current_timezone())
 
         if not self.owner:
-            # Create or update a permanent availability event
-            CustomEvent.objects.update_or_create(
-                calendar=self.calendar,
-                event_type='availability',
-                defaults={
-                    'start': timezone.now(),
-                    'end': never_date
-                }
-            )
+                # # Delete all existing availability events in the calendar
+                # CustomEvent.objects.filter(
+                #     calendar=self.calendar,
+                #     event_type='availability'
+                # ).delete()
+
+                # Create or update a permanent availability event
+                CustomEvent.objects.update_or_create(
+                    calendar=self.calendar,
+                    event_type='availability',
+                    defaults={
+                        'start': timezone.now(),
+                        'end': never_date
+                    },
+                    title= "Permanent Availability"
+                )
         else:
             if old_owner != self.owner:
                 # Owner has changed, delete availability events
@@ -181,5 +180,6 @@ class CustomEvent(Event):
             self.start = timezone.make_aware(self.start, timezone.get_current_timezone())
         if timezone.is_naive(self.end):
             self.end = timezone.make_aware(self.end, timezone.get_current_timezone())
+        print(f"Saving CustomEvent: {self.title}")
         super(CustomEvent, self).save(*args, **kwargs)
     

@@ -33,7 +33,18 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(CustomEvent)
 class CustomEventAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'start', 'end', 'event_type', 'calendar')
+    search_fields = ('title', 'event_type')
+    def save_model(self, request, obj, form, change):
+        # Debug statement before saving
+        print(f"Before saving: {obj.title}, start: {obj.start}, end: {obj.end}")
+        
+        # Call the superclass method to save the object
+        super().save_model(request, obj, form, change)
+        
+        # Debug statement after saving
+        print(f"After saving: {obj.title}, start: {obj.start}, end: {obj.end}")
+
 
 # Define an inline admin descriptor for Person model
 # which acts a bit like a singleton
