@@ -32,7 +32,10 @@ class BookingForm(forms.Form):
     
     #  dont think this actually does anything , but it is called in home view
     def clean_guest_type(self):
-        return int(self.guest_type)
+        guest_type = self.cleaned_data.get('guest_type')
+        if not guest_type:
+            raise forms.ValidationError("Guest type is required.")
+        return guest_type
 
     def clean(self):
         cleaned_data = super().clean()

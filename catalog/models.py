@@ -190,7 +190,8 @@ class CustomEvent(Event):
 
     guest_type = models.IntegerField(
         choices=GuestType.choices,
-        default=GuestType.STRANGER  # Default to "Anyone can stay here"
+        default=GuestType.STRANGER,
+        null=True, blank=True# Default to "Anyone can stay here"
     )
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
     def save(self, *args, **kwargs):

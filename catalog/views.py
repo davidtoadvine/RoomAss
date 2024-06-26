@@ -159,15 +159,17 @@ def home(request):
             end_date = None
             guest_type = None
     else:
-        # Initial load
+        # Retrieve data from session if available
+        start_date = request.session.get('start_date', timezone.localtime(timezone.now()).date())
+        end_date = request.session.get('end_date', timezone.localtime(timezone.now()).date() + timedelta(days=1))
+        guest_type = int(request.session.get('guest_type', 2))
+
         form = DateRangeForm(initial={
-            'start_date': timezone.localtime(timezone.now()).date(),
-            'end_date': timezone.localtime(timezone.now()).date() + timedelta(days=1),
-            'guest_type': 2  # Default to "Well known to Twin Oaks"
+            'start_date': start_date,
+            'end_date': end_date,
+            'guest_type': guest_type
         })
-        start_date = timezone.localtime(timezone.now()).date()
-        end_date = timezone.localtime(timezone.now()).date() + timedelta(days=1)
-        guest_type = 2  # Default guest type
+
 
 
     
@@ -292,6 +294,12 @@ def create_booking(request):
                     guest_type = guest_type
                 )
                 booking_event.save()
+                
+                # Store form data in session
+                request.session['start_date'] = str(start_date.date())
+                request.session['end_date'] = str(end_date.date())
+                request.session['guest_type'] = guest_type
+            
                 return redirect('home')
             else:
                 return render(request, 'catalog/home.html', {'error': 'Room is not available'})

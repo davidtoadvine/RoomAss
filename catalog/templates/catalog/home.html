@@ -67,7 +67,7 @@
           type="submit"
           onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}',
           '{{ room.section.name }}', '{{ start_date }}', '{{ end_date }}',
-          '{{ room.image.url }}'
+          '{{ room.image.url }}', {{guest_type}}
           )"
         >
           Book Room
@@ -125,6 +125,9 @@
             <!-- Form Column -->
             <div class="col-md-6">
               <input type="hidden" name="room_id" id="bookingRoomId" />
+              <input type="hidden" name="guest_type" id="bookingGuestType" value = {{guest_type}} />
+
+              
 
               <input
                 type="hidden"
@@ -261,7 +264,8 @@
     sectionName,
     startDate,
     endDate,
-    roomImageUrl
+    roomImageUrl,
+    guestType
   ) {
     event.preventDefault();
   
@@ -274,7 +278,7 @@
     $("#bookingSectionName").text(sectionName);
     $("#bookingStartDate").text(startDate);
     $("#bookingEndDate").text(endDate);
-
+    $("bookingGuestType").val(guestType);
     // Set the room image
     if (roomImageUrl) {
       $("#bookingRoomImage").attr("src", roomImageUrl).show();
