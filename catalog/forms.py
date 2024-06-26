@@ -6,9 +6,9 @@ from .models import Person
 class BookingForm(forms.Form):
     
     GUEST_TYPE_CHOICES = [
-        ('stranger', 'Relatively new / unknown'),
-        ('known', 'Well known to Twin Oaks'),
-        ('member', 'Twin Oaks member'),
+        (1, 'Relatively new / unknown'),
+        (2, 'Well known to Twin Oaks'),
+        (3, 'Twin Oaks member'),
     ]
 
     room_id = forms.IntegerField(widget=forms.HiddenInput())
@@ -29,6 +29,10 @@ class BookingForm(forms.Form):
         # Sanitize input using bleach
         host_name = bleach.clean(host_name)
         return host_name
+    
+    #  dont think this actually does anything , but it is called in home view
+    def clean_guest_type(self):
+        return int(self.guest_type)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -42,6 +46,14 @@ class BookingForm(forms.Form):
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+
+    GUEST_TYPE_CHOICES = [
+        (1, 'Relatively new / unknown'),
+        (2, 'Well known to Twin Oaks'),
+        (3, 'Twin Oaks member'),
+    ]
+    guest_type = forms.ChoiceField(choices=GUEST_TYPE_CHOICES, required=True, initial=2)
+
 
 class AvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

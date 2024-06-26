@@ -163,17 +163,15 @@ class Person(models.Model):
   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
   parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
 
-  PREFERENCE_CHOICES = [
-        ('preference_open', 'Open to anyone'),
-        ('preference_mid', 'Well known guests'),
-        ('preference_strict', 'Members only'),
-    ]
+  class Preference(models.IntegerChoices):
+        ANYONE = 1, 'Anyone can stay here'
+        KNOWN_PEOPLE = 2, 'Only people well known to TO can stay here'
+        MEMBERS = 3, 'Only TO members can stay here'
 
-    # Define the preferences field with a default choice
-  preference = models.CharField(
-        max_length=20,
-        choices=PREFERENCE_CHOICES,
-        default='preference_open',  # Set the default choice here
+  preference = models.IntegerField(
+        choices=Preference.choices,
+        default=Preference.ANYONE,
+        
     )
   
   def __str__(self):
@@ -185,20 +183,15 @@ class CustomEvent(Event):
         ('availability', 'Availability'),
     )
 
-    # for occupancy events
-    GUEST_TYPE_CHOICES = [
-        ('anyone', 'Anyone can stay here'),
-        ('known_people', 'Only people well known to TO can stay here'),
-        ('members', 'Only TO members can stay here'),
-    ]
-    guest_type = models.CharField(
-        max_length=20,
-        choices=GUEST_TYPE_CHOICES,
-        blank=True,
-        null=True,
-        default='anyone'
-    )
+    class GuestType(models.IntegerChoices):
+        STRANGER = 1, 'Stranger'
+        KNOWN = 2, 'Known'
+        MEMBER = 3, 'Member'
 
+    guest_type = models.IntegerField(
+        choices=GuestType.choices,
+        default=GuestType.STRANGER  # Default to "Anyone can stay here"
+    )
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
     def save(self, *args, **kwargs):
         # Ensure start and end are timezone-aware

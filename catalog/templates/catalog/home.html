@@ -24,6 +24,14 @@
         value="{{ end_date }}"
       />
     </div>
+    <div class="form-group col-md-4">
+      <label for="guest_type">Guest Type</label>
+      <select class="form-control" id="guestType" name="guest_type">
+        {% for value, display in form.fields.guest_type.choices %}
+            <option value="{{ value }}" {% if form.guest_type.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ display }}</option>
+        {% endfor %}
+    </select>
+  </div>
   </div>
 </form>
 
@@ -33,7 +41,7 @@
       <th scope="col">Building / Section</th>
       <th scope="col">Owner</th>
       <th scope="col">Available Until Noon on...</th>
-      <th scope="col">Restrictions</th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
@@ -51,14 +59,10 @@
         No Further Availability {% endif %}
       </td>
       <td>
-        {%if room.owner.preference == 'preference_mid' or room.owner.preference == 'preference_strict'%}
-        <p>{{room.owner.get_preference_display}}</p>
-        {%endif%}
-      </td>
-      {% if user.is_authenticated %}
+      {% if user.is_authenticated%}
 
-      <td>
-        
+
+
         <button
           type="submit"
           onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}',
@@ -68,7 +72,12 @@
         >
           Book Room
         </button>
-        {%endif%}
+      
+      {%endif%}
+        
+  
+        
+      </td>
         <!-- </form> -->
         {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
@@ -134,14 +143,7 @@
                   required
                 />
               </div>
-              <div class="form-group">
-                <label for="guest_type">Guest Type</label>
-                <select class="form-control" id="bookingGuestType" name="guest_type">
-                    {% for value, display in form.fields.guest_type.choices %}
-                        <option value="{{ value }}" {% if form.guest_type.value == value %}selected{% endif %}>{{ display }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+              
               <div class="form-group">
                 <label for="hostName">Host Name</label>
                 <input
@@ -196,8 +198,13 @@
   // gathering date information
   var startDateInput = document.getElementById("start_date");
   var endDateInput = document.getElementById("end_date");
+  var guestTypeInput = document.getElementById("guestType")
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
+
+  guestTypeInput.addEventListener("change", function(){
+    validateAndSubmitDate();
+  });
 
   // listener for start date form
   startDateInput.addEventListener("change", function () {

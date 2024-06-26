@@ -1,5 +1,5 @@
 from .models import Room, Building, Section, Person
-from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm
+from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm
 
 from datetime import timedelta, time
 from django.utils import timezone
@@ -142,15 +142,39 @@ def my_room(request):
 
 def home(request):
     rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
-        # Get start and end date from the request
-    start_date_str = request.POST.get('start_date')
-    end_date_str = request.POST.get('end_date')
+    
+    if request.method == 'POST':
+        form = DateRangeForm(request.POST)
+        if form.is_valid():
+            print('form is valid')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            guest_type = form.cleaned_data.get('guest_type')
+            print("guest type is ...")
+            x = int(guest_type)
+            print(type(x))
+        else:
+            print("form not valid")
+            start_date = None
+            end_date = None
+            guest_type = None
+    else:
+        # Initial load
+        form = DateRangeForm(initial={
+            'start_date': timezone.localtime(timezone.now()).date(),
+            'end_date': timezone.localtime(timezone.now()).date() + timedelta(days=1),
+            'guest_type': 2  # Default to "Well known to Twin Oaks"
+        })
+        start_date = timezone.localtime(timezone.now()).date()
+        end_date = timezone.localtime(timezone.now()).date() + timedelta(days=1)
+        guest_type = 2  # Default guest type
 
-    # Specific times of day. Need booking start time to be 'in the future', so placing it at
-    # the end of any given day ensures a room won't be prematurely excluded from
-    # availability list. 
+
+    
+
+    # Specific times of day
     start_time = time(23, 59)  # 11:59 PM
-    end_time = time(11, 59)   # 11:59 AM
+    end_time = time(11, 59)    # 11:59 AM
 
     # Get the current local date and the next day's date
     local_now = timezone.localtime(timezone.now())
@@ -161,43 +185,41 @@ def home(request):
     default_end_date = tomorrow
 
     # Convert the start and end date strings to timezone-aware datetime objects
-    if start_date_str and end_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    if start_date and end_date:
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
-            # Ensure the dates are timezone-aware and convert to UTC
-            start_date = timezone.make_aware(datetime.combine(start_date, start_time), timezone.get_current_timezone())
-            end_date = timezone.make_aware(datetime.combine(end_date, end_time), timezone.get_current_timezone())
-            
-        except ValueError:
-            # Use default dates if there's an error in parsing
-            start_date = timezone.make_aware(datetime.combine(default_start_date, start_time), timezone.get_current_timezone())
-            end_date = timezone.make_aware(datetime.combine(default_end_date, end_time), timezone.get_current_timezone())
-            
+        # Ensure the dates are timezone-aware and convert to UTC
+        start_date = timezone.make_aware(datetime.combine(start_date, start_time), timezone.get_current_timezone())
+        end_date = timezone.make_aware(datetime.combine(end_date, end_time), timezone.get_current_timezone())
     else:
         # Use default dates if query parameters are not provided
         start_date = timezone.make_aware(datetime.combine(default_start_date, start_time), timezone.get_current_timezone())
         end_date = timezone.make_aware(datetime.combine(default_end_date, end_time), timezone.get_current_timezone())
-        
-    print("START DATE IS")
-    print(start_date)
+
     available_rooms_info = []
     for room in rooms:
-        if room.is_available(start_date, end_date):
-            print(room.owner)
-            print("so room comes back available")
-            potential_end_date = room.get_last_available_date(start_date)
-            print(potential_end_date)
-            available_rooms_info.append((room, potential_end_date))
+          
+          if room.owner:
+            if int(guest_type) >= int(room.owner.preference):
+              if room.is_available(start_date, end_date) :
+                potential_end_date = room.get_last_available_date(start_date)
+                available_rooms_info.append((room, potential_end_date))
+          else:      
+              if room.is_available(start_date, end_date) :
+                potential_end_date = room.get_last_available_date(start_date)
+                available_rooms_info.append((room, potential_end_date))
 
     context = {
         'available_rooms_info': available_rooms_info,
-        'start_date': start_date_str if start_date_str else today.strftime('%Y-%m-%d'),
-        'end_date': end_date_str if end_date_str else tomorrow.strftime('%Y-%m-%d'),
+        'start_date': start_date.strftime('%Y-%m-%d') if start_date else today.strftime('%Y-%m-%d'),
+        'end_date': end_date.strftime('%Y-%m-%d') if end_date else tomorrow.strftime('%Y-%m-%d'),
         'today': today,
         'tomorrow': tomorrow,
-        'form': BookingForm(),
+        'form': form,
+        'guest_type': guest_type
     }
     return render(request, 'catalog/home.html', context)
 
