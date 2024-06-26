@@ -21,7 +21,7 @@
                   {% endif %}
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{room.owner.id}}">
-                  {% for value, display in room.owner.PREFERENCE_CHOICES %}
+                  {% for value, display in room.owner.Preference.choices %}
                       <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
                   {% endfor %}
               </div>
@@ -84,7 +84,7 @@
                     {% endif %}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{child.id}}">
-                    {% for value, display in child.PREFERENCE_CHOICES %}
+                    {% for value, display in child.Preference.choices %}
                         <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                 </div>

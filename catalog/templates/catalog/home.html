@@ -1,5 +1,5 @@
 {% extends "base_generic.html" %} {% block content %}
-<h1>Available Rooms</h1>
+<h1>Available Guest Rooms</h1>
 
 <form method="post" action="{% url 'home' %}" id="dateRangeForm">
   {% csrf_token %}
@@ -45,6 +45,19 @@
     </tr>
   </thead>
   <tbody>
+    {% if not available_rooms_info%}
+    <tr>
+      <td>
+        <p>No rooms available.</p>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    {%endif%}
     {% for room, availability_date in available_rooms_info %}
     <tr>
       <td>{{ room.section.building.name }} / {{ room.section.name }}</td>
@@ -290,7 +303,20 @@
   }
 
   function submitBookingForm() {
+    let guestName = document.getElementById("guestName").value.trim()
+   
+      // Simulate form submission and failure
+      // Check if the value is empty or whitespace
+      if (guestName === "") {
+        alert("Guest Name cannot be empty or just whitespace.");
+        return;
+    }
+     else {
+      alert("Submitted booking.")
+     }
     $("#bookingForm").submit();
-  }
+    }
+  
+  
 </script>
 {% endblock %}

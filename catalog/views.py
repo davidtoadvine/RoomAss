@@ -304,6 +304,7 @@ def create_booking(request):
             else:
                 return render(request, 'catalog/home.html', {'error': 'Room is not available'})
         else:
+            print('not valid')
             print(form.errors)  # Print form errors to the console for debugging
             return render(request, 'catalog/home.html', {'error': 'Form is invalid', 'form_errors': form.errors})
     return redirect('home')
