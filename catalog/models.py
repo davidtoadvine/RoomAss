@@ -184,6 +184,21 @@ class CustomEvent(Event):
         ('occupancy', 'Occupancy'),
         ('availability', 'Availability'),
     )
+
+    # for occupancy events
+    GUEST_TYPE_CHOICES = [
+        ('anyone', 'Anyone can stay here'),
+        ('known_people', 'Only people well known to TO can stay here'),
+        ('members', 'Only TO members can stay here'),
+    ]
+    guest_type = models.CharField(
+        max_length=20,
+        choices=GUEST_TYPE_CHOICES,
+        blank=True,
+        null=True,
+        default='anyone'
+    )
+
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
     def save(self, *args, **kwargs):
         # Ensure start and end are timezone-aware

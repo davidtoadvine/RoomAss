@@ -10,8 +10,7 @@ from django.contrib.auth.models import User
 
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
-# admin.site.register(PeriodicTask)
-# admin.site.register(CrontabSchedule)
+
 class SectionInline(admin.TabularInline):
     model = Section
     extra = 1  # Number of empty sections to displa

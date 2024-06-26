@@ -1,25 +1,23 @@
-from django.shortcuts import render, get_object_or_404, redirect
-# Create your views here.
 from .models import Room, Building, Section, Person
+from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm
 
 from datetime import timedelta, time
 from django.utils import timezone
-import pytz
-from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 
 
-def building_list(request):
-    buildings = Building.objects.all()
-    return render(request, 'catalog/building_list.html', {'buildings': buildings})
+# def building_list(request):
+#     buildings = Building.objects.all()
+#     return render(request, 'catalog/building_list.html', {'buildings': buildings})
 
-def building_detail(request, building_id):
-    building = get_object_or_404(Building, pk=building_id)
-    return render(request, 'catalog/building_detail.html', {'building': building})
+# def building_detail(request, building_id):
+#     building = get_object_or_404(Building, pk=building_id)
+#     return render(request, 'catalog/building_detail.html', {'building': building})
 
-def section_detail(request, section_id):
-    section = get_object_or_404(Section, pk=section_id)
-    return render(request, 'catalog/section_detail.html', {'section': section})
+# def section_detail(request, section_id):
+#     section = get_object_or_404(Section, pk=section_id)
+#     return render(request, 'catalog/section_detail.html', {'section': section})
 
 def create_availability(request):
       if request.method == 'POST':
@@ -248,6 +246,7 @@ def create_booking(request):
             host_name = form.cleaned_data['host_name']
             room = Room.objects.get(id=room_id)
             host_object = request.user
+            guest_type = form.cleaned_data['guest_type']
 
             # Convert dates to datetime objects with specific time (around noon)
             start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
@@ -267,7 +266,8 @@ def create_booking(request):
                     end=end_date,
                     title= f"Booking: {guest} hosted by {host_name}",
                     description = "Meaningful Description",
-                    creator = host_object
+                    creator = host_object,
+                    guest_type = guest_type
                 )
                 booking_event.save()
                 return redirect('home')
