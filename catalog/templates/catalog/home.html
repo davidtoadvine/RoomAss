@@ -250,13 +250,14 @@
     var startDate = startDateInput.value;
     var endDate = endDateInput.value;
     var now = new Date();
+    var yesterday = now.setDate(now.getDate() - 1);
 
     if (startDate && endDate) {
       var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
       var endDateObj = new Date(endDate + "T11:59:59"); // Set time to just before noon
 
-      if (startDateObj < now) {
-        alert("Start date cannot be in the past.");
+      if (startDateObj < yesterday) {
+        alert("Start date cannot be that far in the past.");
         return false;
       } else if (startDateObj > endDateObj) {
         alert("Invalid date range.");

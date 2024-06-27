@@ -221,17 +221,34 @@
       endDateInput.value = endDateObj.toISOString().split("T")[0];
     }
     if (!validateDate()) {
-      startDateInput.value = previousStartDate;
-    } else {
-      previousStartDate = startDateInput.value;
-    }
+      
+    // Parse the date strings into Date objects
+    var startDateObj = new Date();
+    var endDateObj = new Date()
+
+        startDateInput.value = startDateObj.toISOString().split("T")[0];
+
+        endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+        endDateInput.value = endDateObj.toISOString().split("T")[0];    }
+    else {
+    previousEndDate = endDateInput.value;
+  }
   });
 
    // listener for end date form
 endDateInput.addEventListener("change", function () {
   if (!validateDate()) {
-    endDateInput.value = previousEndDate;
-  } else {
+   
+
+    // Parse the date strings into Date objects
+    var startDateObj = new Date();
+    var endDateObj = new Date()
+
+        startDateInput.value = startDateObj.toISOString().split("T")[0];
+
+        endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+        endDateInput.value = endDateObj.toISOString().split("T")[0];    }
+    else {
     previousEndDate = endDateInput.value;
   }
 });
@@ -242,9 +259,11 @@ endDateInput.addEventListener("change", function () {
     var now = new Date();
 
     if (startDate && endDate) {
-      var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
-      var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
 
+      // late time so if you're leaving at 5pm today and creating an availability for the night, it will be accepted
+      var startDateObj = new Date(startDate + "T23:59"); //
+      var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+    
       if (startDateObj < now) {
         alert("Start date cannot be in the past.");
         return false;
@@ -252,11 +271,12 @@ endDateInput.addEventListener("change", function () {
         alert("Invalid date range.");
         return false;
       } else {
-         //document.getElementById("availabilityForm").submit(); 
         return true;
       }
       }
-      return true;
+      // ?
+      alert("not start and end")
+      return false;
   }
    //////////////////////////////////////EDIT AVAILABILITY///////////////////////////////////////////////////////////////////////
   function showEditAvailabilityForm(eventId, start, end) {
@@ -299,7 +319,7 @@ endDateInput.addEventListener("change", function () {
       editEndDateInput.value = editEndDateObj.toISOString().split("T")[0];
     }
     if (!validateEditDate()) {
-      editStartDateInput.value = previousEditStartDate;
+      editEndDateInput.value = "";  
     } else {
       previousEditStartDate = editStartDateInput.value;
     }
@@ -308,7 +328,8 @@ endDateInput.addEventListener("change", function () {
    // listener for end date form
   editEndDateInput.addEventListener("change", function () {
     if (!validateEditDate()) {
-      editEndDateInput.value = previousEditEndDate;
+      editEndDateInput.value = "";  
+      
     } else {
       previousEditEndDate = editEndDateInput.value;
     }
@@ -317,9 +338,7 @@ endDateInput.addEventListener("change", function () {
   function validateEditDate() {
     console.log('validating... start / end')
     var startDate = editStartDateInput.value;
-    console.log(startDate)
     var endDate = editEndDateInput.value;
-    console.log(endDate)
     var now = new Date();
 
     if (startDate && endDate) {
@@ -328,10 +347,7 @@ endDateInput.addEventListener("change", function () {
        var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
        console.log(endDateObj)
 
-      if (startDateObj < now) {
-        alert("Start date cannot be in the past.");
-        return false;
-      } else if (startDateObj > endDateObj) {
+    if (startDateObj > endDateObj) {
         alert("Invalid date range.");
         return false;
       } else {
