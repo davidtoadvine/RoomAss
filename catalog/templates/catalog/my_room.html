@@ -107,8 +107,13 @@
         <tr >
           <td class = "availability-cell" ><div class="flex-container">
             <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+            <div>
+              <button type = "submit"
+              onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+            
             <button type = "submit"
-          onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+              onclick = "showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
+            </div>
           </div></td>
         </tr>
       
