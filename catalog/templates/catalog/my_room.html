@@ -99,7 +99,9 @@
         <tr >
           <td class = "availability-cell" ><div class="flex-container">
             <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
-            <button >Edit</button>
+            <button type = "submit"
+          onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+        </div>
           </div></td>
         </tr>
       
@@ -316,23 +318,31 @@ endDateInput.addEventListener("change", function () {
   function validateDate() {
     var startDate = startDateInput.value;
     var endDate = endDateInput.value;
+
     var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     if (startDate && endDate) {
-       var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
-       var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+      var startDateObj = new Date(startDate + "T00:00:00"); // Set time to start of the day in local time
+      var endDateObj = new Date(endDate + "T11:59:00"); // Set time to just before noon in local time
 
-      if (startDateObj < now) {
+      // Debugging statements
+      console.log("startDateObj:", startDateObj);
+      console.log("today:", today);
+
+      if (startDateObj < today) {
+        
         alert("Start date cannot be in the past.");
         return false;
       } else if (startDateObj > endDateObj) {
         alert("Invalid date range.");
         return false;
       } else {
+         //document.getElementById("availabilityForm").submit(); 
         return true;
       }
-    }
-    return true;
+      }
+      return true;
   }
 
    ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////

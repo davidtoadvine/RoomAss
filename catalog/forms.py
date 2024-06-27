@@ -6,7 +6,7 @@ from .models import Person
 class BookingForm(forms.Form):
     
     GUEST_TYPE_CHOICES = [
-        (1, 'Relatively new / unknown'),
+        (1, 'Relatively new to Twin Oaks'),
         (2, 'Well known to Twin Oaks'),
         (3, 'Twin Oaks member'),
     ]
@@ -51,7 +51,7 @@ class DateRangeForm(forms.Form):
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
     GUEST_TYPE_CHOICES = [
-        (1, 'Relatively new / unknown'),
+        (1, 'Relatively new to Twin Oaks'),
         (2, 'Well known to Twin Oaks'),
         (3, 'Twin Oaks member'),
     ]

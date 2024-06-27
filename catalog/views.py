@@ -7,18 +7,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 
 
-# def building_list(request):
-#     buildings = Building.objects.all()
-#     return render(request, 'catalog/building_list.html', {'buildings': buildings})
-
-# def building_detail(request, building_id):
-#     building = get_object_or_404(Building, pk=building_id)
-#     return render(request, 'catalog/building_detail.html', {'building': building})
-
-# def section_detail(request, section_id):
-#     section = get_object_or_404(Section, pk=section_id)
-#     return render(request, 'catalog/section_detail.html', {'section': section})
-
 def create_availability(request):
       if request.method == 'POST':
         form = AvailabilityForm(request.POST)
@@ -30,7 +18,7 @@ def create_availability(request):
             room_id = form.cleaned_data['room_id']
             room = get_object_or_404(Room, id=room_id)
 
-            # Convert dates to datetime objects with specific time (noon)
+
             start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
             end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
 
@@ -141,23 +129,24 @@ def my_room(request):
     return render(request, 'catalog/my_room.html', context)
 
 def home(request):
+    
+    # get and order rooms for sensible display later
     rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
     
+    # handle form submission
     if request.method == 'POST':
         form = DateRangeForm(request.POST)
         if form.is_valid():
-            print('form is valid')
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
             guest_type = form.cleaned_data.get('guest_type')
-            print("guest type is ...")
-            x = int(guest_type)
-            print(type(x))
+            
         else:
-            print("form not valid")
             start_date = None
             end_date = None
             guest_type = None
+
+    # retrieve prior session values if not a form submisison
     else:
         # Retrieve data from session if available
         start_date = request.session.get('start_date', timezone.localtime(timezone.now()).date())
@@ -170,18 +159,23 @@ def home(request):
             'guest_type': guest_type
         })
 
-
-
-    
-
-    # Specific times of day
-    start_time = time(23, 59)  # 11:59 PM
-    end_time = time(11, 59)    # 11:59 AM
-
-    # Get the current local date and the next day's date
+# Get the current local date and the next day's date
     local_now = timezone.localtime(timezone.now())
     today = local_now.date()
     tomorrow = today + timedelta(days=1)
+    
+    # Specific times of day
+    noon = time(12, 0)  # 12:00 PM
+
+    # Specific times of day
+    if local_now >= noon:
+      start_time = time(23, 59)  # 11:59 PM
+    else:
+      start_time = time(0, 1) 
+
+    end_time = time(11, 59)    # 11:59 AM
+
+    
 
     default_start_date = today
     default_end_date = tomorrow
@@ -193,7 +187,7 @@ def home(request):
         if isinstance(end_date, str):
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
-        # Ensure the dates are timezone-aware and convert to UTC
+        # Ensure the dates are timezone-aware 
         start_date = timezone.make_aware(datetime.combine(start_date, start_time), timezone.get_current_timezone())
         end_date = timezone.make_aware(datetime.combine(end_date, end_time), timezone.get_current_timezone())
     else:
