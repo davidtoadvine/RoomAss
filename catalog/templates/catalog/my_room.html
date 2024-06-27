@@ -101,7 +101,6 @@
             <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
             <button type = "submit"
           onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
-        </div>
           </div></td>
         </tr>
       
@@ -286,68 +285,65 @@ endDateInput.addEventListener("change", function () {
 
   ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
     // gathering date information
-  var startDateInput = document.getElementById("startDate");
-  var endDateInput = document.getElementById("endDate");
-  var previousStartDate = startDateInput.value;
-  var previousEndDate = endDateInput.value;
+  var editStartDateInput = document.getElementById("editStartDate");
+  var editEndDateInput = document.getElementById("editEndDate");
+  var previousEditStartDate = editStartDateInput.value;
+  var previousEditEndDate = editEndDateInput.value;
 
    // listener for start date form
-  startDateInput.addEventListener("change", function () {
-    if (startDateInput.value >= endDateInput.value) {
-      var startDateObj = new Date(startDateInput.value);
-      var endDateObj = new Date(startDateObj);
-      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
-      endDateInput.value = endDateObj.toISOString().split("T")[0];
+  editStartDateInput.addEventListener("change", function () {
+    if (editStartDateInput.value >= editEndDateInput.value) {
+      var editStartDateObj = new Date(editStartDateInput.value);
+      var editEndDateObj = new Date(editStartDateObj);
+      editEndDateObj.setDate(editStartDateObj.getDate() + 1); // Increment end date by one day
+      editEndDateInput.value = editEndDateObj.toISOString().split("T")[0];
     }
-    if (!validateDate()) {
-      startDateInput.value = previousStartDate;
+    if (!validateEditDate()) {
+      editStartDateInput.value = previousEditStartDate;
     } else {
-      previousStartDate = startDateInput.value;
+      previousEditStartDate = editStartDateInput.value;
     }
   });
 
    // listener for end date form
-  endDateInput.addEventListener("change", function () {
-    if (!validateDate()) {
-      endDateInput.value = previousEndDate;
+  editEndDateInput.addEventListener("change", function () {
+    if (!validateEditDate()) {
+      editEndDateInput.value = previousEditEndDate;
     } else {
-      previousEndDate = endDateInput.value;
+      previousEditEndDate = editEndDateInput.value;
     }
   });
   
-  function validateDate() {
-    var startDate = startDateInput.value;
-    var endDate = endDateInput.value;
-
+  function validateEditDate() {
+    console.log('validating... start / end')
+    var startDate = editStartDateInput.value;
+    console.log(startDate)
+    var endDate = editEndDateInput.value;
+    console.log(endDate)
     var now = new Date();
-    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     if (startDate && endDate) {
-      var startDateObj = new Date(startDate + "T00:00:00"); // Set time to start of the day in local time
-      var endDateObj = new Date(endDate + "T11:59:00"); // Set time to just before noon in local time
+       var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
+       console.log(startDateObj)
+       var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+       console.log(endDateObj)
 
-      // Debugging statements
-      console.log("startDateObj:", startDateObj);
-      console.log("today:", today);
-
-      if (startDateObj < today) {
-        
+      if (startDateObj < now) {
         alert("Start date cannot be in the past.");
         return false;
       } else if (startDateObj > endDateObj) {
         alert("Invalid date range.");
         return false;
       } else {
-         //document.getElementById("availabilityForm").submit(); 
         return true;
       }
-      }
-      return true;
+    }
+    return true;
   }
 
    ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
     // gathering date information
-  var editStartDateInput = document.getElementById("editStartDate");
+  {% comment %} var editStartDateInput = document.getElementById("editStartDate");
   var editEndDateInput = document.getElementById("editEndDate");
   var previousStartDate = editStartDateInput.value;
   var previousEndDate = editEndDateInput.value;
@@ -375,7 +371,7 @@ endDateInput.addEventListener("change", function () {
       previousEndDate = editEndDateInput.value;
     }
   });
-  
+   {% endcomment %}
   
 
 
