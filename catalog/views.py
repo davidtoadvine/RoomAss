@@ -1,4 +1,4 @@
-from .models import Room, Building, Section, Person
+from .models import Room, Building, Section, Person, CustomEvent
 from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm, DeleteAvailabilityForm
 
 from datetime import timedelta, time
@@ -92,13 +92,62 @@ def delete_availability(request):
         form = DeleteAvailabilityForm(request.POST)
         
         if form.is_valid():
-        
+            print('valid delete form!!!')
             event_id = form.cleaned_data['event_id']
+            avail_event = get_object_or_404(CustomEvent, id=event_id)
+            calendar = avail_event.calendar
+  
+          # Original availability event's start and end dates
+            avail_start_date = avail_event.start
+            avail_end_date = avail_event.end
 
-            event = get_object_or_404(CustomEvent, id=event_id)
-            event.delete()
+            # Filter occupancy events that are within the original availability event's dates
+            occupancy_events = CustomEvent.objects.filter(
+                calendar=calendar,
+                event_type='occupancy',
+                start__gte=avail_start_date,
+                end__lte=avail_end_date
+            ).order_by('start')
+
+
+            rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
+
+            for event in occupancy_events:
+              print('occ event')
+              print(event)
+              guest_type = event.guest_type
+              start_date= event.start
+              end_date = event.end
+
+              for room in rooms:
+                if room.owner:
+                    if int(guest_type) >= int(room.owner.preference):
+                        if room.is_available(start_date, end_date):
+                            event.calendar = room.calendar
+                            event.save()
+                            event_assigned = True
+                            break
+                else:
+                    if room.is_available(start_date, end_date):
+                        event.calendar = room.calendar
+                        event.save()
+                        event_assigned = True
+                        break
+
+              if not event_assigned:
+                print(f"Event {event.id} could not be assigned to any room.")
+
+
+
+
+
+
+
+
+
+        avail_event.delete()
             # Redirect to a success page or the same page
-            return redirect('my_room')  # R
+        return redirect('my_room')  # R
 
     return redirect('my_room') 
 
