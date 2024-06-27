@@ -68,7 +68,10 @@ class EditAvailabilityForm(forms.Form):
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
 
-
+class DeleteAvailabilityForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    event_id = forms.IntegerField(widget=forms.HiddenInput())
 # honestly not sure why this is a model form, guessing it doesn't need to be
 class GuestPreferencesForm(forms.ModelForm):
     class Meta:

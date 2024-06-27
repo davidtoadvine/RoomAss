@@ -1,5 +1,5 @@
 from .models import Room, Building, Section, Person
-from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm
+from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm, DeleteAvailabilityForm
 
 from datetime import timedelta, time
 from django.utils import timezone
@@ -84,10 +84,24 @@ def edit_availability(request):
             # Log form errors for debugging
             print(form.errors)
             return redirect('my_room')  # Redirect to a relevant page after saving
-
-            
     
     return HttpResponse("Invalid request method", status=405)
+
+def delete_availability(request):
+    if request.method == 'POST':
+        form = DeleteAvailabilityForm(request.POST)
+        
+        if form.is_valid():
+        
+            event_id = form.cleaned_data['event_id']
+
+            event = get_object_or_404(CustomEvent, id=event_id)
+            event.delete()
+            # Redirect to a success page or the same page
+            return redirect('my_room')  # R
+
+    return redirect('my_room') 
+
         
 def my_room(request):
     person = request.user.person

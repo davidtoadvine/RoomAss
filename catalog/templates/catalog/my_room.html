@@ -35,11 +35,19 @@
     {% for a_event in availability_events %}
       <tr>
           <td class = "availability-cell">
+
           <div class="flex-container">
+
           <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+          <div>
           <button type = "submit"
           onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+        
+        <button type = "submit"
+          onclick = "showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
         </div>
+      
+      </div>
       </td>
       </tr>
 
@@ -183,6 +191,40 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-primary">Confirm Availability</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Availability Modal -->
+<div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="deleteAvailabilityForm" method="post" action="{% url 'delete_availability' %}"> 
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" >Delete Availability?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type = "hidden" name = "event_id" id = "deleteEventId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="deleteStartDate" class="form-control" readonly />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="deleteEndDate" class="form-control" readonly/>
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Delete</button>
         </div>
       </form>
     </div>
@@ -401,6 +443,33 @@ endDateInput.addEventListener("change", function () {
         $(formId).submit();
     });
 });
+
+
+function showDeleteAvailabilityForm(eventId, start, end) {
+  event.preventDefault();
+  // Set the form values
+   // Use moment.js to parse the custom date format
+   const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+   const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+     
+   console.log(eventId)
+   console.log(start)
+   console.log(end)
+     
+     // Set the form values
+     $("#deleteStartDate").val(startDate);
+     $("#deleteEndDate").val(endDate);
+     $("#deleteEventId").val(eventId);
+  // Show the modal
+  $('#deleteAvailabilityModal').modal('show');
+}
+
+function submitAvailabilityForm() {
+  $("#deleteAvailabilityForm").submit();
+}
+
+
+
 </script>
 
 {% endblock %}
