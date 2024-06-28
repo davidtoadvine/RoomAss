@@ -258,6 +258,15 @@ def my_room(request):
     }
     return render(request, 'catalog/my_room.html', context)
 
+
+
+
+
+
+
+
+
+
 def home(request):
     
     # get and order rooms for sensible display later
@@ -338,6 +347,13 @@ def home(request):
     }
     return render(request, 'catalog/home.html', context)
 
+
+
+
+
+
+
+
 def person_detail(request, person_id):
     person = get_object_or_404(Person, pk=person_id)
     room = person.room
@@ -353,23 +369,30 @@ def person_detail(request, person_id):
 from datetime import datetime, timedelta
 from .models import CustomEvent, Room, Person
 
-def assign_owner(room, person):
-    room.owner = person
-    room.save()
 
 
-def make_room_temporarily_available(room, start_date, end_date):
+
+
+
+# def assign_owner(room, person):
+#     room.owner = person
+#     room.save()
+
+
+
+# def make_room_temporarily_available(room, start_date, end_date):
     
-    #need to make time zone aware!
+#     #need to make time zone aware!
 
-    # Create a temporary availability event
-    CustomEvent.objects.create(
-        title=f"Temporary Availability for Room {room.number}",
-        start=start_date,
-        end=end_date,
-        calendar=room.calendar,
-        event_type='availability'
-    )
+#     # Create a temporary availability event
+#     CustomEvent.objects.create(
+#         title=f"Temporary Availability for Room {room.number}",
+#         start=start_date,
+#         end=end_date,
+#         calendar=room.calendar,
+#         event_type='availability'
+#     )
+
 def create_booking(request):
 
     if request.method == 'POST':
@@ -418,6 +441,11 @@ def create_booking(request):
             return render(request, 'catalog/home.html', {'error': 'Form is invalid', 'form_errors': form.errors})
     return redirect('home')
 
+
+
+
+
+
 def merge_overlapping_events(calendar):
     
     events = CustomEvent.objects.filter(calendar = calendar, event_type='availability').order_by('start')
@@ -447,8 +475,16 @@ def merge_overlapping_events(calendar):
         event.save()
 
 
+
+
+
 def normalize_time(dt):
     return dt.replace(hour=12, minute=0, second=0, microsecond=0)
+
+
+
+
+
 
 def edit_guest_preferences(request, person_id):
 
@@ -465,7 +501,10 @@ def edit_guest_preferences(request, person_id):
     
     return render(request, 'edit_guest_preferences.html', {'form': form, 'person': person})
 
-################################################################################################################################333
+
+
+
+
 def create_stopgap_booking(room, event, start_date, end_date, guest_type):
                               
                             #book it
@@ -483,10 +522,9 @@ def create_stopgap_booking(room, event, start_date, end_date, guest_type):
 
           
 
-def ensure_timezone_aware(date):
-  if timezone.is_naive(date):
-                return timezone.make_aware(date, timezone.get_current_timezone())
-  return date
+
+
+
 
 
 def date_to_aware_datetime(date, hour, minute ):
@@ -496,3 +534,8 @@ def date_to_aware_datetime(date, hour, minute ):
             else:
                 date = datetime.combine(date, time(hour, minute))
             return ensure_timezone_aware(date)
+
+def ensure_timezone_aware(date):
+  if timezone.is_naive(date):
+                return timezone.make_aware(date, timezone.get_current_timezone())
+  return date
