@@ -55,30 +55,240 @@ def edit_availability(request):
             # Process the form data
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
+            print("end date coming in is...")
+            print(end_date)
             event_id = form.cleaned_data['event_id']
 
-            # Convert dates to datetime objects with specific time (noon)
-            start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
-            end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
+          # Convert dates to datetime objects with specific time (around noon)
+            if isinstance(start_date, datetime):
+                new_avail_start_date = start_date.replace(hour=12, minute=1)
+            else:
+                new_avail_start_date = datetime.combine(start_date, time(12, 1))
+
+            if isinstance(end_date, datetime):
+                new_avail_end_date = end_date.replace(hour=11, minute=59)
+            else:
+                new_avail_end_date = datetime.combine(end_date, time(11, 59))
 
             # Ensure dates are timezone-aware
-            if timezone.is_naive(start_date):
-                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
-            if timezone.is_naive(end_date):
-                end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
-
+            if timezone.is_naive(new_avail_start_date):
+                new_avail_start_date = timezone.make_aware(new_avail_start_date, timezone.get_current_timezone())
+            if timezone.is_naive(new_avail_end_date):
+                new_avail_end_date = timezone.make_aware(new_avail_end_date, timezone.get_current_timezone())
             # Fetch the existing event
-            event = get_object_or_404(CustomEvent, id=event_id)
+            avail_event = get_object_or_404(CustomEvent, id=event_id)
+            calendar = avail_event.calendar
+
+            # Original availability event's start and end dates
+            orig_avail_start_date = avail_event.start
+            orig_avail_end_date = avail_event.end
 
             # Update the event with new dates
-            event.start = start_date
-            event.end = end_date
-            event.title = f"Availability, {request.user}"
-            event.description = "Meaningful Description"
-            event.creator = request.user  # Update creator if needed
+            avail_event.start = new_avail_start_date
+            avail_event.end = new_avail_end_date
+            avail_event.title = f"Availability, {request.user}"
+            avail_event.description = "CHANGED"
+            avail_event.creator = request.user  # Update creator if needed
 
-            event.save()
-            merge_overlapping_events(event.calendar)  # Call the function to handle overlaps
+            avail_event.save()
+            merge_overlapping_events(avail_event.calendar)  # Call the function to handle overlaps
+
+####################################################################################################################
+            
+
+            # Filter occupancy events that are within the original availability event's dates
+            occupancy_events = CustomEvent.objects.filter(
+                calendar=calendar,
+                event_type='occupancy',
+                start__gte=orig_avail_start_date,
+                end__lte=orig_avail_end_date
+            ).order_by('start')
+
+
+            rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
+
+            for event in occupancy_events:
+            
+              guest_type = event.guest_type
+              start_date= event.start
+              end_date = event.end
+              ############
+              # if there has been an infringement
+              # 
+              ##############
+              # deal with end overlap
+              if event.end > new_avail_end_date:
+                  print("end date conflict seen")
+                  event.end = new_avail_end_date
+
+                  for room in rooms:
+                    if room.owner:
+                        if int(guest_type) >= int(room.owner.preference):
+                          if room.is_available(new_avail_end_date, end_date):
+
+                              # Convert dates to datetime objects with specific time (around noon)
+                            # if isinstance(new_avail_end_date, datetime):
+                            #     new_avail_end_date = new_avail_end_date.replace(hour=12, minute=1)
+                            # else:
+                            #     new_avail_end_date = datetime.combine(new_avail_end_date, datetime.min.time()).replace(hour=12, minute=1)
+
+                            # if isinstance(end_date, datetime):
+                            #     end_date = end_date.replace(hour=11, minute=59)
+                            # else:
+                            #     end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
+
+                              # Ensure dates are timezone-aware
+                            if timezone.is_naive(new_avail_end_date):
+                                  new_avail_end_date = timezone.make_aware(new_avail_end_date, timezone.get_current_timezone())
+                            if timezone.is_naive(end_date):
+                                  end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
+
+                            event.end = new_avail_end_date
+                            event.save()
+                              #book it
+                            booking_event = CustomEvent(
+                              calendar=room.calendar,
+                              event_type='occupancy',
+                              start=new_avail_end_date,
+                              end=end_date,
+                              title= f"Booking: REASSIGNED hosted by {str(event.creator)}",
+                              description = "Meaningful Description",
+                              creator = event.creator,
+                              guest_type = guest_type
+                              )
+                            booking_event.save()
+                            event_assigned = True
+                            break
+                    else:
+                              # Convert dates to datetime objects with specific time (around noon)
+                              # if isinstance(new_avail_end_date, datetime):
+                              #   new_avail_end_date = new_avail_end_date.replace(hour=12, minute=1)
+                              # else:
+                              #   new_avail_end_date = datetime.combine(new_avail_end_date, datetime.min.time()).replace(hour=12, minute=1)
+
+                              # if isinstance(end_date, datetime):
+                              #     end_date = end_date.replace(hour=11, minute=59)
+                              # else:
+                              #     end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
+
+                              # Ensure dates are timezone-aware
+                              if timezone.is_naive(new_avail_end_date):
+                                new_avail_end_date = timezone.make_aware(new_avail_end_date, timezone.get_current_timezone())
+                              if timezone.is_naive(end_date):
+                                end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
+
+                              event.end = new_avail_end_date
+                              event.save()
+                              #book it
+                              booking_event = CustomEvent(
+                              calendar=room.calendar,
+                              event_type='occupancy',
+                              start=new_avail_end_date,
+                              end=end_date,
+                              title= f"Booking: REASSIGNED hosted by {str(event.creator)}",
+                              description = "Meaningful Description",
+                              creator = event.creator,
+                              guest_type = guest_type
+                              )
+                              booking_event.save()
+                              event_assigned = True
+                              break
+                        
+                              break
+                  if not event_assigned:
+                    print(f"Event {event.id} (front portion) could not be assigned to any room.")
+              ################          
+              # deal with start overlap
+              if event.start < new_avail_start_date:
+                  event.start = new_avail_start_date
+
+                  for room in rooms:
+                    if room.owner:
+                        if int(guest_type) >= int(room.owner.preference):
+                        
+                            if room.is_available(start_date, new_avail_start_date):
+                               # Convert dates to datetime objects with specific time (around noon)
+                              # if isinstance(new_avail_start_date, datetime):
+                              #     new_avail_start_date = new_avail_start_date.replace(hour=12, minute=1)
+                              # else:
+                              #     new_avail_start_date = datetime.combine(new_avail_start_date, datetime.min.time()).replace(hour=12, minute=1)
+
+                              # if isinstance(start_date, datetime):
+                              #     start_date = start_date.replace(hour=11, minute=59)
+                              # else:
+                              #     start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=11, minute=59)
+
+                              # Ensure dates are timezone-aware
+                              if timezone.is_naive(new_avail_start_date):
+                                new_avail_start_date = timezone.make_aware(new_avail_start_date, timezone.get_current_timezone())
+                              if timezone.is_naive(start_date):
+                                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
+
+                              event.start = new_avail_start_date
+                              event.save()
+                            #book it
+                              booking_event = CustomEvent(
+                              calendar=room.calendar,
+                              event_type='occupancy',
+                              start=start_date,
+                              end=new_avail_start_date,
+                              title= f"Booking: REASSIGNED hosted by {str(event.creator)}",
+                              description = "Meaningful Description",
+                              creator = event.creator,
+                              guest_type = guest_type
+                              )
+                              booking_event.save()
+                              event_assigned = True
+                              event_assigned = True
+
+                              break
+                    else:
+                        if room.is_available(start_date, new_avail_start_date):
+                                 # Convert dates to datetime objects with specific time (around noon)
+                              # if isinstance(new_avail_start_date, datetime):
+                              #     new_avail_start_date = new_avail_start_date.replace(hour=12, minute=1)
+                              # else:
+                              #     new_avail_start_date = datetime.combine(new_avail_start_date, datetime.min.time()).replace(hour=12, minute=1)
+
+                              # if isinstance(start_date, datetime):
+                              #     start_date = start_date.replace(hour=11, minute=59)
+                              # else:
+                              #     start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=11, minute=59)
+
+
+                              # Ensure dates are timezone-aware
+                              if timezone.is_naive(new_avail_start_date):
+                                new_avail_start_date = timezone.make_aware(new_avail_start_date, timezone.get_current_timezone())
+                              if timezone.is_naive(start_date):
+                                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
+
+                              event.start = new_avail_start_date
+                              event.save()
+                            #book it
+                              booking_event = CustomEvent(
+                              calendar=room.calendar,
+                              event_type='occupancy',
+                              start=start_date,
+                              end=new_avail_start_date,
+                              title= f"Booking: REASSIGNED hosted by {str(event.creator)}",
+                              description = "Meaningful Description",
+                              creator = event.creator,
+                              guest_type = guest_type
+                              )
+                              booking_event.save()
+                              event_assigned = True
+                        
+                              break
+
+
+                  if not event_assigned:
+                    print(f"Event {event.id} could not be assigned to any room.")
+
+
+
+
+
+
             return redirect('my_room')  # Redirect to a relevant page after saving
         else:
             # Log form errors for debugging
@@ -415,3 +625,28 @@ def edit_guest_preferences(request, person_id):
         form = GuestPreferencesForm(instance=person)
     
     return render(request, 'edit_guest_preferences.html', {'form': form, 'person': person})
+
+
+def create_booking_from_edit(room, start_date, end_date, host, guest, guest_type):
+    # Convert dates to datetime objects with specific time (around noon)
+            start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
+            end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
+
+            # Ensure dates are timezone-aware
+            if timezone.is_naive(start_date):
+                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
+            if timezone.is_naive(end_date):
+                end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
+
+            
+            booking_event = CustomEvent(
+                calendar=room.calendar,
+                event_type='occupancy',
+                start=start_date,
+                end=end_date,
+                title= f"Booking: {guest} hosted by {host_name}",
+                description = "Meaningful Description",
+                creator = host_object,
+                guest_type = guest_type
+            )
+            booking_event.save()
