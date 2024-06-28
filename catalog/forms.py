@@ -17,6 +17,7 @@ class BookingForm(forms.Form):
     guest_name = forms.CharField(max_length=100, validators = [MinLengthValidator(1), MaxLengthValidator(100)])
     host_name = forms.CharField(max_length=100, validators = [MinLengthValidator(1), MaxLengthValidator(100)])
     guest_type = forms.ChoiceField(choices=GUEST_TYPE_CHOICES, required=False)
+    guest_name = forms.CharField(max_length=20)
 
     def clean_guest_name(self):
         guest_name = self.cleaned_data['guest_name']

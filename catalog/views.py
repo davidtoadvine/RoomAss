@@ -116,7 +116,7 @@ def edit_availability(request):
 
                             occ_event.end = new_avail_end_date
                             occ_event.save()
-                            create_stopgap_booking(room, occ_event, new_avail_end_date, end_date, occ_event.guest_type)
+                            create_stopgap_booking(room, occ_event, new_avail_end_date, end_date, occ_event.guest_type, occ_event.guest_name)
                             event_assigned = True
                             break
                         
@@ -137,7 +137,7 @@ def edit_availability(request):
                               
                               occ_event.start = new_avail_start_date
                               occ_event.save()
-                              create_stopgap_booking(room, occ_event, start_date, new_avail_start_date, occ_event.guest_type)
+                              create_stopgap_booking(room, occ_event, start_date, new_avail_start_date, occ_event.guest_type, occ_event.guest_name)
                               event_assigned = True
 
                               break
@@ -407,6 +407,7 @@ def create_booking(request):
             room = Room.objects.get(id=room_id)
             host_object = request.user
             guest_type = form.cleaned_data['guest_type']
+            guest_name = form.cleaned_data['guest_name']
 
             # Convert dates to datetime objects with specific time (around noon)
             start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
@@ -425,7 +426,8 @@ def create_booking(request):
                     title= f"Booking: {guest} hosted by {host_name}",
                     description = "Meaningful Description",
                     creator = host_object,
-                    guest_type = guest_type
+                    guest_type = guest_type,
+                    guest_name = guest_name
                 )
                 booking_event.save()
                 
@@ -505,7 +507,7 @@ def edit_guest_preferences(request, person_id):
 
 
 
-def create_stopgap_booking(room, event, start_date, end_date, guest_type):
+def create_stopgap_booking(room, event, start_date, end_date, guest_type, guest_name):
                               
                             #book it
                               booking_event = CustomEvent(
@@ -513,14 +515,15 @@ def create_stopgap_booking(room, event, start_date, end_date, guest_type):
                               event_type='occupancy',
                               start=start_date,
                               end=end_date,
-                              title= f"Booking: REASSIGNED hosted by {str(event.creator)}",
+                              title= f"Booking: {guest_name} hosted by {str(event.creator)}",
                               description = "Meaningful Description",
                               creator = event.creator,
-                              guest_type = guest_type
+                              guest_type = guest_type,
+                              guest_name = guest_name
                               )
                               booking_event.save()
 
-          
+
 
 
 
