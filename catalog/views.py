@@ -91,24 +91,40 @@ def edit_availability(request):
 
               #Deal with new end date, new start date, completely delete original occupancy if needed
               if occ_event.end > new_avail_end_date:
+                  print("occ end is greater than the new avail end date")
+
                   occ_event.end = new_avail_end_date
+                  occ_event.save()
               
                   if new_avail_end_date > occ_event.start:
+                    print("new avail end is greater than orig occ start")
                     handle_reassign(occ_event, new_avail_end_date, end_date,owner )
                   else:
+                    print("new avail end is NOT greater than orig occ start")
+
                     handle_reassign(occ_event, start_date,end_date,owner)
                     full_reassign = True
 
 
-              if not full_reassign and occ_event.start < new_avail_start_date:
-                  
+              if not full_reassign and occ_event.start < new_avail_start_date: 
+                  print('not full reassigned. And occ event start is earlier than new Avail start')
+                  print(occ_event.start)
+                  print("is set to")
+                  print(new_avail_start_date)
                   occ_event.start = new_avail_start_date
+                  occ_event.save()
+                  print("occ event start is now equal to new avail start")
+                 
+
                   if new_avail_start_date < occ_event.end:
+                      print("getting window between original start date and new avail start")
                       handle_reassign(occ_event, start_date, new_avail_start_date, owner)
                   else:
+                      print('getting window between orig start and orig end')
                       handle_reassign(occ_event, start_date, end_date,owner)
 
               if occ_event.start >= occ_event.end:
+                  print("deleting orig occ event because start is NOW after or equal to end")
                   occ_event.delete()
 
             return redirect('my_room')  # Redirect to a relevant page after saving
@@ -148,6 +164,7 @@ def delete_availability(request):
               end_date = event.end
               owner = request.user
               handle_reassign(event, start_date, end_date, owner)
+              event.delete()
 
         avail_event.delete()
         # Redirect to a success page or the same page
@@ -539,8 +556,8 @@ def handle_reassign(occ_event, start_date, end_date, owner):
                             (not room.owner))):
                         
 
-                            occ_event.end = start_date
-                            occ_event.save()
+                            #occ_event.end = start_date
+                            #occ_event.save()
                             create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
                             event_assigned = True
 
