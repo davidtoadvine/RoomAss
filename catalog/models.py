@@ -26,7 +26,7 @@ class Room(models.Model):
   section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='rooms')
   number = models.IntegerField()
   #available = models.BooleanField()
-  calendar = models.OneToOneField(Calendar, on_delete=models.CASCADE, null=True, blank=True, related_name='room_calendar')
+  calendar = models.OneToOneField(Calendar, on_delete=models.CASCADE, null=True, blank=True, related_name='room')
   owner = models.OneToOneField('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
   image = models.ImageField(upload_to='room_images/', null=True, blank=True)
   

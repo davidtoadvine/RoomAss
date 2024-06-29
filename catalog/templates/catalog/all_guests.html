@@ -11,6 +11,7 @@
                     <th>Host Name</th>
                     <th>Start Date</th>
                     <th>End Date</th>
+                    <th>Location</th>
              
                 </tr>
             </thead>
@@ -35,8 +36,13 @@
                 <tr>
                     <td>{{ event.guest_name }}</td>
                     <td>{{ event.creator }}</td>
-                    <td>{{ event.start|date:"m-d" }}</td>
-                    <td>{{ event.end|date:"m-d" }}</td>
+                    <td>{{ event.start|date:"F d" }}</td>
+                    <td>{{ event.end|date:"F d" }}</td>
+                    {% if event.calendar.room.owner%}
+                    <td>{{event.calendar.room.owner}}'s room, {{event.calendar.room.section.building}}</td>
+                    {%else%}
+                    <td>Room #{{event.calendar.room.number}}, {{event.calendar.room.section.building}}</td>
+                    {%endif%}
                 </tr>
                 {% endfor %}
                 {%endif%}
