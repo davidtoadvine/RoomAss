@@ -54,3 +54,27 @@
 .booked-cell {
   background-color: lightcoral;
 }
+.hover-image {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  max-width: 600px;  /* Set a maximum width for the image */
+  max-height: 600px; /* Set a maximum height for the image */
+}
+
+.button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.booking-room-image {
+  width: auto; /* Adjust the width as needed */
+  height: auto;
+  /* min-width: 400px;
+  min-height: 400px; */
+  object-fit: contain;
+}
+
+.modal-lg {
+  max-width: 55%;
+}

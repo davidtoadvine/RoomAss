@@ -370,29 +370,6 @@ from datetime import datetime, timedelta
 from .models import CustomEvent, Room, Person
 
 
-
-
-
-
-# def assign_owner(room, person):
-#     room.owner = person
-#     room.save()
-
-
-
-# def make_room_temporarily_available(room, start_date, end_date):
-    
-#     #need to make time zone aware!
-
-#     # Create a temporary availability event
-#     CustomEvent.objects.create(
-#         title=f"Temporary Availability for Room {room.number}",
-#         start=start_date,
-#         end=end_date,
-#         calendar=room.calendar,
-#         event_type='availability'
-#     )
-
 def create_booking(request):
 
     if request.method == 'POST':
@@ -402,7 +379,6 @@ def create_booking(request):
             room_id = form.cleaned_data['room_id']
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
-            guest = form.cleaned_data['guest_name']
             host_name = form.cleaned_data['host_name']
             room = Room.objects.get(id=room_id)
             host_object = request.user
@@ -423,7 +399,7 @@ def create_booking(request):
                     event_type='occupancy',
                     start=start_date,
                     end=end_date,
-                    title= f"Booking: {guest} hosted by {host_name}",
+                    title= f"Booking: {guest_name} hosted by {host_name}",
                     description = "Meaningful Description",
                     creator = host_object,
                     guest_type = guest_type,
@@ -515,7 +491,7 @@ def create_stopgap_booking(room, event, start_date, end_date, guest_type, guest_
                               event_type='occupancy',
                               start=start_date,
                               end=end_date,
-                              title= f"Booking: {guest_name} hosted by {str(event.creator)}",
+                              title= f"Auto Booking: {guest_name} hosted by {str(event.creator)}",
                               description = "Meaningful Description",
                               creator = event.creator,
                               guest_type = guest_type,

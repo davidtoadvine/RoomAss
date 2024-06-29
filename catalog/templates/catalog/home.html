@@ -39,6 +39,7 @@
   <thead>
     <tr>
       <th scope="col">Building / Section</th>
+      {% comment %} <th scope="col">View</th> {% endcomment %}
       <th scope="col">Owner</th>
       <th scope="col">Available Until Noon on...</th>
       <th scope="col"></th>
@@ -60,7 +61,16 @@
     {%endif%}
     {% for room, availability_date in available_rooms_info %}
     <tr>
-      <td>{{ room.section.building.name }} / {{ room.section.name }}</td>
+      
+      <td>
+        {{ room.section.building.name }} / {{ room.section.name }}
+      </td>
+      {% comment %} <td>
+        <div class="button-container">
+          <button class="hover-button" data-image-url="{{ room.image.url }}">Hover over me</button>
+      </div>
+
+      </td> {% endcomment %}
       <td>
         {% if room.owner %} {{ room.owner.name }} {% else %} Unassigned
         {%endif%}
@@ -110,101 +120,59 @@
 
 {% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
 <!-- Booking Modal -->
-<div
-  class="modal fade"
-  id="bookingModal"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="bookingModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <form id="bookingForm" method="post" action="{% url 'create_booking' %}">
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="bookingModalLabel">Confirm Booking</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="row">
             <!-- Form Column -->
-            <div class="col-md-6">
+            <div class="col-md-4">
               <input type="hidden" name="room_id" id="bookingRoomId" />
-              <input type="hidden" name="guest_type" id="bookingGuestType" value = {{guest_type}} />
+              <input type="hidden" name="guest_type" id="bookingGuestType" value="{{guest_type}}" />
 
-              
-
-              <input
-                type="hidden"
-                name="start_date"
-                id="bookingStartDateHidden"
-              />
+              <input type="hidden" name="start_date" id="bookingStartDateHidden" />
               <input type="hidden" name="end_date" id="bookingEndDateHidden" />
 
               <div class="form-group">
                 <label for="guestName">Guest Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="guestName"
-                  name="guest_name"
-                  required
-                />
+                <input type="text" class="form-control" id="guestName" name="guest_name" required />
               </div>
-              
+
               <div class="form-group">
                 <label for="hostName">Host Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="hostName"
-                  name="host_name"
-                  value = "{{user}}"
-                  readonly
-                  required
-                />
+                <input type="text" class="form-control" id="hostName" name="host_name" value="{{user}}" readonly required />
               </div>
-              <p>Room Number: <span id="bookingRoomNumber"></span></p>
-              <p>Building: <span id="bookingBuildingName"></span></p>
-              <p>Section: <span id="bookingSectionName"></span></p>
               <p>Start Date: <span id="bookingStartDate"></span></p>
               <p>End Date: <span id="bookingEndDate"></span></p>
+
+              <p>Building: <span id="bookingBuildingName"></span></p>
+              <p>Section: <span id="bookingSectionName"></span></p>
+              <p>Room Number: <span id="bookingRoomNumber"></span></p>
+              
+           
             </div>
             <!-- Image Column -->
-
-            <div class="col-md-6">
-              <!-- Image Column -->
-              <img
-                id="bookingRoomImage"
-                src=""
-                alt="Room Image"
-                class="img-fluid"
-                style="max-width: 200px; max-height: 400px"
-              />
+            <div class="col-md-8">
+              <img id="bookingRoomImage" src="" alt="Room Image" class="img-fluid booking-room-image" />
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Close
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            onclick="submitBookingForm()"
-          >
-            Confirm Booking
-          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="submitBookingForm()">Confirm Booking</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
 {% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
     </div>
   </div>
@@ -318,6 +286,34 @@
     $("#bookingForm").submit();
     }
   
+
+
+
+
+
+    document.querySelectorAll('.hover-button').forEach(button => {
+      const hoverImage = document.createElement('img');
+      hoverImage.classList.add('hover-image');
+      document.body.appendChild(hoverImage);
   
+      button.addEventListener('mouseover', function () {
+          hoverImage.src = button.getAttribute('data-image-url');
+          hoverImage.style.display = 'block';
+  
+          // Wait for the image to load to get its height
+          hoverImage.onload = function() {
+              const halfImageHeight = hoverImage.offsetHeight / 2;
+  
+              button.addEventListener('mousemove', function (e) {
+                  hoverImage.style.left = (e.pageX + 10) + 'px';
+                  hoverImage.style.top = (e.pageY - halfImageHeight) + 'px';
+              });
+          };
+      });
+  
+      button.addEventListener('mouseout', function () {
+          hoverImage.style.display = 'none';
+      });
+  });
 </script>
 {% endblock %}
