@@ -6,6 +6,9 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 def create_availability(request):
       if request.method == 'POST':
@@ -52,12 +55,7 @@ def edit_availability(request):
           # Convert dates to datetime objects with specific time (around noon)
           
             new_avail_start_date = date_to_aware_datetime(start_date,11,59)
-       
-
-            
             new_avail_end_date = date_to_aware_datetime(end_date,12,1)
-     
-
 
             # Fetch the existing event
             avail_event = get_object_or_404(CustomEvent, id=event_id)
@@ -73,10 +71,9 @@ def edit_availability(request):
             avail_event.title = f"Availability, {request.user}"
             avail_event.description = "CHANGED"
             avail_event.creator = request.user  # Update creator if needed
-
             avail_event.save()
             merge_overlapping_events(avail_event.calendar)  # Call the function to handle overlaps
-   
+
             #######
             ####### Now we deal with any dispruptions occupation events
             #######
@@ -97,16 +94,23 @@ def edit_availability(request):
               guest_type = occ_event.guest_type
               start_date= occ_event.start
               end_date = occ_event.end
+              guest_name = occ_event.guest_name
+              host_name = occ_event.creator
+              host_email = occ_event.creator.email
               ############
               # if there has been an infringement
               ##############
               # deal with end overlap
               if occ_event.end > new_avail_end_date:
-                  print("end date conflict seen")
                   occ_event.end = new_avail_end_date
+                
 
                   for room in rooms:
                     
+                    email_start_date = (new_avail_end_date.__str__())[:-15]
+                    email_end_date = (end_date.__str__())[:-15]
+                    event_assigned = False
+
                     if (    (room.is_available(new_avail_end_date, end_date))
                             and
                             ((room.owner and int(guest_type) >= int(room.owner.preference))
@@ -118,32 +122,68 @@ def edit_availability(request):
                             occ_event.save()
                             create_stopgap_booking(room, occ_event, new_avail_end_date, end_date, occ_event.guest_type, occ_event.guest_name)
                             event_assigned = True
+
+                            send_mail(
+                                      "Your room booking has changed",
+                                      f"{request.user} has had an availability change. Your guest {guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
+                                      "autoRoomAss@email.com",
+                                      [f"{host_email}"],
+                                      fail_silently=False
+                                      )
+
                             break
                         
                             
                   if not event_assigned:
-                    print(f"Event {occ_event.id} (front portion) could not be assigned to any room.")
+                      send_mail(
+                                      "Your room booking has changed",
+                                      f"{request.user} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
+                                      "autoRoomAss@email.com",
+                                      [f"{host_email}"],
+                                      fail_silently=False
+                                      )
               ################          
               # deal with start overlap
               if occ_event.start < new_avail_start_date:
                   occ_event.start = new_avail_start_date
 
                   for room in rooms:
-                    if (  (room.is_available(start_date, new_avail_start_date))
+
+                    email_start_date = (start_date.__str__())[:-15]
+                    email_end_date = (new_avail_start_date.__str__())[:-15]
+                    event_assigned = False
+                    if (  (room.is_available(start_date, new_avail_start_date)) # if room is available for date range
                             and
-                            ((room.owner and int(guest_type) >= int(room.owner.preference))
+                            ((room.owner and int(guest_type) >= int(room.owner.preference)) # and sastisfies owner's guest preference
                             or
-                            (not room.owner))):
+                            (not room.owner))): 
                               
                               occ_event.start = new_avail_start_date
                               occ_event.save()
                               create_stopgap_booking(room, occ_event, start_date, new_avail_start_date, occ_event.guest_type, occ_event.guest_name)
                               event_assigned = True
 
+                              send_mail(
+                                      "Your room booking has changed",
+                                      f"{request.user} has had an availability change. Your guest {guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
+                                      "autoRoomAss@email.com",
+                                      [f"{host_email}"],
+                                      fail_silently=False
+                                      )
+                              
                               break
                     
                   if not event_assigned:
-                    print(f"Event {occ_event.id} could not be assigned to any room.")
+                      send_mail(
+                                      "Your room booking has changed",
+                                      f"{request.user} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
+                                      "autoRoomAss@email.com",
+                                      [f"{host_email}"],
+                                      fail_silently=False
+                                      )
+
+              if occ_event.start >= occ_event.end:
+                  occ_event.delete()
 
             return redirect('my_room')  # Redirect to a relevant page after saving
         else:
@@ -187,22 +227,38 @@ def delete_availability(request):
               end_date = event.end
 
               for room in rooms:
-                if room.owner:
-                    if int(guest_type) >= int(room.owner.preference):
-                        if room.is_available(start_date, end_date):
+                email_start_date = (start_date.__str__())[:-15]
+                email_end_date = (end_date.__str__())[:-15]
+                event_assigned = False
+
+                if ((room.is_available(start_date, end_date)) # if room is available for date range
+                    and
+                    ((room.owner and int(guest_type) >= int(room.owner.preference)) # and sastisfies owner's guest preference
+                    or
+                    (not room.owner))): 
+                            
                             event.calendar = room.calendar
                             event.save()
                             event_assigned = True
+
+                            send_mail(
+                                      "Your room booking has changed",
+                                      f"{request.user} has had an availability change. Your guest {event.guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
+                                      "autoRoomAss@email.com",
+                                      [f"{event.creator.email}"],
+                                      fail_silently=False
+                                      )
                             break
-                else:
-                    if room.is_available(start_date, end_date):
-                        event.calendar = room.calendar
-                        event.save()
-                        event_assigned = True
-                        break
+            
 
               if not event_assigned:
-                print(f"Event {event.id} could not be assigned to any room.")
+                send_mail(
+                                      "Your room booking has changed",
+                                      f"{request.user} has had an availability change. Your guest {event.guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
+                                      "autoRoomAss@email.com",
+                                      [f"{event.creator.email}"],
+                                      fail_silently=False
+                                      )
 
 
         avail_event.delete()
@@ -257,8 +313,6 @@ def my_room(request):
         'end_date': dayafter.strftime('%Y-%m-%d'),
     }
     return render(request, 'catalog/my_room.html', context)
-
-
 
 
 
