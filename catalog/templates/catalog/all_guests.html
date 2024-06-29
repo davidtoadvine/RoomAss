@@ -3,7 +3,7 @@
 {% extends "base_generic.html" %} {% block content %}
 
     <div class="container">
-        <h1>Occupation Events</h1>
+        <h1>All Scheduled Bookings</h1>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -11,21 +11,35 @@
                     <th>Host Name</th>
                     <th>Start Date</th>
                     <th>End Date</th>
-                    <th>Room</th>
-                    <th>Guest Type</th>
+             
                 </tr>
             </thead>
             <tbody>
+                {% if not occupation_events%}
+                <tr>
+                  <td>
+                    <p> No guests currently booked.<p>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+
+                {%else%}
                 {% for event in occupation_events %}
                 <tr>
                     <td>{{ event.guest_name }}</td>
-                    <td>{{ event.host_name }}</td>
-                    <td>{{ event.start|date:"Y-m-d H:i" }}</td>
-                    <td>{{ event.end|date:"Y-m-d H:i" }}</td>
-                    <td>{{ event.calendar.name }}</td>
-                    <td>{{ event.get_guest_type_display }}</td>
+                    <td>{{ event.creator }}</td>
+                    <td>{{ event.start|date:"m-d" }}</td>
+                    <td>{{ event.end|date:"m-d" }}</td>
                 </tr>
                 {% endfor %}
+                {%endif%}
             </tbody>
         </table>
     </div>
