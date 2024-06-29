@@ -7,8 +7,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 
 from django.core.mail import send_mail
-from django.conf import settings
-
 
 def create_availability(request):
       if request.method == 'POST':
@@ -54,8 +52,8 @@ def edit_availability(request):
 
           # Convert dates to datetime objects with specific time (around noon)
           
-            new_avail_start_date = date_to_aware_datetime(start_date,11,59)
-            new_avail_end_date = date_to_aware_datetime(end_date,12,1)
+            new_avail_start_date = date_to_aware_datetime(start_date,12,1)
+            new_avail_end_date = date_to_aware_datetime(end_date,11,59)
 
             # Fetch the existing event
             avail_event = get_object_or_404(CustomEvent, id=event_id)
@@ -89,15 +87,26 @@ def edit_availability(request):
               start_date= occ_event.start
               end_date = occ_event.end
               owner = request.user
+              full_reassign = False
 
               #Deal with new end date, new start date, completely delete original occupancy if needed
               if occ_event.end > new_avail_end_date:
                   occ_event.end = new_avail_end_date
-                  handle_reassign(occ_event, new_avail_end_date,end_date,owner )
+              
+                  if new_avail_end_date > occ_event.start:
+                    handle_reassign(occ_event, new_avail_end_date, end_date,owner )
+                  else:
+                    handle_reassign(occ_event, start_date,end_date,owner)
+                    full_reassign = True
 
-              if occ_event.start < new_avail_start_date:
+
+              if not full_reassign and occ_event.start < new_avail_start_date:
+                  
                   occ_event.start = new_avail_start_date
-                  handle_reassign(occ_event, start_date,new_avail_start_date,owner)
+                  if new_avail_start_date < occ_event.end:
+                      handle_reassign(occ_event, start_date, new_avail_start_date, owner)
+                  else:
+                      handle_reassign(occ_event, start_date, end_date,owner)
 
               if occ_event.start >= occ_event.end:
                   occ_event.delete()
@@ -134,22 +143,18 @@ def delete_availability(request):
                 end__lte=avail_end_date
             ).order_by('start')
 
-
             for event in occupancy_events:
-          
               start_date= event.start
               end_date = event.end
               owner = request.user
-
-              handle_reassign(event,start_date,end_date,owner)
+              handle_reassign(event, start_date, end_date, owner)
 
         avail_event.delete()
-            # Redirect to a success page or the same page
+        # Redirect to a success page or the same page
         return redirect('my_room') 
 
     return redirect('my_room') 
 
-        
 
 
 
@@ -177,13 +182,10 @@ def my_room(request):
             'occupancy': child_occupancy_events
         }
 
-
     # Get the current local date and the next day's date
     local_now = timezone.localtime(timezone.now())
     tomorrow = local_now.date() + timedelta(days=1)
     dayafter = tomorrow + timedelta(days=1)
-
-
 
     context = {
         'room': room,
@@ -356,9 +358,18 @@ def create_booking(request):
     return redirect('home')
 
 
+def all_guests(request):
+    # Retrieve all occupation events
+    occupation_events = CustomEvent.objects.filter(event_type='occupancy').select_related('calendar').order_by('start')
+    
+    context = {
+        'occupation_events': occupation_events,
+    }
+    
+    return render(request, 'catalog/all_guests.html', context)
 
 
-
+############################################################################################################
 
 def merge_overlapping_events(calendar):
     
@@ -456,11 +467,63 @@ def ensure_timezone_aware(date):
   return date
 
 def handle_reassign(occ_event, start_date, end_date, owner):
+                  
+
+                  # if orig_date > new_date:
+                  #     start_date = new_date
+                  #     end_date = orig_date
+
+                  # elif orig_date < new_date:
+                  #     start_date = orig_date
+                  #     end_date = new_date
+                  
+                  # rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
+                  
+                  # guest_type = occ_event.guest_type
+                  # guest_name = occ_event.guest_name
+                  # host_email = occ_event.creator.email
+
+                  # for room in rooms:
+                    
+                  #   email_start_date = (start_date.__str__())[:-15]
+                  #   email_end_date = (end_date.__str__())[:-15]
+                  #   event_assigned = False
+
+                  #   if (    (room.is_available(start_date, end_date))
+                  #           and
+                  #           ((room.owner and int(guest_type) >= int(room.owner.preference))
+                  #           or
+                  #           (not room.owner))):
+                        
+
+                  #           occ_event.end = start_date
+                  #           occ_event.save()
+                  #           create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
+                  #           event_assigned = True
+
+                  #           send_mail(
+                  #                     "Your room booking has changed",
+                  #                     f"{owner} has had an availability change. Your guest {guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
+                  #                     "autoRoomAss@email.com",
+                  #                     [f"{host_email}"],
+                  #                     fail_silently=False
+                  #                     )
+
+                  #           break
+                        
+                            
+                  # if not event_assigned:
+                  #     send_mail(
+                  #                     "Your room booking has changed",
+                  #                     f"{owner} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
+                  #                     "autoRoomAss@email.com",
+                  #                     [f"{host_email}"],
+                  #                     fail_silently=False
+                  #                     )
                   rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
                   
                   guest_type = occ_event.guest_type
                   guest_name = occ_event.guest_name
-                  host_name = occ_event.creator
                   host_email = occ_event.creator.email
 
                   for room in rooms:

@@ -1,0 +1,32 @@
+<!-- all_guests.html -->
+
+{% extends "base_generic.html" %} {% block content %}
+
+    <div class="container">
+        <h1>Occupation Events</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Guest Name</th>
+                    <th>Host Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Room</th>
+                    <th>Guest Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in occupation_events %}
+                <tr>
+                    <td>{{ event.guest_name }}</td>
+                    <td>{{ event.host_name }}</td>
+                    <td>{{ event.start|date:"Y-m-d H:i" }}</td>
+                    <td>{{ event.end|date:"Y-m-d H:i" }}</td>
+                    <td>{{ event.calendar.name }}</td>
+                    <td>{{ event.get_guest_type_display }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endblock %}
