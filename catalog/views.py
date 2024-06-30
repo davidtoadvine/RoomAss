@@ -8,6 +8,9 @@ from django.http import HttpResponse
 
 from django.core.mail import send_mail
 
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def create_availability(request):
       if request.method == 'POST':
         form = AvailabilityForm(request.POST)
@@ -39,7 +42,8 @@ def create_availability(request):
         
         else:
             return redirect('my_room')
-
+        
+@login_required
 def edit_availability(request):
     if request.method == 'POST':
         form = EditAvailabilityForm(request.POST)
@@ -137,7 +141,7 @@ def edit_availability(request):
 
 
 
-
+@login_required
 def delete_availability(request):
     if request.method == 'POST':
         form = DeleteAvailabilityForm(request.POST)
@@ -177,7 +181,7 @@ def delete_availability(request):
 
 
 
-
+@login_required
 def my_room(request):
     person = request.user.person
     room = person.room
@@ -324,7 +328,7 @@ def person_detail(request, person_id):
 from datetime import datetime, timedelta
 from .models import CustomEvent, Room, Person
 
-
+@login_required
 def create_booking(request):
 
     if request.method == 'POST':
@@ -376,14 +380,51 @@ def create_booking(request):
 
 
 def all_guests(request):
-    # Retrieve all occupation events
-    occupation_events = CustomEvent.objects.filter(event_type='occupancy').select_related('calendar').order_by('start')
-    
+    occupation_events = CustomEvent.objects.filter(event_type='occupancy')
+
+    processed_events = []
+    for event in occupation_events:
+        event_info = {
+            'guest_name': event.guest_name,
+            'creator': event.creator,
+            'start': event.start,
+            'end': event.end,
+            'room_info': None,
+        }
+        if event.calendar.room.owner:
+            event_info['room_info'] = f"{event.calendar.room.owner}'s room, {event.calendar.room.section.building}"
+        else:
+            event_info['room_info'] = f"Room #{event.calendar.room.number}, {event.calendar.room.section.building}"
+        processed_events.append(event_info)
+
     context = {
-        'occupation_events': occupation_events,
+        'occupation_events': processed_events,
     }
-    
     return render(request, 'catalog/all_guests.html', context)
+
+@login_required
+def my_guests(request):
+    occupation_events = CustomEvent.objects.filter(event_type='occupancy', creator=request.user)
+
+    processed_events = []
+    for event in occupation_events:
+        event_info = {
+            'guest_name': event.guest_name,
+            'creator': event.creator,
+            'start': event.start,
+            'end': event.end,
+            'room_info': None,
+        }
+        if event.calendar.room.owner:
+            event_info['room_info'] = f"{event.calendar.room.owner}'s room, {event.calendar.room.section.building}"
+        else:
+            event_info['room_info'] = f"Room #{event.calendar.room.number}, {event.calendar.room.section.building}"
+        processed_events.append(event_info)
+
+    context = {
+        'occupation_events': processed_events,
+    }
+    return render(request, 'catalog/my_guests.html', context)
 
 
 ############################################################################################################
@@ -580,3 +621,51 @@ def handle_reassign(occ_event, start_date, end_date, owner):
                                       [f"{host_email}"],
                                       fail_silently=False
                                       )
+                      
+
+#############################################################################33
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import CustomEvent
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+
+@login_required
+def my_guests(request):
+    occupation_events = CustomEvent.objects.filter(event_type='occupancy', creator=request.user)
+
+    processed_events = []
+    for event in occupation_events:
+        event_info = {
+            'id': event.id,
+            'guest_name': event.guest_name,
+            'creator': event.creator,
+            'start': event.start,
+            'end': event.end,
+            'room_info': None,
+        }
+        if event.calendar.room.owner:
+            event_info['room_info'] = f"{event.calendar.room.owner}'s room, {event.calendar.room.section.building}"
+        else:
+            event_info['room_info'] = f"Room #{event.calendar.room.number}, {event.calendar.room.section.building}"
+        processed_events.append(event_info)
+
+    context = {
+        'occupation_events': processed_events,
+    }
+    return render(request, 'catalog/my_guests.html', context)
+
+
+
+@login_required
+def delete_event(request, event_id):
+    event = get_object_or_404(CustomEvent, id=event_id)
+
+    if event.creator != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this event.")
+
+    if request.method == 'POST':
+        event.delete()
+        return redirect('my_guests')
+
+    return render(request, 'catalog/delete_event.html', {'event': event})

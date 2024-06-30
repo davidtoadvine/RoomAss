@@ -1,8 +1,7 @@
 from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 import bleach
-from .models import Person
-
+from .models import Person, CustomEvent
 class BookingForm(forms.Form):
     
     GUEST_TYPE_CHOICES = [

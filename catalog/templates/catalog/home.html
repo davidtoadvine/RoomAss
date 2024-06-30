@@ -65,12 +65,7 @@
       <td>
         {{ room.section.building.name }} / {{ room.section.name }}
       </td>
-      {% comment %} <td>
-        <div class="button-container">
-          <button class="hover-button" data-image-url="{{ room.image.url }}">Hover over me</button>
-      </div>
-
-      </td> {% endcomment %}
+ 
       <td>
         {% if room.owner %} {{ room.owner.name }} {% else %} Unassigned
         {%endif%}

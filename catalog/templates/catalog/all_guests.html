@@ -1,52 +1,37 @@
 <!-- all_guests.html -->
 
-{% extends "base_generic.html" %} {% block content %}
+{% extends "base_generic.html" %}
 
-    <div class="container">
-        <h1>All Scheduled Bookings</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Guest Name</th>
-                    <th>Host Name</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Location</th>
-             
-                </tr>
-            </thead>
-            <tbody>
-                {% if not occupation_events%}
-                <tr>
-                  <td>
-                    <p> No guests currently booked.<p>
-                  </td>
-                  <td>
-                  </td>
-                  <td>
-                  </td>
-                  <td>
-                  </td>
-                  <td>
-                  </td>
-                </tr>
-
-                {%else%}
+{% block content %}
+<div class="container">
+    <h1>Scheduled Bookings</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Guest Name</th>
+                <th>Host Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if occupation_events %}
                 {% for event in occupation_events %}
                 <tr>
                     <td>{{ event.guest_name }}</td>
                     <td>{{ event.creator }}</td>
                     <td>{{ event.start|date:"F d" }}</td>
                     <td>{{ event.end|date:"F d" }}</td>
-                    {% if event.calendar.room.owner%}
-                    <td>{{event.calendar.room.owner}}'s room, {{event.calendar.room.section.building}}</td>
-                    {%else%}
-                    <td>Room #{{event.calendar.room.number}}, {{event.calendar.room.section.building}}</td>
-                    {%endif%}
+                    <td>{{ event.room_info }}</td>
                 </tr>
                 {% endfor %}
-                {%endif%}
-            </tbody>
-        </table>
-    </div>
-    {% endblock %}
+            {% else %}
+                <tr>
+                    <td colspan="5">No guests currently booked.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

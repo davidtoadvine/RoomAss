@@ -1,0 +1,65 @@
+<!-- my_guests.html -->
+
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>My Guests</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Guest Name</th>
+                <th>Host Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Room</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if not occupation_events %}
+                <tr>
+                    <td colspan="6">No guests currently booked.</td>
+                </tr>
+            {% else %}
+                {% for event in occupation_events %}
+                <tr>
+                    <td>{{ event.guest_name }}</td>
+                    <td>{{ event.creator }}</td>
+                    <td>{{ event.start|date:"F d" }}</td>
+                    <td>{{ event.end|date:"F d" }}</td>
+                    <td>{{ event.room_info }}</td>
+                    <td>
+                        <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal-{{ event.id }}">Delete</button>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal-{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ event.id }}" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <form id="deleteEventForm-{{ event.id }}" method="post" action="{% url 'delete_event' event.id %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel-{{ event.id }}">Delete Event</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete this event?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
