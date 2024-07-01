@@ -677,9 +677,7 @@ def extend_booking(request, event_id):
             new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
             new_end_date = datetime.combine(new_end_date, datetime.min.time()).replace(hour=11, minute=59)
             new_start_date= ensure_timezone_aware(new_start_date)
-            print("new start returned")
             new_end_date=ensure_timezone_aware(new_end_date)
-            print("new end returned")
 
           
             # Fetch the existing event
@@ -687,23 +685,26 @@ def extend_booking(request, event_id):
             room = event.calendar.room
           
             old_start_date = ensure_timezone_aware(event.start)
-
-            print(old_start_date)
             old_end_date = ensure_timezone_aware(event.end)
 
-            
-
+            conflict = False
             # Update the event dates
             if new_start_date < old_start_date and room.is_available(new_start_date, old_start_date):
               event.start = new_start_date
-        
               event.save()
-            
+            elif new_start_date != old_start_date:
+              conflict = True
+                
             if new_end_date > old_end_date and room.is_available(old_end_date, new_end_date):
               event.end = new_end_date
               event.save()
+            elif new_end_date!= old_end_date:
+              conflict = True
 
-            return redirect('my_guests')  # Redirect to the appropriate page after saving
+            if conflict:
+                return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end})
+            else:
+              return redirect('my_guests')  # Redirect to the appropriate page after saving
 
     return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
@@ -738,3 +739,6 @@ def shorten_booking(request, event_id):
 
   return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
+def extend_conflict(request):
+    return render(request, 'catalog/extend_conflict.html')
+    

@@ -1,0 +1,14 @@
+<!-- catalog/templates/catalog/delete_event.html -->
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Conflict Notice</h1>
+    <p>The room is unavailable for the full date range you've chosen.</p>
+    <p> Your booking is now from {{start}} to {{end}}</p>
+    <p> You may want to try booking another room on the Available Rooms page for the missing days.</p>
+
+        <a href="{% url 'my_guests' %}" class="btn btn-secondary">Back</a>
+    
+</div>
+{% endblock %}
