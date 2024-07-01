@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 
 from django.core.mail import send_mail
-
+import pytz
 from django.contrib.auth.decorators import login_required
 
 @login_required
@@ -55,7 +55,6 @@ def edit_availability(request):
             event_id = form.cleaned_data['event_id']
 
           # Convert dates to datetime objects with specific time (around noon)
-          
             new_avail_start_date = date_to_aware_datetime(start_date,12,1)
             new_avail_end_date = date_to_aware_datetime(end_date,11,59)
 
@@ -95,40 +94,25 @@ def edit_availability(request):
 
               #Deal with new end date, new start date, completely delete original occupancy if needed
               if occ_event.end > new_avail_end_date:
-                  print("occ end is greater than the new avail end date")
-
                   occ_event.end = new_avail_end_date
                   occ_event.save()
               
                   if new_avail_end_date > occ_event.start:
-                    print("new avail end is greater than orig occ start")
                     handle_reassign(occ_event, new_avail_end_date, end_date,owner )
                   else:
-                    print("new avail end is NOT greater than orig occ start")
-
                     handle_reassign(occ_event, start_date,end_date,owner)
                     full_reassign = True
 
-
               if not full_reassign and occ_event.start < new_avail_start_date: 
-                  print('not full reassigned. And occ event start is earlier than new Avail start')
-                  print(occ_event.start)
-                  print("is set to")
-                  print(new_avail_start_date)
                   occ_event.start = new_avail_start_date
-                  occ_event.save()
-                  print("occ event start is now equal to new avail start")
-                 
+                  occ_event.save()                
 
                   if new_avail_start_date < occ_event.end:
-                      print("getting window between original start date and new avail start")
                       handle_reassign(occ_event, start_date, new_avail_start_date, owner)
                   else:
-                      print('getting window between orig start and orig end')
                       handle_reassign(occ_event, start_date, end_date,owner)
 
               if occ_event.start >= occ_event.end:
-                  print("deleting orig occ event because start is NOW after or equal to end")
                   occ_event.delete()
 
             return redirect('my_room')  # Redirect to a relevant page after saving
@@ -519,10 +503,20 @@ def date_to_aware_datetime(date, hour, minute ):
                 date = datetime.combine(date, time(hour, minute))
             return ensure_timezone_aware(date)
 
-def ensure_timezone_aware(date):
-  if timezone.is_naive(date):
-                return timezone.make_aware(date, timezone.get_current_timezone())
-  return date
+def ensure_timezone_aware(date, tz_name='America/New_York'):
+    if timezone.is_naive(date):
+        aware_date = timezone.make_aware(date, timezone.get_current_timezone())
+        print(f"Converted Naive Date: {aware_date} to Timezone: {timezone.get_current_timezone()}")
+    else:
+        aware_date = date
+        print(f"Date is already aware: {aware_date}")
+
+    # Convert to specified timezone
+    target_timezone = pytz.timezone(tz_name)
+    converted_date = aware_date.astimezone(target_timezone)
+    print(f"Converted Date to {tz_name} Timezone: {converted_date}")
+
+    return converted_date
 
 def handle_reassign(occ_event, start_date, end_date, owner):
                   
@@ -669,3 +663,50 @@ def delete_event(request, event_id):
         return redirect('my_guests')
 
     return render(request, 'catalog/delete_event.html', {'event': event})
+
+@login_required
+def extend_booking(request, event_id):
+    if request.method == 'POST':
+        form = EditAvailabilityForm(request.POST)
+        if form.is_valid():
+            event_id = form.cleaned_data['event_id']
+            new_start_date = form.cleaned_data['start_date']
+            new_end_date = form.cleaned_data['end_date']
+
+            # Convert dates to datetime objects with specific time (around noon)
+            new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
+            new_end_date = datetime.combine(new_end_date, datetime.min.time()).replace(hour=11, minute=59)
+            new_start_date= ensure_timezone_aware(new_start_date)
+            print("new start returned")
+            new_end_date=ensure_timezone_aware(new_end_date)
+            print("new end returned")
+
+          
+            # Fetch the existing event
+            event = get_object_or_404(CustomEvent, id=event_id)
+            room = event.calendar.room
+          
+            old_start_date = ensure_timezone_aware(event.start)
+
+            print(old_start_date)
+            old_end_date = ensure_timezone_aware(event.end)
+
+            
+
+            # Update the event dates
+            if new_start_date < old_start_date and room.is_available(new_start_date, old_start_date):
+              event.start = new_start_date
+        
+              event.save()
+            
+            if new_end_date > old_end_date and room.is_available(old_end_date, new_end_date):
+              event.end = new_end_date
+              event.save()
+
+            return redirect('my_guests')  # Redirect to the appropriate page after saving
+
+    return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
+
+@login_required
+def shorten_booking(request, event_id):
+  return

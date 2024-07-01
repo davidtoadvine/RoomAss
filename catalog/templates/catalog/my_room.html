@@ -390,9 +390,9 @@ endDateInput.addEventListener("change", function () {
 
     if (startDate && endDate) {
        var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
-       console.log(startDateObj)
+      console.log(startDateObj)
        var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
-       console.log(endDateObj)
+      console.log(endDateObj)
 
     if (startDateObj > endDateObj) {
         alert("Invalid date range.");

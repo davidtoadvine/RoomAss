@@ -4,12 +4,11 @@
 
 {% block content %}
 <div class="container">
-    <h1>My Guests</h1>
+    <h1>{{request.user}}'s Guests</h1>
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Guest Name</th>
-                <th>Host Name</th>
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Room</th>
@@ -25,14 +24,67 @@
                 {% for event in occupation_events %}
                 <tr>
                     <td>{{ event.guest_name }}</td>
-                    <td>{{ event.creator }}</td>
                     <td>{{ event.start|date:"F d" }}</td>
                     <td>{{ event.end|date:"F d" }}</td>
                     <td>{{ event.room_info }}</td>
                     <td>
-                        <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal-{{ event.id }}">Delete</button>
+                      <button class="btn btn-primary"
+                      data-toggle="modal" 
+                      data-target="#extendModal-{{ event.id }}" 
+                      data-id="{{ event.id }}" 
+                      data-start-date="{{ event.start|date:'Y-m-d' }}" 
+                      data-end-date="{{ event.end|date:'Y-m-d' }}">Extend</button>
+
+                      <button class="btn btn-primary" 
+                      data-toggle="modal" 
+                      data-target="#shortenModal-{{ event.id }}" 
+                      data-id="{{ event.id }}" 
+                      data-start-date="{{ event.start|date:'Y-m-d' }}" 
+                      data-end-date="{{ event.end|date:'Y-m-d' }}">Shorten</button>
+
+                    <button class="btn btn-danger" 
+                    data-toggle="modal" 
+                    data-target="#deleteModal-{{ event.id }}" 
+                    data-id="{{ event.id }}" 
+                    data-start-date="{{ event.start|date:'Y-m-d' }}" 
+                    data-end-date="{{ event.end|date:'Y-m-d' }}">Delete</button>
+
+
                     </td>
                 </tr>
+{% comment %} /////////////////////////////////////////////////////////////////{% endcomment %}
+
+<!-- Extend Booking Modal -->
+<div class="modal fade" id="extendModal-{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="extendModalLabel-{{ event.id }}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="extendForm-{{ event.id }}" method="post" action="{% url 'extend_booking' event.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="extendModalLabel-{{ event.id }}">Extend Booking</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="event_id" id="extendEventId-{{ event.id }}">
+          <div class="form-group">
+            <label for="extendStartDate-{{ event.id }}">Start Date</label>
+            <input type="date" class="form-control" id="extendStartDate-{{ event.id }}" name="start_date" onchange="validateExtendDate('{{ event.id }}')">
+          </div>
+          <div class="form-group">
+            <label for="extendEndDate-{{ event.id }}">End Date</label>
+            <input type="date" class="form-control" id="extendEndDate-{{ event.id }}" name="end_date" onchange="validateExtendDate('{{ event.id }}')">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
                 <!-- Delete Modal -->
                 <div class="modal fade" id="deleteModal-{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ event.id }}" aria-hidden="true">
@@ -41,13 +93,16 @@
                             <form id="deleteEventForm-{{ event.id }}" method="post" action="{% url 'delete_event' event.id %}">
                                 {% csrf_token %}
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-{{ event.id }}">Delete Event</h5>
+                                    <h5 class="modal-title" id="deleteModalLabel-{{ event.id }}">Delete Event?</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
                                     <p>Are you sure you want to delete this event?</p>
+                                    <p>--{{event.guest_name}} staying in {{event.room_info}}--</p>
+                                    <p>--Start: {{event.start}}--</p>
+                                      <p>--End: {{event.end}}--</p>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -62,4 +117,59 @@
         </tbody>
     </table>
 </div>
+<script>
+  $(document).ready(function() {
+    // Function to populate the extend modal
+    $('.modal').on('show.bs.modal', function(event) {
+      var button = $(event.relatedTarget);
+      var eventId = button.data('id');
+      var startDate = button.data('start-date');
+      var endDate = button.data('end-date');
+
+      var modal = $(this);
+      modal.find(`#extendEventId-${eventId}`).val(eventId);
+      modal.find(`#extendStartDate-${eventId}`).val(startDate);
+      modal.find(`#extendEndDate-${eventId}`).val(endDate);
+
+      // Set the original start and end date data attributes
+      modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
+      modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
+
+      // Similar setup for shorten modal
+      modal.find(`#shortenEventId-${eventId}`).val(eventId);
+      modal.find(`#shortenStartDate-${eventId}`).val(startDate);
+      modal.find(`#shortenEndDate-${eventId}`).val(endDate);
+      
+      modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start', startDate);
+      modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end', endDate);
+    });
+  });
+
+  // Function to validate date selection
+  function validateExtendDate(eventId) {
+    const startDateInput = document.getElementById(`extendStartDate-${eventId}`);
+    const endDateInput = document.getElementById(`extendEndDate-${eventId}`);
+    const originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+    const originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+    const newStartDate = new Date(startDateInput.value);
+    const newEndDate = new Date(endDateInput.value);
+
+    console.log('new start date ' + newStartDate)
+    console.log('Original Start Date: ', originalStartDate);
+    console.log('Original End Date: ', originalEndDate);
+    console.log('new end date ' + newEndDate)
+
+    if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
+      alert("New dates cannot shrink the original window.");
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+    }
+  }
+
+  // Attach change event listeners to the date inputs
+  $(document).on('change', '.extend-start-date, .extend-end-date', function() {
+    const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+    validateExtendDate(eventId);
+  });
+</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import home, create_booking, create_availability, edit_guest_preferences, delete_availability, all_guests, my_guests,delete_event
+from .views import home, create_booking, create_availability, edit_guest_preferences, delete_availability, all_guests, my_guests,delete_event, extend_booking, shorten_booking
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
@@ -14,12 +14,13 @@ urlpatterns = [
     path('create_availability', create_availability, name = 'create_availability'),
     path('edit_availability', views.edit_availability, name = 'edit_availability'),
     path('edit_guest_preferences/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),
-        path('delete_availability/', delete_availability, name='delete_availability'),
-            path('all_guests/', all_guests, name='all_guests'),
-                path('my_guests/', my_guests, name='my_guests'),
-                path('my_guests/', my_guests, name='my_guests'),
+    path('delete_availability/', delete_availability, name='delete_availability'),
+    path('all_guests/', all_guests, name='all_guests'),
+    path('my_guests/', my_guests, name='my_guests'),
 
-    path('delete_event/<int:event_id>/', delete_event, name='delete_event'),]
+    path('delete_event/<int:event_id>/', delete_event, name='delete_event'),
+    path('extend_booking/<int:event_id>/', extend_booking,name='extend_booking' ),
+    path('shorten_booking/<int:event_id>/', shorten_booking,name='shorten_booking'), ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
