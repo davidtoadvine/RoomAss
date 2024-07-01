@@ -52,6 +52,7 @@
 
                     </td>
                 </tr>
+     
 {% comment %} /////////////////////////////////////////////////////////////////{% endcomment %}
 
 <!-- Extend Booking Modal -->
@@ -102,11 +103,11 @@
           <input type="hidden" name="event_id" id="shortenEventId-{{ event.id }}">
           <div class="form-group">
             <label for="shortenStartDate-{{ event.id }}">Start Date</label>
-            <input type="date" class="form-control" id="shortenStartDate-{{ event.id }}" name="start_date">
+            <input type="date" class="form-control shorten-start-date" id="shortenStartDate-{{ event.id }}" name="start_date">
           </div>
           <div class="form-group">
             <label for="shortenEndDate-{{ event.id }}">End Date</label>
-            <input type="date" class="form-control" id="shortenEndDate-{{ event.id }}" name="end_date">
+            <input type="date" class="form-control shorten-end-date" id="shortenEndDate-{{ event.id }}" name="end_date">
           </div>
         </div>
         <div class="modal-footer">
@@ -162,7 +163,6 @@
       // Set the original start and end date data attributes
       modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
       modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
-
       // Similar setup for shorten modal
       modal.find(`#shortenEventId-${eventId}`).val(eventId);
       modal.find(`#shortenStartDate-${eventId}`).val(startDate);
@@ -175,17 +175,13 @@
 
   // Function to validate date selection
   function validateExtendDate(eventId) {
-    const startDateInput = document.getElementById(`extendStartDate-${eventId}`);
-    const endDateInput = document.getElementById(`extendEndDate-${eventId}`);
-    const originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
-    const originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
-    const newStartDate = new Date(startDateInput.value);
-    const newEndDate = new Date(endDateInput.value);
+    let startDateInput = document.getElementById(`extendStartDate-${eventId}`);
+    let endDateInput = document.getElementById(`extendEndDate-${eventId}`);
+    let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+    let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+    let newStartDate = new Date(startDateInput.value);
+    let newEndDate = new Date(endDateInput.value);
 
-    console.log('new start date ' + newStartDate)
-    console.log('Original Start Date: ', originalStartDate);
-    console.log('Original End Date: ', originalEndDate);
-    console.log('new end date ' + newEndDate)
 
     if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
       alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
@@ -193,11 +189,38 @@
       endDateInput.value = endDateInput.getAttribute('data-original-end');
     }
   }
-
   // Attach change event listeners to the date inputs
   $(document).on('change', '.extend-start-date, .extend-end-date', function() {
     const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
     validateExtendDate(eventId);
+  });
+  ////////////////////////////////////////////////////////////////////////////
+  // Function to validate date selection
+  function validateShortenDate(eventId) {
+    let startDateInput = document.getElementById(`shortenStartDate-${eventId}`);
+    let endDateInput = document.getElementById(`shortenEndDate-${eventId}`);
+    let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+    let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+    let newStartDate = new Date(startDateInput.value);
+    let newEndDate = new Date(endDateInput.value);
+
+    if (newStartDate < originalStartDate || newEndDate > originalEndDate) {
+      alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+    }
+    else if (newStartDate >= originalEndDate || newEndDate<= originalStartDate){
+      alert("The start date cannot occur on or after the end date. If you wish to delete this event, please use the 'Delete' button.");
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+    }
+  } 
+  /////////////////////////////////////////////////////////////////////////////////
+
+  // Attach change event listeners to the date inputs
+$(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
+    const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+    validateShortenDate(eventId);
   });
 </script>
 {%endfor%}

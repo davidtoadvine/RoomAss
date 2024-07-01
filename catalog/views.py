@@ -707,6 +707,34 @@ def extend_booking(request, event_id):
 
     return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
+
 @login_required
 def shorten_booking(request, event_id):
-  return
+  if request.method == 'POST':
+        form = EditAvailabilityForm(request.POST)
+        if form.is_valid():
+            event_id = form.cleaned_data['event_id']
+            new_start_date = form.cleaned_data['start_date']
+            new_end_date = form.cleaned_data['end_date']
+
+            # Convert dates to datetime objects with specific time (around noon)
+            new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
+            new_end_date = datetime.combine(new_end_date, datetime.min.time()).replace(hour=11, minute=59)
+            new_start_date= ensure_timezone_aware(new_start_date)
+            new_end_date=ensure_timezone_aware(new_end_date)
+
+          
+            # Fetch the existing event
+            event = get_object_or_404(CustomEvent, id=event_id)
+
+          
+      
+            event.start = new_start_date
+        
+            event.end = new_end_date
+            event.save()
+
+            return redirect('my_guests')  # Redirect to the appropriate page after saving
+
+  return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
+
