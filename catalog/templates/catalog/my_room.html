@@ -252,7 +252,7 @@
     $("#availabilityForm").submit();
   }
 
-////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
   // gathering date information
   var startDateInput = document.getElementById("startDate");
   var endDateInput = document.getElementById("endDate");
@@ -350,7 +350,7 @@ endDateInput.addEventListener("change", function () {
     $("#editAvailabilityForm").submit();
   }
 
-  ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////EDIT -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
     // gathering date information
   var editStartDateInput = document.getElementById("editStartDate");
   var editEndDateInput = document.getElementById("editEndDate");
@@ -404,49 +404,22 @@ endDateInput.addEventListener("change", function () {
     return true;
   }
 
-   ////////////////////////////////////LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
-    // gathering date information
-  {% comment %} var editStartDateInput = document.getElementById("editStartDate");
-  var editEndDateInput = document.getElementById("editEndDate");
-  var previousStartDate = editStartDateInput.value;
-  var previousEndDate = editEndDateInput.value;
+   //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   // listener for start date form
-  editStartDateInput.addEventListener("change", function () {
-    if (editStartDateInput.value >= editEndDateInput.value) {
-      var startDateObj = new Date(editStartDateInput.value);
-      var endDateObj = new Date(startDateObj);
-      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
-      editEndDateInput.value = endDateObj.toISOString().split("T")[0];
-    }
-    if (!validateDate()) {
-      editStartDateInput.value = previousStartDate;
-    } else {
-      previousStartDate = editStartDateInput.value;
-    }
-    });
-
-   // listener for end date form
-  editEndDateInput.addEventListener("change", function () {
-    if (!validateDate()) {
-      editEndDateInput.value = previousEndDate;
-    } else {
-      previousEndDate = editEndDateInput.value;
-    }
-  });
-   {% endcomment %}
-  
 
 
 
   $(document).ready(function() {
     $('.dropdown-item').click(function(e) {
         e.preventDefault();
+        alert("Submitting your preference. \nNote: Any change to your preferences will not affect guests already scheduled for your room.");
+
         var preference = $(this).data('value');
         var formId = $(this).data('target');
         $(formId + ' input[name="preference"]').val(preference);
         $(formId).submit();
     });
+
 });
 
 

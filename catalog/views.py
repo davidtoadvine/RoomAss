@@ -646,6 +646,8 @@ def my_guests(request):
 
     context = {
         'occupation_events': processed_events,
+                    'image_url': event.calendar.room.image.url
+
     }
     return render(request, 'catalog/my_guests.html', context)
 

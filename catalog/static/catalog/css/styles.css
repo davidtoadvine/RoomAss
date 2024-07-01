@@ -78,3 +78,10 @@
 .modal-lg {
   max-width: 55%;
 }
+.btn-link{
+  padding: 5px 10px;
+  background-color: lightblue;
+  color: black;
+  border: none;
+  cursor: pointer;
+}

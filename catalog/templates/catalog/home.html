@@ -286,29 +286,6 @@
 
 
 
-    document.querySelectorAll('.hover-button').forEach(button => {
-      const hoverImage = document.createElement('img');
-      hoverImage.classList.add('hover-image');
-      document.body.appendChild(hoverImage);
-  
-      button.addEventListener('mouseover', function () {
-          hoverImage.src = button.getAttribute('data-image-url');
-          hoverImage.style.display = 'block';
-  
-          // Wait for the image to load to get its height
-          hoverImage.onload = function() {
-              const halfImageHeight = hoverImage.offsetHeight / 2;
-  
-              button.addEventListener('mousemove', function (e) {
-                  hoverImage.style.left = (e.pageX + 10) + 'px';
-                  hoverImage.style.top = (e.pageY - halfImageHeight) + 'px';
-              });
-          };
-      });
-  
-      button.addEventListener('mouseout', function () {
-          hoverImage.style.display = 'none';
-      });
-  });
+
 </script>
 {% endblock %}
