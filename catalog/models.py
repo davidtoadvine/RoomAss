@@ -32,8 +32,8 @@ class Room(models.Model):
   
   @staticmethod
   def create_room_calendar(room):
-        calendar_name = f"Room {room.number} Calendar"
-        calendar_slug = f"room-{room.number}"
+        calendar_name = f"Room {room.number} in {room.building} Calendar"
+        calendar_slug = f"room-{room.number} in {room.building}"
         calendar, created = Calendar.objects.get_or_create(name=calendar_name, slug=calendar_slug)
         if created:
             calendar.save()
