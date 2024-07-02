@@ -37,7 +37,7 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(CustomEvent)
 class CustomEventAdmin(admin.ModelAdmin):
-    list_display = ('title', 'start', 'end', 'event_type', 'calendar', 'guest_type')
+    list_display = ('title', 'start', 'end', 'event_type', 'calendar')
     search_fields = ('title', 'event_type')
     def save_model(self, request, obj, form, change):
         # Debug statement before saving

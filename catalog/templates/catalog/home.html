@@ -59,7 +59,7 @@
       </td>
     </tr>
     {%endif%}
-    {% for room, availability_date in available_rooms_info %}
+    {% for room, availability_date, room_image_url in available_rooms_info %}
     <tr>
       
       <td>
@@ -85,7 +85,7 @@
           type="submit"
           onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}',
           '{{ room.section.name }}', '{{ start_date }}', '{{ end_date }}',
-          '{{ room.image.url }}', {{guest_type}}
+          '{{ room_image_url }}', {{guest_type}}
           )"
         >
           Book Room

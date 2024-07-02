@@ -269,15 +269,13 @@ def home(request):
     available_rooms_info = []
     for room in rooms:
           
-          if room.owner:
-            if int(guest_type) >= int(room.owner.preference):
-              if room.is_available(start_date, end_date) :
-                potential_end_date = room.get_last_available_date(start_date)
-                available_rooms_info.append((room, potential_end_date))
-          else:      
-              if room.is_available(start_date, end_date) :
-                potential_end_date = room.get_last_available_date(start_date)
-                available_rooms_info.append((room, potential_end_date))
+        if room.is_available(start_date, end_date) and (not room.owner or int(guest_type) >= int(room.owner.preference)):
+          potential_end_date = room.get_last_available_date(start_date)
+          if room.image:
+            room_image_url = room.image.url
+          else:
+            room_image_url = "" 
+          available_rooms_info.append((room, potential_end_date, room_image_url))
 
     context = {
         'available_rooms_info': available_rooms_info,
