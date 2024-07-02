@@ -31,10 +31,9 @@ class RoomAdmin(admin.ModelAdmin):
         form.base_fields['owner'].queryset = Person.objects.all()
         return form
 
-@admin.register(Person)
-class PersonAdmin(admin.ModelAdmin):
-    list_display = ('name', 'contact_email')
-    search_fields = ('name', 'contact_email')
+admin.site.register(Person)# class PersonAdmin(admin.ModelAdmin):
+    # list_display = ('name')
+    # search_fields = ('name')
 
 @admin.register(CustomEvent)
 class CustomEventAdmin(admin.ModelAdmin):

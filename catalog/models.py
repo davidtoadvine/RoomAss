@@ -12,7 +12,6 @@ from schedule.models import Calendar
 
 class Person(models.Model):
   name = models.CharField(max_length=255)
-  contact_email = models.EmailField(null=True, blank=True)
   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
   parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
 
