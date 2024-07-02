@@ -642,9 +642,14 @@ def my_guests(request):
             event_info['room_info'] = f"Room #{event.calendar.room.number}, {event.calendar.room.section.building}"
         processed_events.append(event_info)
 
+        if event.calendar.room.image:
+            image_url = event.calendar.room.image.url
+        else:
+            image_url = ''
+
     context = {
         'occupation_events': processed_events,
-                    'image_url': event.calendar.room.image.url
+                    'image_url': image_url
 
     }
     return render(request, 'catalog/my_guests.html', context)
