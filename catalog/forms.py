@@ -9,7 +9,6 @@ class BookingForm(forms.Form):
         (2, 'Well known to Twin Oaks'),
         (3, 'Twin Oaks member'),
     ]
-
     room_id = forms.IntegerField(widget=forms.HiddenInput())
     start_date = forms.DateField(widget=forms.HiddenInput())
     end_date = forms.DateField(widget=forms.HiddenInput())
@@ -77,3 +76,22 @@ class GuestPreferencesForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = ['preference']
+
+class CustomEventForm(forms.ModelForm):
+    class Meta:
+        model = CustomEvent
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        event_type = cleaned_data.get('event_type')
+        guest_name = cleaned_data.get('guest_name')
+
+        # Debug statements
+        print(f"Cleaning form: event_type={event_type}, guest_name={guest_name}")
+
+        if event_type == 'occupancy' and not guest_name:
+            print("Guest name is required for occupancy events.")
+            self.add_error('guest_name', 'Guest name is required for occupancy events.')
+
+        return cleaned_data

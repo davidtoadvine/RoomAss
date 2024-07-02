@@ -185,7 +185,7 @@ class CustomEvent(Event):
         default=GuestType.STRANGER,
         null=True, blank=True# Default to "Anyone can stay here"
     )
-    guest_name = models.CharField(max_length=20, null=True)
+    guest_name = models.CharField(max_length=20, blank = True , null=True)
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
     
     def save(self, *args, **kwargs):
