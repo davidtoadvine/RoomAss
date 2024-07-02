@@ -167,7 +167,9 @@ def delete_availability(request):
 
 @login_required
 def my_room(request):
-    person = request.user.person
+  person = request.user.person
+    # Using hasattr
+  if hasattr(person, 'room'):
     room = person.room
     calendar = room.calendar
 
@@ -202,6 +204,11 @@ def my_room(request):
         'end_date': dayafter.strftime('%Y-%m-%d'),
     }
     return render(request, 'catalog/my_room.html', context)
+  else:
+      return redirect('no_room')
+
+    
+  
 
 
 
@@ -627,6 +634,8 @@ def my_guests(request):
     occupation_events = CustomEvent.objects.filter(event_type='occupancy', creator=request.user)
 
     processed_events = []
+    image_url = ""
+
     for event in occupation_events:
         event_info = {
             'id': event.id,
@@ -644,8 +653,6 @@ def my_guests(request):
 
         if event.calendar.room.image:
             image_url = event.calendar.room.image.url
-        else:
-            image_url = ''
 
     context = {
         'occupation_events': processed_events,
@@ -747,3 +754,7 @@ def shorten_booking(request, event_id):
 def extend_conflict(request):
     return render(request, 'catalog/extend_conflict.html')
     
+
+@login_required
+def no_room(request):
+    return render(request, 'catalog/no_room.html')
