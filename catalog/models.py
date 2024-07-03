@@ -47,7 +47,7 @@ class Section(models.Model):
 class Room(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='rooms')
     number = models.IntegerField()
-    calendar = models.OneToOneField(Calendar, on_delete=models.CASCADE, null=True, blank=True, related_name='room')
+    calendar = models.OneToOneField(Calendar, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     owner = models.OneToOneField(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     image = models.ImageField(upload_to='room_images/', null=True, blank=True)
   
@@ -123,7 +123,7 @@ class Room(models.Model):
         # Ensure the room has a calendar
         if not self.calendar:
             self.calendar = Calendar.objects.create()
-            print('Making calendar because there isn\'t one (ROOM SAVE)')
+            print('Creating calendar because there isn\'t one (ROOM SAVE)')
             self.save(update_fields=['calendar'])
 
         # Update the calendar name
@@ -159,6 +159,8 @@ class Room(models.Model):
                     calendar=self.calendar,
                     event_type='availability'
                 ).delete()
+
+        super().save(*args, **kwargs)
   
 
 

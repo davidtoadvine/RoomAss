@@ -1,25 +1,21 @@
 from django.contrib import admin
-
-# Register your models here.
-from .models import Building, Section, Room, Person, CustomEvent
-from .forms import CustomEventForm
-
-#admin.site.register(Building)
-admin.site.register(Section)
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-
+from .models import Building, Section, Room, Person, CustomEvent
+from .forms import CustomEventForm
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
-
+# Inline for Sections in Building
 class SectionInline(admin.TabularInline):
     model = Section
-    extra = 1  # Number of empty sections to displa
+    extra = 1  # Number of empty sections to display
 
+# Building Admin
 @admin.register(Building)
 class BuildingAdmin(admin.ModelAdmin):
-    inlines = [SectionInline] 
+    inlines = [SectionInline]
 
+# Room Admin
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('section', 'number', 'owner')
@@ -31,15 +27,19 @@ class RoomAdmin(admin.ModelAdmin):
         form.base_fields['owner'].queryset = Person.objects.all()
         return form
 
-admin.site.register(Person)# class PersonAdmin(admin.ModelAdmin):
-    # list_display = ('name')
-    # search_fields = ('name')
+# Person Admin
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    ordering = ('name',)  # Order by name alphabetically
+   
 
+# CustomEvent Admin
 @admin.register(CustomEvent)
 class CustomEventAdmin(admin.ModelAdmin):
     form = CustomEventForm
     list_display = ('title', 'start', 'end', 'event_type', 'calendar')
     search_fields = ('title', 'event_type')
+
     def save_model(self, request, obj, form, change):
         # Debug statement before saving
         print(f"Before saving: {obj.title}, start: {obj.start}, end: {obj.end}")
@@ -50,9 +50,7 @@ class CustomEventAdmin(admin.ModelAdmin):
         # Debug statement after saving
         print(f"After saving: {obj.title}, start: {obj.start}, end: {obj.end}")
 
-
-# Define an inline admin descriptor for Person model
-# which acts a bit like a singleton
+# Define an inline admin descriptor for Person model which acts a bit like a singleton
 class PersonInline(admin.StackedInline):
     model = Person
     can_delete = False

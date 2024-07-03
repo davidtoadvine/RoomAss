@@ -38,7 +38,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th scope="col">Building / Section</th>
+      <th scope="col">Building / Section / Room #</th>
       {% comment %} <th scope="col">View</th> {% endcomment %}
       <th scope="col">Owner</th>
       <th scope="col">Available Until Noon on...</th>
@@ -63,7 +63,11 @@
     <tr>
       
       <td>
-        {{ room.section.building.name }} / {{ room.section.name }}
+        <button class="btn-link"
+                      data-toggle="modal" 
+                      data-target="#floorplanModal" 
+                    >{{ room.section.building.name }} / {{ room.section.name }} / {{room.number}}</button>
+        
       </td>
  
       <td>
@@ -109,11 +113,44 @@
       </td>
       
     </tr>
+
+
+
+
+
+
+
+<!-- Floorplan Modal -->
+<div class="modal fade" id="floorplanModal" tabindex="-1" role="dialog" aria-labelledby="floorplanModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="floorplanModalLabel">Room View</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img src="{{ room_image_url }}" alt="Room Image" class = "img-fluid">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
     {% endfor %}
   </tbody>
 </table>
 
 {% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
+
+
+
 <!-- Booking Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
@@ -174,6 +211,11 @@
 </div>
 
 <script>
+  $(document).ready(function() {
+    $('#floorplanModal').on('shown.bs.modal', function () {
+        console.log('Image src:', $('#floorplanModal img').attr('src'));
+    });
+});
   // gathering date information
   var startDateInput = document.getElementById("start_date");
   var endDateInput = document.getElementById("end_date");
