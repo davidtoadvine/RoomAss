@@ -1,0 +1,51 @@
+Restrict calendar picks for lengthen
+
+
+getevents type ='occupancy' creator = request.user
+
+"C:\Users\user\Envs\my_django_environment\Scripts\python.exe" "C:\Users\user\Desktop\RoomAss\manage.py" runserver
+Add forms for Guest and Host
+reset Guest for after booking is made
+
+Events should be in form
+Avlblty: Hawina's Room, Date - Date
+Booking: Guest by Host, Date - Date
+
+set PATH=C:\Users\user\Envs\my_django_environment\Scripts;%PATH%
+Do You Need to Change the PATH Again?
+
+For the Current Session:
+
+    For the duration of your current command line session, you shouldn't need to adjust the PATH again. The change will remain effective until you close your terminal or command prompt window.
+
+For Future Sessions:
+
+    When you open a new command line session in the future, you'll need to ensure that the virtual environment is activated again. This is because changes made with the set PATH=... command in Windows Command Prompt are temporary and only apply to the current session.
+    Every time you start a new session, you'll need to reactivate your virtual environment using the activate script (\path\to\your\venv\Scripts\activate) to ensure the right Python executable is used. This should automatically set the PATH correctly for that session.
+
+Making the Fix Permanent:
+
+If you find it cumbersome to adjust the PATH or activate the virtual environment in every new session, you can make the change more permanent in a couple of ways:
+
+    Environment Variable Settings:
+        Go to the System Properties in Windows, and then to the Environment Variables.
+        Find the PATH variable and move the path to your virtual environment's Scripts folder (C:\Users\user\Envs\my_django_environment\Scripts) to the top of the list. This ensures that it's always picked first when you have your environment activated.
+
+    Batch or Shell Script:
+        You could create a batch file (on Windows) or a shell script (on Unix-like systems) that you run whenever you start working on your project. This script would activate your virtual environment and ensure that everything is set up correctly each time.
+
+    Example of a Windows batch file (start_project.bat):
+
+    batch
+
+    @echo off
+    cd \path\to\your\project
+    call \path\to\your\venv\Scripts\activate
+    python manage.py runserver
+
+    IDE Configuration:
+        If you are using an Integrated Development Environment (IDE) like PyCharm or Visual Studio Code, you can configure it to automatically use the correct virtual environment for each project. This often resolves many path-related issues by ensuring that the IDE consistently uses the correct interpreter and environment settings.
+
+Conclusion
+
+The PATH adjustment was indeed a significant part of the fix. For day-to-day development, ensure that you activate your virtual environment at the start of each development session. This standard practice not only avoids path issues but also ensures that all dependencies and packages are correctly scoped within your project, minimizing the risk of conflicts or incorrect package versions being used.

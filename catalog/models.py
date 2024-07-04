@@ -10,6 +10,9 @@ from django.db import transaction
 from django.utils.text import slugify
 from schedule.models import Calendar
 
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 class Person(models.Model):
   name = models.CharField(max_length=255)
   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
@@ -200,4 +203,8 @@ class CustomEvent(Event):
         super(CustomEvent, self).save(*args, **kwargs)
     
 
-
+# Signal to delete Calendar when Room is deleted
+@receiver(post_delete, sender=Room)
+def delete_calendar_when_room_deleted(sender, instance, **kwargs):
+    if instance.calendar:
+        instance.calendar.delete()
