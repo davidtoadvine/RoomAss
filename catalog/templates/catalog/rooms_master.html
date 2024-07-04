@@ -1,55 +1,133 @@
-{% extends "base_generic.html" %} {% block content %}
+{% extends "base_generic.html" %}
+ {% block content %}
 {%load static%}
 {% load custom_filters %}
+
 <h1>Rooms Master</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
-    
-    {% if room %}
-        <h2>Room {{ room.number }} in {{ room.section.name }}</h2>
-        <p>Building: {{ room.section.building.name }}</p>
-        
-        <h3>Availability Events</h3>
-        <ul>
-            {% for event in availability_events %}
-                <li>{{ event.start }} - {{ event.end }}</li>
-            {% empty %}
-                <li>No availability events</li>
-            {% endfor %}
-        </ul>
+<form id="userSelectForm" method="post">
+  {% csrf_token %}
+  {{ form.user.label_tag }} {{ form.user }}
+</form>
 
-        <h3>Occupancy Events</h3>
-        <ul>
-            {% for event in occupancy_events %}
-                <li>{{ event.start }} - {{ event.end }}</li>
-            {% empty %}
-                <li>No occupancy events</li>
-            {% endfor %}
-        </ul>
-
-        <h3>Children Events</h3>
-        {% for child, events in children_events.items %}
-            <h4>Child: {{ child.name }}</h4>
-            <h5>Availability Events</h5>
-            <ul>
-                {% for event in events.availability %}
-                    <li>{{ event.start }} - {{ event.end }}</li>
-                {% empty %}
-                    <li>No availability events</li>
-                {% endfor %}
-            </ul>
-
-            <h5>Occupancy Events</h5>
-            <ul>
-                {% for event in events.occupancy %}
-                    <li>{{ event.start }} - {{ event.end }}</li>
-                {% empty %}
-                    <li>No occupancy events</li>
-                {% endfor %}
-            </ul>
+{% if room %}
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>
+            <div class="flex-container">
+              <span>{{ room.owner }}'s Room</span>
+              <form id="preferenceForm-{{room.owner.id}}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
+                {% csrf_token %}
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{room.owner.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if room.owner.preference %}
+                      {{ room.owner.get_preference_display }}
+                    {% else %}
+                      Select Preference
+                    {% endif %}
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{room.owner.id}}">
+                    {% for value, display in room.owner.Preference.choices %}
+                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+                <input type="hidden" name="preference" id="preferenceInput-{{room.owner.id}}">
+              </form>
+            </div>
+          </th>
+        </tr>
+        {% for a_event in availability_events %}
+          <tr>
+            <td class="availability-cell">
+              <div class="flex-container">
+                <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+                <div>
+                  <button type="button" onclick="showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+                  <button type="button" onclick="showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% for o_event in occupancy_events %}
+            {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
+              <tr>
+                <td class="booked-cell" style="padding-left: 50px;">Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+              </tr>
+            {% endif %}
+          {% endfor %}
         {% endfor %}
-    {% endif %}
-{%endblock%}
+        <tr>
+          <td>
+            <button type="button" onclick="showAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    {% for child, events in children_events.items %}
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>
+            <div class="flex-container">
+              <span>{{ child.name }}'s Room</span>
+              <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
+                {% csrf_token %}
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{child.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if child.preference %}
+                      {{ child.get_preference_display }}
+                    {% else %}
+                      Select Preference
+                    {% endif %}
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{child.id}}">
+                    {% for value, display in child.Preference.choices %}
+                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+                <input type="hidden" name="preference" id="preferenceInput-{{child.id}}">
+              </form>
+            </div>
+          </th>
+        </tr>
+        {% for a_event in events.availability %}
+          <tr>
+            <td class="availability-cell">
+              <div class="flex-container">
+                <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+                <div>
+                  <button type="button" onclick="showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+                  <button type="button" onclick="showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% for o_event in events.occupancy %}
+            {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
+              <tr>
+                <td class="booked-cell" style="padding-left: 50px;">Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        <tr>
+          <td>
+            <button type="button" onclick="showAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    {% endfor %}
+{% endif %}
+
+<script>
+function submitForm() {
+    document.getElementById('userSelectForm').submit();
+}
+
+document.getElementById('id_user').onchange = submitForm;
+</script>
+{% endblock %}

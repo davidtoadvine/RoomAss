@@ -796,7 +796,7 @@ def rooms_master(request):
                     local_now = timezone.localtime(timezone.now())
                     tomorrow = local_now.date() + timedelta(days=1)
                     dayafter = tomorrow + timedelta(days=1)
-
+                    print(tomorrow.strftime('%Y-%m-%d'))
                     context = {
                         'form': form,
                         'room': room,
