@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils.text import slugify
 from schedule.models import Calendar
 
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 class Person(models.Model):
@@ -35,6 +35,7 @@ class Person(models.Model):
 # Create your models here.
 class Building(models.Model):
   name = models.CharField(max_length = 255)
+  offline = models.BooleanField(default=False)
   
   def __str__(self):
     return self.name
@@ -42,7 +43,7 @@ class Building(models.Model):
 class Section(models.Model):
   building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name='floors')
   name = models.CharField(max_length=255)
-  #imagefield needed
+  offline = models.BooleanField(default=False)
 
   def __str__(self):
     return f"{self.building.name} / {self.name} Section"
@@ -53,6 +54,7 @@ class Room(models.Model):
     calendar = models.OneToOneField(Calendar, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     owner = models.OneToOneField(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     image = models.ImageField(upload_to='room_images/', null=True, blank=True)
+    offline = models.BooleanField(default=False)
   
     def __str__(self):
         return f"{self.section.building.name} Section {self.section.name} Room {self.number}"
@@ -208,3 +210,20 @@ class CustomEvent(Event):
 def delete_calendar_when_room_deleted(sender, instance, **kwargs):
     if instance.calendar:
         instance.calendar.delete()
+
+
+@receiver(post_save, sender=Building)
+def set_sections_and_rooms_offline(sender, instance, **kwargs):
+    sections = instance.sections.all()
+    for section in sections:
+        if section.offline != instance.offline:
+            section.offline = instance.offline
+            section.save()
+
+@receiver(post_save, sender=Section)
+def set_rooms_offline(sender, instance, **kwargs):
+    rooms = instance.rooms.all()
+    for room in rooms:
+        if room.offline != instance.offline:
+            room.offline = instance.offline
+            room.save()
