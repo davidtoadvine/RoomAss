@@ -123,11 +123,326 @@
     {% endfor %}
 {% endif %}
 
+{% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
+<!-- Create Availability Modal -->
+<div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="availabilityForm" method="post" action="{% url 'create_availability' %}"> 
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id ="availabilityPersonName"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type="hidden" name="room_id" id="availabilityRoomId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="startDate" class="form-control" value = {{start_date}} />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="endDate" class="form-control" value = {{end_date}} />
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" >Confirm Availability</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Availability Modal -->
+<div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' %}"> 
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" >Edit Availability</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type = "hidden" name = "event_id" id = "eventId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="editStartDate" class="form-control" />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="editEndDate" class="form-control" />
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Availability</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Availability Modal -->
+<div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="deleteAvailabilityForm" method="post" action="{% url 'delete_availability' %}"> 
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" >Delete Availability?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type = "hidden" name = "event_id" id = "deleteEventId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="deleteStartDate" class="form-control" readonly />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="deleteEndDate" class="form-control" readonly/>
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
 function submitForm() {
     document.getElementById('userSelectForm').submit();
 }
 
 document.getElementById('id_user').onchange = submitForm;
+
+
+
+/////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////
+function showAvailabilityForm(event, roomId, name) {
+  event.preventDefault();
+  // Set the form values
+  document.getElementById('availabilityRoomId').value = roomId;
+  document.getElementById('availabilityPersonName').innerText = 'Create Availability for ' + name + '\'s Room';
+  
+  // Show the modal
+  $('#availabilityModal').modal('show');
+}
+
+function submitAvailabilityForm() {
+  $("#availabilityForm").submit();
+}
+
+////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+// gathering date information
+var startDateInput = document.getElementById("startDate");
+var endDateInput = document.getElementById("endDate");
+var previousStartDate = startDateInput.value;
+var previousEndDate = endDateInput.value;
+
+// listener for start date form
+startDateInput.addEventListener("change", function () {
+  if (startDateInput.value >= endDateInput.value) {
+    var startDateObj = new Date(startDateInput.value);
+    var endDateObj = new Date(startDateObj);
+    endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+    endDateInput.value = endDateObj.toISOString().split("T")[0];
+  }
+  if (!validateDate()) {
+    
+  // Parse the date strings into Date objects
+  var startDateObj = new Date();
+  var endDateObj = new Date()
+
+      startDateInput.value = startDateObj.toISOString().split("T")[0];
+
+      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+      endDateInput.value = endDateObj.toISOString().split("T")[0];    }
+  else {
+  previousEndDate = endDateInput.value;
+}
+});
+
+ // listener for end date form
+endDateInput.addEventListener("change", function () {
+if (!validateDate()) {
+ 
+
+  // Parse the date strings into Date objects
+  var startDateObj = new Date();
+  var endDateObj = new Date()
+
+      startDateInput.value = startDateObj.toISOString().split("T")[0];
+
+      endDateObj.setDate(startDateObj.getDate() + 1); // Increment end date by one day
+      endDateInput.value = endDateObj.toISOString().split("T")[0];    }
+  else {
+  previousEndDate = endDateInput.value;
+}
+});
+
+function validateDate() {
+  var startDate = startDateInput.value;
+  var endDate = endDateInput.value;
+  var now = new Date();
+
+  if (startDate && endDate) {
+
+    // late time so if you're leaving at 5pm today and creating an availability for the night, it will be accepted
+    var startDateObj = new Date(startDate + "T23:59"); //
+    var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+  
+    if (startDateObj < now) {
+      alert("Start date cannot be in the past.");
+      return false;
+    } else if (startDateObj > endDateObj) {
+      alert("Invalid date range.");
+      return false;
+    } else {
+      return true;
+    }
+    }
+    // ?
+    alert("not start and end")
+    return false;
+}
+ //////////////////////////////////////EDIT AVAILABILITY///////////////////////////////////////////////////////////////////////
+function showEditAvailabilityForm(eventId, start, end) {
+  // Prevent default action if needed (e.g., if inside a form submission handler)
+  // event.preventDefault();
+  
+  // Use moment.js to parse the custom date format
+const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+  
+  console.log(eventId)
+  console.log(start)
+  console.log(end)
+  
+  // Set the form values
+  $("#editStartDate").val(startDate);
+  $("#editEndDate").val(endDate);
+  $("#eventId").val(eventId);
+
+  // Show the modal
+  $('#editAvailabilityModal').modal('show');
+}
+function submitEditAvailabilityForm(){
+  $("#editAvailabilityForm").submit();
+}
+
+////////////////////////////////////EDIT -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
+  // gathering date information
+var editStartDateInput = document.getElementById("editStartDate");
+var editEndDateInput = document.getElementById("editEndDate");
+var previousEditStartDate = editStartDateInput.value;
+var previousEditEndDate = editEndDateInput.value;
+
+ // listener for start date form
+editStartDateInput.addEventListener("change", function () {
+  if (editStartDateInput.value >= editEndDateInput.value) {
+    var editStartDateObj = new Date(editStartDateInput.value);
+    var editEndDateObj = new Date(editStartDateObj);
+    editEndDateObj.setDate(editStartDateObj.getDate() + 1); // Increment end date by one day
+    editEndDateInput.value = editEndDateObj.toISOString().split("T")[0];
+  }
+  if (!validateEditDate()) {
+    editEndDateInput.value = "";  
+  } else {
+    previousEditStartDate = editStartDateInput.value;
+  }
+});
+
+ // listener for end date form
+editEndDateInput.addEventListener("change", function () {
+  if (!validateEditDate()) {
+    editEndDateInput.value = "";  
+    
+  } else {
+    previousEditEndDate = editEndDateInput.value;
+  }
+});
+
+function validateEditDate() {
+  console.log('validating... start / end')
+  var startDate = editStartDateInput.value;
+  var endDate = editEndDateInput.value;
+  var now = new Date();
+
+  if (startDate && endDate) {
+     var startDateObj = new Date(startDate + "T12:01"); // Set time to end of the day
+    console.log(startDateObj)
+     var endDateObj = new Date(endDate + "T11:59"); // Set time to just before noon
+    console.log(endDateObj)
+
+  if (startDateObj > endDateObj) {
+      alert("Invalid date range.");
+      return false;
+    } else {
+      return true;
+    }
+  }
+  return true;
+}
+
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+$(document).ready(function() {
+  $('.dropdown-item').click(function(e) {
+      e.preventDefault();
+      alert("Submitting your preference. \nNote: Any change to your preferences will not affect guests already scheduled for your room.");
+
+      var preference = $(this).data('value');
+      var formId = $(this).data('target');
+      $(formId + ' input[name="preference"]').val(preference);
+      $(formId).submit();
+  });
+
+});
+
+
+function showDeleteAvailabilityForm(eventId, start, end) {
+event.preventDefault();
+// Set the form values
+ // Use moment.js to parse the custom date format
+ const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+ const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+   
+ console.log(eventId)
+ console.log(start)
+ console.log(end)
+   
+   // Set the form values
+   $("#deleteStartDate").val(startDate);
+   $("#deleteEndDate").val(endDate);
+   $("#deleteEventId").val(eventId);
+// Show the modal
+$('#deleteAvailabilityModal').modal('show');
+}
+
+function submitAvailabilityForm() {
+$("#deleteAvailabilityForm").submit();
+}
+
+
+
 </script>
 {% endblock %}

@@ -39,6 +39,9 @@ def create_availability(request):
             availability_event.save()
             merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
 
+            if request.user.is_superuser:
+              return redirect('rooms_master')
+            
             return redirect('my_room')
         
         else:
@@ -116,10 +119,12 @@ def edit_availability(request):
               if occ_event.start >= occ_event.end:
                   occ_event.delete()
 
+            if request.user.is_superuser:
+              return redirect('rooms_master')
+            
             return redirect('my_room')  # Redirect to a relevant page after saving
         else:
             # Log form errors for debugging
-            print(form.errors)
             return redirect('my_room')  # Redirect to a relevant page after saving
     
     return HttpResponse("Invalid request method", status=405)
@@ -156,6 +161,8 @@ def delete_availability(request):
               event.delete()
 
         avail_event.delete()
+        if request.user.is_superuser:
+              return redirect('rooms_master')
         # Redirect to a success page or the same page
         return redirect('my_room') 
 
@@ -766,7 +773,9 @@ def no_room(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request):
+    print('in master')
     if request.method == 'POST':
+        print('iffed in master')
         form = UserSelectForm(request.POST)
         if form.is_valid():
             selected_user = form.cleaned_data['user']
@@ -808,11 +817,14 @@ def rooms_master(request):
                         'end_date': dayafter.strftime('%Y-%m-%d'),
                     }
                     return render(request, 'catalog/rooms_master.html', context)
+                
+            #FIXME is this real code?
             except Person.DoesNotExist:
                 return redirect('no_person')
         else:
             form = UserSelectForm()
     else:
+        print('elsed in master')
         form = UserSelectForm()
 
     return render(request, 'catalog/rooms_master.html', {'form': form})
