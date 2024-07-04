@@ -1,5 +1,5 @@
 from .models import Room, Building, Section, Person, CustomEvent
-from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm, DeleteAvailabilityForm
+from .forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm, DeleteAvailabilityForm, UserSelectForm
 
 from datetime import timedelta, time
 from django.utils import timezone
@@ -8,7 +8,8 @@ from django.http import HttpResponse
 
 from django.core.mail import send_mail
 import pytz
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
+from django.contrib.auth.models import User
 
 @login_required
 def create_availability(request):
@@ -758,3 +759,67 @@ def extend_conflict(request):
 @login_required
 def no_room(request):
     return render(request, 'catalog/no_room.html')
+
+
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
+def rooms_master(request):
+    if request.method == 'POST':
+        form = UserSelectForm(request.POST)
+        if form.is_valid():
+            selected_user = form.cleaned_data['user']
+            try:
+                person = selected_user.person
+                if hasattr(person, 'room'):
+                    room = person.room
+                    calendar = room.calendar
+                    
+                    availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
+                    occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
+
+                    children = person.children.all()
+                    children_events = {}
+                    
+                    for child in children:
+                        child_room = Room.objects.filter(owner=child).first()
+                        if child_room and child_room.calendar:
+                            child_calendar = child_room.calendar
+                            child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
+                            child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
+                            children_events[child] = {
+                                'availability': child_availability_events,
+                                'occupancy': child_occupancy_events
+                            }
+
+                    local_now = timezone.localtime(timezone.now())
+                    tomorrow = local_now.date() + timedelta(days=1)
+                    dayafter = tomorrow + timedelta(days=1)
+
+                    context = {
+                        'form': form,
+                        'room': room,
+                        'availability_events': availability_events,
+                        'occupancy_events': occupancy_events,
+                        'children_events': children_events,
+                        'children': children,
+                        'start_date': tomorrow.strftime('%Y-%m-%d'),
+                        'end_date': dayafter.strftime('%Y-%m-%d'),
+                    }
+                    return render(request, 'catalog/rooms_master.html', context)
+            except Person.DoesNotExist:
+                return redirect('no_person')
+        else:
+            form = UserSelectForm()
+    else:
+        form = UserSelectForm()
+
+    return render(request, 'catalog/rooms_master.html', {'form': form})
+
+
+
+
+
+
+

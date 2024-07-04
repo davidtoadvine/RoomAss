@@ -2,6 +2,7 @@ from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 import bleach
 from .models import Person, CustomEvent
+from django.contrib.auth.models import User
 class BookingForm(forms.Form):
     
     GUEST_TYPE_CHOICES = [
@@ -95,3 +96,6 @@ class CustomEventForm(forms.ModelForm):
             self.add_error('guest_name', 'Guest name is required for occupancy events.')
 
         return cleaned_data
+    
+class UserSelectForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=User.objects.all(), label="Select User")

@@ -1,0 +1,55 @@
+{% extends "base_generic.html" %} {% block content %}
+{%load static%}
+{% load custom_filters %}
+<h1>Rooms Master</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    
+    {% if room %}
+        <h2>Room {{ room.number }} in {{ room.section.name }}</h2>
+        <p>Building: {{ room.section.building.name }}</p>
+        
+        <h3>Availability Events</h3>
+        <ul>
+            {% for event in availability_events %}
+                <li>{{ event.start }} - {{ event.end }}</li>
+            {% empty %}
+                <li>No availability events</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Occupancy Events</h3>
+        <ul>
+            {% for event in occupancy_events %}
+                <li>{{ event.start }} - {{ event.end }}</li>
+            {% empty %}
+                <li>No occupancy events</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Children Events</h3>
+        {% for child, events in children_events.items %}
+            <h4>Child: {{ child.name }}</h4>
+            <h5>Availability Events</h5>
+            <ul>
+                {% for event in events.availability %}
+                    <li>{{ event.start }} - {{ event.end }}</li>
+                {% empty %}
+                    <li>No availability events</li>
+                {% endfor %}
+            </ul>
+
+            <h5>Occupancy Events</h5>
+            <ul>
+                {% for event in events.occupancy %}
+                    <li>{{ event.start }} - {{ event.end }}</li>
+                {% empty %}
+                    <li>No occupancy events</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endif %}
+{%endblock%}

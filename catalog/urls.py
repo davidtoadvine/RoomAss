@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-from .views import home, create_booking, create_availability, edit_guest_preferences, delete_availability, all_guests, my_guests,delete_event, extend_booking, shorten_booking, extend_conflict, no_room
+from .views import create_booking, create_availability, edit_guest_preferences, delete_availability, all_guests
+from .views import rooms_master,my_guests,delete_event, extend_booking, shorten_booking, extend_conflict, no_room
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
@@ -22,7 +23,9 @@ urlpatterns = [
     path('extend_booking/<int:event_id>/', extend_booking,name='extend_booking' ),
     path('shorten_booking/<int:event_id>/', shorten_booking,name='shorten_booking'),
      path('extend_conflict', extend_conflict,name='extend_conflict'),
-    path('no_room/', no_room, name='no_room'),  ]
+    path('no_room/', no_room, name='no_room'),
+         path('rooms_master/', rooms_master, name='rooms_master'),
+  ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
