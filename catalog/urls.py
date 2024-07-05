@@ -28,6 +28,7 @@ urlpatterns = [
     path('no_room/', no_room, name='no_room'),
          path('rooms_master/', rooms_master, name='rooms_master'),
              path('rooms_master/<int:user_id>/', views.rooms_master, name='rooms_master_with_user'),
+                 path('no_person/', views.no_person, name='no_person'),
   ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

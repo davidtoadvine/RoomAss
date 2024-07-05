@@ -13,7 +13,7 @@
   {{ form.user.label_tag }} {{ form.user }}
 </form>
 
-{% if selected_person %}
+{% if selected_person and room %}
     <h2>{{ selected_person.name }}'s Room</h2>
     <table class="table">
       <tbody>
@@ -127,7 +127,11 @@
     </table>
     {% endfor %}
 {% else %}
-    <p>Please select a user to view their room details.</p>
+<p></p>
+<p>There is currently no room information to display.</p>
+<p>Please select a user to view their room details.</p>
+<p>(If you have already selected a user, they appear to not have a room.)</p>
+
 {% endif %}
 
 <!-- Create Availability Modal -->

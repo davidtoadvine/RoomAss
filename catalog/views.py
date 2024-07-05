@@ -778,24 +778,25 @@ def no_room(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request, user_id=None):
-    print('rooms master')
     form = UserSelectForm()
 
     # Determine the selected person
     if request.method == 'POST':
-        print('rm POST!!!!!!!!!')
         form = UserSelectForm(request.POST)
 
         if form.is_valid():
-            selected_user = form.cleaned_data['user']
-            selected_person = selected_user.person
-            return redirect('rooms_master_with_user', user_id=selected_user.id)
-        else:
-            # Handle form errors here if needed
-            return redirect('rooms_master')
+          selected_user = form.cleaned_data['user']
+          try:
+                selected_person = selected_user.person
+                print("WE HAVE A SELECTED PERSON")
+                print(selected_person)
+                return redirect('rooms_master_with_user', user_id=selected_user.id)
+          except Person.DoesNotExist:
+                print("NO PERSON")
+                # Handle case where user does not have an associated person
+                return redirect('no_person')  # or render a template with an error message
 
     else:
-        print("rm GET")
         selected_person = None
         if user_id:
             user = get_object_or_404(User, id=user_id)
@@ -843,3 +844,7 @@ def rooms_master(request, user_id=None):
             })
 
         return render(request, 'catalog/rooms_master.html', context)
+    
+@login_required
+def no_person(request):
+    return render(request, 'catalog/no_person.html')
