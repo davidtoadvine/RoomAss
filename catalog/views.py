@@ -48,11 +48,13 @@ def create_availability(request):
             return redirect('my_room')
         
 @login_required
-def edit_availability(request):
+def edit_availability(request, user_id):
     if request.method == 'POST':
+        print("edit availability!")
         form = EditAvailabilityForm(request.POST)
         
         if form.is_valid():
+            print("edit avail valid form")
             # Process the form data
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
@@ -120,7 +122,10 @@ def edit_availability(request):
                   occ_event.delete()
 
             if request.user.is_superuser:
-              return redirect('rooms_master')
+              print('SUPERUSER')
+              print('sending user id...')
+              print(user_id)
+              return redirect('rooms_master_with_user', user_id = user_id)
             
             return redirect('my_room')  # Redirect to a relevant page after saving
         else:
@@ -772,54 +777,69 @@ def no_room(request):
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
-def rooms_master(request):
+def rooms_master(request, user_id=None):
+    print('rooms master')
+    form = UserSelectForm()
+
+    # Determine the selected person
     if request.method == 'POST':
+        print('rm POST!!!!!!!!!')
         form = UserSelectForm(request.POST)
+
         if form.is_valid():
             selected_user = form.cleaned_data['user']
-            try:
-                person = selected_user.person
-                if hasattr(person, 'room'):
-                    room = person.room
-                    calendar = room.calendar
-                    
-                    availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
-                    occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
-
-                    children = person.children.all()
-                    children_events = {}
-                    
-                    for child in children:
-                        child_room = Room.objects.filter(owner=child).first()
-                        if child_room and child_room.calendar:
-                            child_calendar = child_room.calendar
-                            child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
-                            child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
-                            children_events[child] = {
-                                'availability': child_availability_events,
-                                'occupancy': child_occupancy_events
-                            }
-
-                    local_now = timezone.localtime(timezone.now())
-                    tomorrow = local_now.date() + timedelta(days=1)
-                    dayafter = tomorrow + timedelta(days=1)
-
-                    context = {
-                        'form': form,
-                        'room': room,
-                        'availability_events': availability_events,
-                        'occupancy_events': occupancy_events,
-                        'children_events': children_events,
-                        'children': children,
-                        'start_date': tomorrow.strftime('%Y-%m-%d'),
-                        'end_date': dayafter.strftime('%Y-%m-%d'),
-                    }
-                    return render(request, 'catalog/rooms_master.html', context)
-            except Person.DoesNotExist:
-                return redirect('no_person')
+            selected_person = selected_user.person
+            return redirect('rooms_master_with_user', user_id=selected_user.id)
         else:
-            form = UserSelectForm()
-    else:
-        form = UserSelectForm()
+            # Handle form errors here if needed
+            return redirect('rooms_master')
 
-    return render(request, 'catalog/rooms_master.html', {'form': form})
+    else:
+        print("rm GET")
+        selected_person = None
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+            selected_person = get_object_or_404(Person, user=user)
+        
+        context = {
+            'form': form,
+            'selected_person': selected_person,
+            'user_id': user_id,
+        }
+        
+        if selected_person and hasattr(selected_person, 'room'):
+            room = selected_person.room
+            calendar = room.calendar
+
+            availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
+            occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
+
+            children = selected_person.children.all()
+            children_events = {}
+
+            for child in children:
+                child_room = Room.objects.filter(owner=child).first()
+                if child_room and child_room.calendar:
+                    child_calendar = child_room.calendar
+                    child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
+                    child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
+                    children_events[child] = {
+                        'availability': child_availability_events,
+                        'occupancy': child_occupancy_events
+                    }
+
+            local_now = timezone.localtime(timezone.now())
+            tomorrow = local_now.date() + timedelta(days=1)
+            dayafter = tomorrow + timedelta(days=1)
+
+            context.update({
+                'room': room,
+                'availability_events': availability_events,
+                'occupancy_events': occupancy_events,
+                'children_events': children_events,
+                'children': children,
+                'start_date': tomorrow.strftime('%Y-%m-%d'),
+                'end_date': dayafter.strftime('%Y-%m-%d'),
+            })
+
+        return render(request, 'catalog/rooms_master.html', context)

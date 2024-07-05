@@ -1,7 +1,11 @@
 {% extends "base_generic.html" %}
- {% block content %}
-{%load static%}
+{% block content %}
+{% load static %}
 {% load custom_filters %}
+
+<script>console.log(user_id)</script>
+<script>console.log(selected_person.name)</script>
+
 
 <h1>Rooms Master</h1>
 <form id="userSelectForm" method="post">
@@ -9,30 +13,31 @@
   {{ form.user.label_tag }} {{ form.user }}
 </form>
 
-{% if room %}
+{% if selected_person %}
+    <h2>{{ selected_person.name }}'s Room</h2>
     <table class="table">
       <tbody>
         <tr>
           <th>
             <div class="flex-container">
               <span>{{ room.owner }}'s Room</span>
-              <form id="preferenceForm-{{room.owner.id}}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
+              <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{room.owner.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if room.owner.preference %}
                       {{ room.owner.get_preference_display }}
                     {% else %}
                       Select Preference
                     {% endif %}
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{room.owner.id}}">
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room.owner.id }}">
                     {% for value, display in room.owner.Preference.choices %}
                       <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                   </div>
                 </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{room.owner.id}}">
+                <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
               </form>
             </div>
           </th>
@@ -43,8 +48,8 @@
               <div class="flex-container">
                 <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
-                  <button type="button" onclick="showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
-                  <button type="button" onclick="showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
+                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Edit</button>
+                  <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}')">Delete</button>
                 </div>
               </div>
             </td>
@@ -72,23 +77,23 @@
           <th>
             <div class="flex-container">
               <span>{{ child.name }}'s Room</span>
-              <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
+              <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{child.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ child.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if child.preference %}
                       {{ child.get_preference_display }}
                     {% else %}
                       Select Preference
                     {% endif %}
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{child.id}}">
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ child.id }}">
                     {% for value, display in child.Preference.choices %}
                       <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                   </div>
                 </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{child.id}}">
+                <input type="hidden" name="preference" id="preferenceInput-{{ child.id }}">
               </form>
             </div>
           </th>
@@ -99,8 +104,8 @@
               <div class="flex-container">
                 <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
-                  <button type="button" onclick="showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
-                  <button type="button" onclick="showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
+                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}, {{user_id}})">Edit</button>
+                  <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}')">Delete</button>
                 </div>
               </div>
             </td>
@@ -115,15 +120,16 @@
         {% endfor %}
         <tr>
           <td>
-            <button type="button" onclick="showAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button>
+            <button type="button" onclick="showAvailabilityForm(event, '{{ child.room.id }}', '{{ child.name }}')">+ Create new availability</button>
           </td>
         </tr>
       </tbody>
     </table>
     {% endfor %}
+{% else %}
+    <p>Please select a user to view their room details.</p>
 {% endif %}
 
-{% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
 <!-- Create Availability Modal -->
 <div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -131,7 +137,7 @@
       <form id="availabilityForm" method="post" action="{% url 'create_availability' %}"> 
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title" id ="availabilityPersonName"></h5>
+          <h5 class="modal-title" id="availabilityPersonName"></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -142,15 +148,15 @@
             <div class="col-md-6">
               <input type="hidden" name="room_id" id="availabilityRoomId" />
               <label for="startDate">Start Date:</label>
-              <input type="date" name="start_date" id="startDate" class="form-control" value = {{start_date}} />
+              <input type="date" name="start_date" id="startDate" class="form-control" value="{{ start_date }}" />
               <label for="endDate">End Date:</label>
-              <input type="date" name="end_date" id="endDate" class="form-control" value = {{end_date}} />
+              <input type="date" name="end_date" id="endDate" class="form-control" value="{{ end_date }}" />
             </div> 
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary" >Confirm Availability</button>
+          <button type="submit" class="btn btn-primary">Confirm Availability</button>
         </div>
       </form>
     </div>
@@ -161,10 +167,11 @@
 <div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' %}"> 
-        {% csrf_token %}
+      <form id="editAvailabilityForm" method="post" action="{% if user_id %}{% url 'edit_availability' user_id %}{% else %}#{% endif %}"> 
+                {% csrf_token %}
+        <input type="hidden" name="user_id" id="editUserId" value="{{ user_id }}">
         <div class="modal-header">
-          <h5 class="modal-title" >Edit Availability</h5>
+          <h5 class="modal-title">Edit Availability</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -173,7 +180,7 @@
           <div class="row">
             <!-- Form Column -->
             <div class="col-md-6">
-              <input type = "hidden" name = "event_id" id = "eventId" />
+              <input type="hidden" name="event_id" id="eventId" />
               <label for="startDate">Start Date:</label>
               <input type="date" name="start_date" id="editStartDate" class="form-control" />
               <label for="endDate">End Date:</label>
@@ -198,7 +205,7 @@
       <form id="deleteAvailabilityForm" method="post" action="{% url 'delete_availability' %}"> 
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title" >Delete Availability?</h5>
+          <h5 class="modal-title">Delete Availability?</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -207,11 +214,11 @@
           <div class="row">
             <!-- Form Column -->
             <div class="col-md-6">
-              <input type = "hidden" name = "event_id" id = "deleteEventId" />
+              <input type="hidden" name="event_id" id="deleteEventId" />
               <label for="startDate">Start Date:</label>
               <input type="date" name="start_date" id="deleteStartDate" class="form-control" readonly />
               <label for="endDate">End Date:</label>
-              <input type="date" name="end_date" id="deleteEndDate" class="form-control" readonly/>
+              <input type="date" name="end_date" id="deleteEndDate" class="form-control" readonly />
             </div> 
           </div>
         </div>
@@ -224,12 +231,18 @@
   </div>
 </div>
 
-<script>
-function submitForm() {
-    document.getElementById('userSelectForm').submit();
-}
 
-document.getElementById('id_user').onchange = submitForm;
+
+
+<script>
+// Use the correct ID for the select element
+document.getElementsByName('user')[0].onchange = function() {
+  const selectedUserId = this.value;
+  const form = document.getElementById('userSelectForm');
+  const url = "{% url 'rooms_master' %}" + selectedUserId + "/";
+  form.action = url;
+  form.submit();
+};
 
 
 
@@ -322,7 +335,7 @@ endDateInput.addEventListener("change", function () {
       return false;
   }
    //////////////////////////////////////EDIT AVAILABILITY///////////////////////////////////////////////////////////////////////
-  function showEditAvailabilityForm(eventId, start, end) {
+  function showEditAvailabilityForm(eventId, start, end, userId) {
     // Prevent default action if needed (e.g., if inside a form submission handler)
     // event.preventDefault();
     
@@ -333,11 +346,13 @@ endDateInput.addEventListener("change", function () {
     console.log(eventId)
     console.log(start)
     console.log(end)
+    console.log(userId)
     
     // Set the form values
     $("#editStartDate").val(startDate);
     $("#editEndDate").val(endDate);
     $("#eventId").val(eventId);
+    $("#editUserId").val(userId);  // Set the user_id in the form
   
     // Show the modal
     $('#editAvailabilityModal').modal('show');
