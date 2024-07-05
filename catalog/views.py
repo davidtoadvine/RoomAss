@@ -773,9 +773,7 @@ def no_room(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request):
-    print('in master')
     if request.method == 'POST':
-        print('iffed in master')
         form = UserSelectForm(request.POST)
         if form.is_valid():
             selected_user = form.cleaned_data['user']
@@ -805,7 +803,7 @@ def rooms_master(request):
                     local_now = timezone.localtime(timezone.now())
                     tomorrow = local_now.date() + timedelta(days=1)
                     dayafter = tomorrow + timedelta(days=1)
-                    print(tomorrow.strftime('%Y-%m-%d'))
+
                     context = {
                         'form': form,
                         'room': room,
@@ -817,21 +815,11 @@ def rooms_master(request):
                         'end_date': dayafter.strftime('%Y-%m-%d'),
                     }
                     return render(request, 'catalog/rooms_master.html', context)
-                
-            #FIXME is this real code?
             except Person.DoesNotExist:
                 return redirect('no_person')
         else:
             form = UserSelectForm()
     else:
-        print('elsed in master')
         form = UserSelectForm()
 
     return render(request, 'catalog/rooms_master.html', {'form': form})
-
-
-
-
-
-
-

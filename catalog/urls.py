@@ -22,10 +22,10 @@ urlpatterns = [
     path('delete_event/<int:event_id>/', delete_event, name='delete_event'),
     path('extend_booking/<int:event_id>/', extend_booking,name='extend_booking' ),
     path('shorten_booking/<int:event_id>/', shorten_booking,name='shorten_booking'),
-     path('extend_conflict', extend_conflict,name='extend_conflict'),
+    path('extend_conflict', extend_conflict,name='extend_conflict'),
     path('no_room/', no_room, name='no_room'),
-         path('rooms_master/', rooms_master, name='rooms_master'),
-             path('rooms_master/<int:person_id>/', views.rooms_master, name='rooms_master_with_person'),
+    path('rooms_master/', rooms_master, name='rooms_master'),
+    path('rooms_master/<int:person_id>/', views.rooms_master, name='rooms_master_with_person'),
   ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
