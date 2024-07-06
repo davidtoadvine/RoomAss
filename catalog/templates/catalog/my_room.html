@@ -41,7 +41,7 @@
           <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
           <div>
           <button type = "submit"
-          onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
+          onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}', '{{request.user.id}}')">Edit</button>
         
         <button type = "submit"
           onclick = "showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
@@ -173,8 +173,10 @@
 <div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' %}"> 
+      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' request.user.id %}"> 
         {% csrf_token %}
+        {% comment %} <input type="hidden" name="user_id" id="editUserId" value="{{ request.user.id }}"> {% endcomment %}
+
         <div class="modal-header">
           <h5 class="modal-title" >Edit Availability</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -342,6 +344,8 @@ endDateInput.addEventListener("change", function () {
     $("#editStartDate").val(startDate);
     $("#editEndDate").val(endDate);
     $("#eventId").val(eventId);
+      // Set the user_id in the form
+
   
     // Show the modal
     $('#editAvailabilityModal').modal('show');
