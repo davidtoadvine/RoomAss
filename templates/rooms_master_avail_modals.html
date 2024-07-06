@@ -1,0 +1,106 @@
+<!-- Create Availability Modal -->
+<div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="availabilityForm" method="post" action="{% if user_id %}{% url 'create_availability' user_id %}{% else %}#{% endif %}"> 
+        {% csrf_token %}
+        <input type="hidden" name="user_id" id="createUserId" value="{{ user_id }}">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="availabilityPersonName"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type="hidden" name="room_id" id="availabilityRoomId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="startDate" class="form-control" value="{{ start_date }}" />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="endDate" class="form-control" value="{{ end_date }}" />
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Availability</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Availability Modal -->
+<div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="editAvailabilityForm" method="post" action="{% if user_id %}{% url 'edit_availability' user_id %}{% else %}#{% endif %}"> 
+                {% csrf_token %}
+        <input type="hidden" name="user_id" id="editUserId" value="{{ user_id }}">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Availability</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type="hidden" name="event_id" id="eventId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="editStartDate" class="form-control" />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="editEndDate" class="form-control" />
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Availability</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Availability Modal -->
+<div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="deleteAvailabilityForm" method="post" action="{% if user_id %}{% url 'delete_availability' user_id %}{% else %}#{% endif %}">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" id="deleteUserId" value="{{ user_id }}">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Availability?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Form Column -->
+            <div class="col-md-6">
+              <input type="hidden" name="event_id" id="deleteEventId" />
+              <label for="startDate">Start Date:</label>
+              <input type="date" name="start_date" id="deleteStartDate" class="form-control" readonly />
+              <label for="endDate">End Date:</label>
+              <input type="date" name="end_date" id="deleteEndDate" class="form-control" readonly />
+            </div> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
