@@ -826,7 +826,10 @@ def rooms_master(request, user_id=None):
                     child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
                     children_events[child] = {
                         'availability': child_availability_events,
-                        'occupancy': child_occupancy_events
+                        'occupancy': child_occupancy_events,
+                        'room_image_url': child_room.image.url if child_room.image else '',
+
+                        
                     }
 
             local_now = timezone.localtime(timezone.now())
@@ -835,6 +838,7 @@ def rooms_master(request, user_id=None):
 
             context.update({
                 'room': room,
+                'room_image_url': room.image.url if room.image else '',
                 'availability_events': availability_events,
                 'occupancy_events': occupancy_events,
                 'children_events': children_events,

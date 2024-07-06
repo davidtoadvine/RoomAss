@@ -3,9 +3,6 @@
 {% load static %}
 {% load custom_filters %}
 
-<script>console.log(user_id)</script>
-<script>console.log(selected_person.name)</script>
-
 
 <h1>Rooms Master</h1>
 <form id="userSelectForm" method="post">
@@ -20,7 +17,11 @@
         <tr>
           <th>
             <div class="flex-container">
-              <span>{{ room.owner }}'s Room</span>
+              <button
+              class="btn-link"
+              onclick="showFloorplanModal('{{room_image_url }}')"
+            >{{ room.owner}}'s Room
+          </button>
               <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
@@ -76,7 +77,11 @@
         <tr>
           <th>
             <div class="flex-container">
-              <span>{{ child.name }}'s Room</span>
+              <button
+              class="btn-link"
+              onclick="showFloorplanModal('{{ events.room_image_url }}')"
+            >{{ child.name}}'s Room
+          </button>
               <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
@@ -129,8 +134,8 @@
 {% else %}
 <p></p>
 <p>There is currently no room information to display.</p>
-<p>Please select a user to view their room details.</p>
-<p>(If you have already selected a user, they appear to not have a room.)</p>
+<p>Please select a User to view their room details. (Childrens' rooms are accessible via a parent User.)</p>
+<p>If you have already selected a User, they appear to not have a room.</p>
 
 {% endif %}
 
@@ -238,6 +243,24 @@
 
 
 
+<!-- Floorplan Modal -->
+<div class="modal fade" id="floorplanModal" tabindex="-1" role="dialog" aria-labelledby="floorplanModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="floorplanModalLabel">Room View</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img id="floorplanImage" src="" alt="Room Image" class="img-fluid">      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 // Use the correct ID for the select element
 document.getElementsByName('user')[0].onchange = function() {
@@ -461,7 +484,17 @@ function submitAvailabilityForm() {
   $("#deleteAvailabilityForm").submit();
 }
 
+$(document).ready(function() {
+  $('#floorplanModal').on('shown.bs.modal', function () {
+      console.log('Image src:', $('#floorplanModal img').attr('src'));
+  });
+});
 
 
+ // Function to show the floorplan modal with the correct image
+ function showFloorplanModal(imageUrl) {
+  document.getElementById('floorplanImage').src = imageUrl;
+  $('#floorplanModal').modal('show');
+}
 </script>
 {% endblock %}
