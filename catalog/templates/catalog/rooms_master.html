@@ -109,7 +109,7 @@
               <div class="flex-container">
                 <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
-                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}, {{user_id}})">Edit</button>
+                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Edit</button>
                   <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}')">Delete</button>
                 </div>
               </div>

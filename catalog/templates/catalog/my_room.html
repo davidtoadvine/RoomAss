@@ -140,7 +140,7 @@
 <div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="availabilityForm" method="post" action="{% url 'create_availability' %}"> 
+      <form id="availabilityForm" method="post" action="{% url 'create_availability' request.user.id %}"> 
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id ="availabilityPersonName"></h5>
@@ -209,7 +209,7 @@
 <div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteAvailabilityForm" method="post" action="{% url 'delete_availability' %}"> 
+      <form id="deleteAvailabilityForm" method="post" action="{% url 'delete_availability' request.user.id %}"> 
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" >Delete Availability?</h5>
