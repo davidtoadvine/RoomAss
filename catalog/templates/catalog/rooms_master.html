@@ -3,7 +3,6 @@
 {% load static %}
 {% load custom_filters %}
 
-
 <h1>Rooms Master</h1>
 <form id="userSelectForm" method="post">
   {% csrf_token %}
@@ -17,11 +16,8 @@
         <tr>
           <th>
             <div class="flex-container">
-              <button
-              class="btn-link"
-              onclick="showFloorplanModal('{{room_image_url }}')"
-            >{{ room.owner}}'s Room
-          </button>
+              <button class="btn-link"
+              onclick="showFloorplanModal('{{room_image_url }}')">{{ room.owner}}'s Room</button>
               <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
@@ -58,9 +54,40 @@
           {% for o_event in occupancy_events %}
             {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
               <tr>
-                <td class="booked-cell" style="padding-left: 50px;">Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+                  
+                <td class="booked-cell" style="padding-left: 50px;">
+                  <div class = "flex-container">
+
+                  <span>
+                  Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}
+                  </span>
+                  <div>
+                    <button class="btn btn-primary btn-occ"
+                      data-toggle="modal" 
+                      data-target="#extendModal-{{ o_event.id }}" 
+                      data-id="{{ o_event.id }}" 
+                      data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
+                      data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
+      
+                    <button class="btn btn-primary btn-occ" 
+                      data-toggle="modal" 
+                      data-target="#shortenModal-{{ o_event.id }}" 
+                      data-id="{{ o_event.id }}" 
+                      data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
+                      data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
+      
+                    <button class="btn btn-danger btn-occ" 
+                      data-toggle="modal" 
+                      data-target="#deleteModal-{{ o_event.id }}" 
+                      data-id="{{ o_event.id }}" 
+                      data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
+                      data-end-date="{{ o_event.end|date:'Y-m-d' }}">Delete</button>
+                  </div>
+
+              </td>
               </tr>
             {% endif %}
+            {% include "modals.html" %}
           {% endfor %}
         {% endfor %}
         <tr>
@@ -121,6 +148,7 @@
                 <td class="booked-cell" style="padding-left: 50px;">Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
               </tr>
             {% endif %}
+            {% include "modals.html" %}
           {% endfor %}
         {% endfor %}
         <tr>
@@ -131,6 +159,9 @@
       </tbody>
     </table>
     {% endfor %}
+
+
+
 {% else %}
 <p></p>
 <p>There is currently no room information to display.</p>
@@ -265,7 +296,15 @@
     </div>
   </div>
 </div>
+
+
+
 <script>
+  // Ensure the script is loaded
+  console.log("Script loaded!");
+
+
+  
 // Use the correct ID for the select element
 document.getElementsByName('user')[0].onchange = function() {
   const selectedUserId = this.value;
@@ -274,6 +313,7 @@ document.getElementsByName('user')[0].onchange = function() {
   form.action = url;
   form.submit();
 };
+
 
 
 
@@ -503,6 +543,152 @@ $(document).ready(function() {
  function showFloorplanModal(imageUrl) {
   document.getElementById('floorplanImage').src = imageUrl;
   $('#floorplanModal').modal('show');
+}
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+$(document).ready(function() {
+  
+  console.log("Document is ready!");
+
+  // Log message to confirm buttons are clicked
+  document.querySelectorAll('.btn-occ').forEach(function(button) {
+    button.addEventListener('click', function() {
+        console.log("Button clicked!!!");
+
+        // Log data attributes
+        console.log('pre attributes...');
+
+        console.log('Data ID:', button.getAttribute('data-id'));
+        console.log('Data Start Date:', button.getAttribute('data-start-date'));
+        console.log('Data End Date:', button.getAttribute('data-end-date'));
+        console.log('post attributes...');
+    });
+});
+
+
+
+  // Function to populate the extend modal
+
+  // $('.modal').on('show.bs.modal', function(event) {
+ //  console.log("Modal is being shown!");
+ //  var button = $(event.relatedTarget);
+ //  var eventId = button.data('id');
+ //  var startDate = button.data('start-date');
+ //  var endDate = button.data('end-date');
+ //  
+ //  console.log(`Opening modal for event ${eventId} with start date ${startDate} and end date ${endDate}`);
+
+ //  var modal = $(this);
+ //  modal.find(`#extendEventId-${eventId}`).val(eventId);
+ //  modal.find(`#extendStartDate-${eventId}`).val(startDate);
+ //  modal.find(`#extendEndDate-${eventId}`).val(endDate);
+
+ //  // Set the original start and end date data attributes
+ //  modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
+ //  modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
+
+ //  // Similar setup for shorten modal
+ //  modal.find(`#shortenEventId-${eventId}`).val(eventId);
+ //  modal.find(`#shortenStartDate-${eventId}`).val(startDate);
+ //  modal.find(`#shortenEndDate-${eventId}`).val(endDate);
+ //  
+ //  modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start', startDate);
+ //  modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end', endDate);
+ //});
+
+  // Populate modals with data attributes
+  $('.modal').on('show.bs.modal', function(event) {
+    var button = $(event.relatedTarget);
+    var eventId = button.data('id');
+    var startDate = button.data('start-date');
+    var endDate = button.data('end-date');
+
+    var modal = $(this);
+    modal.find(`#extendEventId-${eventId}`).val(eventId);
+    modal.find(`#extendStartDate-${eventId}`).val(startDate);
+    modal.find(`#extendEndDate-${eventId}`).val(endDate);
+
+    // Set the original start and end date data attributes
+    modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
+    modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
+    // Similar setup for shorten modal
+    modal.find(`#shortenEventId-${eventId}`).val(eventId);
+    modal.find(`#shortenStartDate-${eventId}`).val(startDate);
+    modal.find(`#shortenEndDate-${eventId}`).val(endDate);
+    
+    modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start', startDate);
+    modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end', endDate);
+  });
+
+function submitExtendForm() {
+            console.log("Extend form submitted!");
+            document.getElementById('extendForm').submit();
+        }
+
+  });
+
+
+// Function to validate date selection
+function validateExtendDate(eventId) {
+  console.log(`Validating extend date for event ${eventId}`);
+  let startDateInput = document.getElementById(`extendStartDate-${eventId}`);
+  let endDateInput = document.getElementById(`extendEndDate-${eventId}`);
+  let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+  let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+  let newStartDate = new Date(startDateInput.value);
+  let newEndDate = new Date(endDateInput.value);
+
+  if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
+    alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
+    startDateInput.value = startDateInput.getAttribute('data-original-start');
+    endDateInput.value = endDateInput.getAttribute('data-original-end');
+  }
+}
+
+// Attach change event listeners to the date inputs
+$(document).on('change', '.extend-start-date, .extend-end-date', function() {
+  const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+  validateExtendDate(eventId);
+});
+
+function validateShortenDate(eventId) {
+  console.log(`Validating shorten date for event ${eventId}`);
+  let startDateInput = document.getElementById(`shortenStartDate-${eventId}`);
+  let endDateInput = document.getElementById(`shortenEndDate-${eventId}`);
+  let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+  let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+  let newStartDate = new Date(startDateInput.value);
+  let newEndDate = new Date(endDateInput.value);
+
+  if (newStartDate < originalStartDate || newEndDate > originalEndDate) {
+    alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
+    startDateInput.value = startDateInput.getAttribute('data-original-start');
+    endDateInput.value = endDateInput.getAttribute('data-original-end');
+  }
+  else if (newStartDate >= originalEndDate || newEndDate <= originalStartDate){
+    alert("The start date cannot occur on or after the end date. If you wish to delete this event, please use the 'Delete' button.");
+    startDateInput.value = startDateInput.getAttribute('data-original-start');
+    endDateInput.value = endDateInput.getAttribute('data-original-end');
+  }
+} 
+
+// Attach change event listeners to the date inputs
+$(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
+  const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+  validateShortenDate(eventId);
+});
+
+function submitExtendForm(eventId) {
+  document.getElementById(`extendForm-${eventId}`).submit();
+}
+
+function submitShortenForm(eventId) {
+  document.getElementById(`shortenForm-${eventId}`).submit();
 }
 </script>
 {% endblock %}
