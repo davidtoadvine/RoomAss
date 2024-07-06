@@ -125,7 +125,7 @@
         {% endfor %}
         <tr>
           <td>
-            <button type="button" onclick="showAvailabilityForm(event, '{{ child.room.id }}', '{{ child.name }}')">+ Create new availability</button>
+            <button type="button" onclick="showAvailabilityForm(event, '{{ child.room.id }}', '{{ child.name }}', '{{user_id}}')">+ Create new availability</button>
           </td>
         </tr>
       </tbody>
@@ -143,8 +143,10 @@
 <div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="availabilityForm" method="post" action="{% url 'create_availability' %}"> 
+      <form id="availabilityForm" method="post" action="{% if user_id %}{% url 'create_availability' user_id %}{% else %}#{% endif %}"> 
         {% csrf_token %}
+        <input type="hidden" name="user_id" id="createUserId" value="{{ user_id }}">
+
         <div class="modal-header">
           <h5 class="modal-title" id="availabilityPersonName"></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -276,11 +278,13 @@ document.getElementsByName('user')[0].onchange = function() {
 
 
 /////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////
-  function showAvailabilityForm(event, roomId, name) {
+  function showAvailabilityForm(event, roomId, name, userId) {
     event.preventDefault();
     // Set the form values
     document.getElementById('availabilityRoomId').value = roomId;
     document.getElementById('availabilityPersonName').innerText = 'Create Availability for ' + name + '\'s Room';
+    $("#createUserId").val(userId);  // Set the user_id in the form
+
     
     // Show the modal
     $('#availabilityModal').modal('show');

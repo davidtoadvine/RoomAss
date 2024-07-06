@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.models import User
 
 @login_required
-def create_availability(request):
+def create_availability(request, user_id):
       if request.method == 'POST':
         form = AvailabilityForm(request.POST)
 
@@ -40,12 +40,13 @@ def create_availability(request):
             merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
 
             if request.user.is_superuser:
-              return redirect('rooms_master')
-            
+              return redirect('rooms_master_with_user', user_id = user_id)
             return redirect('my_room')
         
-        else:
-            return redirect('my_room')
+        # Handle form invalid case
+        if request.user.is_superuser:
+            return redirect('rooms_master_with_user', user_id=user_id)
+        return redirect('my_room')
         
 @login_required
 def edit_availability(request, user_id):
@@ -127,9 +128,10 @@ def edit_availability(request, user_id):
               return redirect('rooms_master_with_user', user_id = user_id)
             
             return redirect('my_room')  # Redirect to a relevant page after saving
-        else:
-            # Log form errors for debugging FIXME this needs to redirect for different user types and print debug?
-            return redirect('my_room')  # Redirect to a relevant page after saving
+        # Handle form invalid case
+        if request.user.is_superuser:
+            return redirect('rooms_master_with_user', user_id=user_id)
+        return redirect('my_room')
     
     return HttpResponse("Invalid request method", status=405)
 
