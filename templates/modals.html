@@ -31,7 +31,7 @@
     </div>
   </div>
 </div>
-        <!-- Shorten Booking Modal -->
+
 <!-- Shorten Booking Modal -->
 <div class="modal fade" id="shortenModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="shortenModalLabel-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -45,7 +45,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <input type="hidden" name="event_id" id="shortenEventId-{{ event.id }}">
+          <input type="hidden" name="event_id" id="shortenEventId-{{ o_event.id }}">
           <div class="form-group">
             <label for="shortenStartDate-{{ o_event.id }}">Start Date</label>
             <input type="date" class="form-control shorten-start-date" id="shortenStartDate-{{ o_event.id }}" name="start_date">

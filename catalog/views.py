@@ -693,6 +693,7 @@ def my_guests(request):
 
 
 @login_required
+# used for occupany events at least
 def delete_event(request, event_id):
     event = get_object_or_404(CustomEvent, id=event_id)
 
@@ -701,6 +702,8 @@ def delete_event(request, event_id):
 
     if request.method == 'POST':
         event.delete()
+        if request.user.is_superuser:
+            return redirect('rooms_master')
         return redirect('my_guests')
 
     return render(request, 'catalog/delete_event.html', {'event': event})
@@ -745,8 +748,11 @@ def extend_booking(request, event_id):
             if conflict:
                 return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end})
             else:
+              if request.user.is_superuser:
+                  return redirect('rooms_master')
               return redirect('my_guests')  # Redirect to the appropriate page after saving
-
+    if request.user.is_superuser:
+                  return redirect('rooms_master')
     return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
 
@@ -775,9 +781,11 @@ def shorten_booking(request, event_id):
         
             event.end = new_end_date
             event.save()
-
+            if request.user.is_superuser:
+                  return redirect('rooms_master')
             return redirect('my_guests')  # Redirect to the appropriate page after saving
-
+  if request.user.is_superuser:
+                  return redirect('rooms_master')
   return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
 def extend_conflict(request):

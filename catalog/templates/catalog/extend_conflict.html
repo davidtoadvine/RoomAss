@@ -8,7 +8,10 @@
     <p> Your booking is now from {{start}} to {{end}}</p>
     <p> You may want to try booking another room on the Available Rooms page for the missing days.</p>
 
+        {%if request.user.is_superuser%}
+       <a href="{% url 'rooms_master' %}" class="btn btn-secondary">Back</a>
+        {%else%}
         <a href="{% url 'my_guests' %}" class="btn btn-secondary">Back</a>
-    
+          {%endif%}
 </div>
 {% endblock %}

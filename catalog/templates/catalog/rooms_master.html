@@ -83,7 +83,7 @@
                       data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
                       data-end-date="{{ o_event.end|date:'Y-m-d' }}">Delete</button>
                   </div>
-
+                </div>
               </td>
               </tr>
             {% endif %}
@@ -145,7 +145,34 @@
           {% for o_event in events.occupancy %}
             {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
               <tr>
-                <td class="booked-cell" style="padding-left: 50px;">Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+                <td class="booked-cell" style="padding-left: 50px;">
+                  <div class = "flex-container">
+
+                  <span>Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</span>
+                <div>
+                  <button class="btn btn-primary btn-occ"
+                    data-toggle="modal" 
+                    data-target="#extendModal-{{ o_event.id }}" 
+                    data-id="{{ o_event.id }}" 
+                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
+                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
+    
+                  <button class="btn btn-primary btn-occ" 
+                    data-toggle="modal" 
+                    data-target="#shortenModal-{{ o_event.id }}" 
+                    data-id="{{ o_event.id }}" 
+                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
+                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
+    
+                  <button class="btn btn-danger btn-occ" 
+                    data-toggle="modal" 
+                    data-target="#deleteModal-{{ o_event.id }}" 
+                    data-id="{{ o_event.id }}" 
+                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
+                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Delete</button>
+                </div>
+              </div>
+              </td>
               </tr>
             {% endif %}
             {% include "modals.html" %}
