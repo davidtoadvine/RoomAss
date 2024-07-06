@@ -481,13 +481,22 @@ def normalize_time(dt):
 def edit_guest_preferences(request, person_id):
 
     person = get_object_or_404(Person, id=person_id)  # Adjust the model accordingly
+    redirect_person = person
+    if redirect_person.parent:
+      redirect_person = redirect_person.parent
+    user_id = redirect_person.user.id
 
     if request.method == 'POST':
       
         form = GuestPreferencesForm(request.POST, instance=person)
         if form.is_valid():
             form.save()
-            return redirect('my_room')  # Adjust to your actual redirect view
+
+            if request.user.is_superuser:
+              return redirect('rooms_master_with_user', user_id=user_id)
+            return redirect('my_room') 
+        
+    # FIXME unsure if what is below here ever happens
     else:
         form = GuestPreferencesForm(instance=person)
     
