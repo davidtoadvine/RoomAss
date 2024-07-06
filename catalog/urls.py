@@ -15,9 +15,10 @@ urlpatterns = [
     path('create_availability', create_availability, name = 'create_availability'),
     # path('edit_availability', views.edit_availability, name = 'edit_availability'),
         path('edit_availability/<int:user_id>', views.edit_availability, name = 'edit_availability'),
+        path('delete_availability/<int:user_id>/', delete_availability, name='delete_availability'),
+
 
     path('edit_guest_preferences/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),
-    path('delete_availability/', delete_availability, name='delete_availability'),
     path('all_guests/', all_guests, name='all_guests'),
     path('my_guests/', my_guests, name='my_guests'),
 

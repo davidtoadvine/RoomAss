@@ -50,7 +50,7 @@
                 <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
                   <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Edit</button>
-                  <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}')">Delete</button>
+                  <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Delete</button>
                 </div>
               </div>
             </td>
@@ -211,8 +211,10 @@
 <div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteAvailabilityForm" method="post" action="{% url 'delete_availability' %}"> 
+      <form id="deleteAvailabilityForm" method="post" action="{% if user_id %}{% url 'delete_availability' user_id %}{% else %}#{% endif %}">
         {% csrf_token %}
+        <input type="hidden" name="user_id" id="deleteUserId" value="{{ user_id }}">
+
         <div class="modal-header">
           <h5 class="modal-title">Delete Availability?</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -461,7 +463,7 @@ endDateInput.addEventListener("change", function () {
 });
 
 
-function showDeleteAvailabilityForm(eventId, start, end) {
+function showDeleteAvailabilityForm(eventId, start, end, userId) {
   event.preventDefault();
   // Set the form values
    // Use moment.js to parse the custom date format
@@ -476,6 +478,8 @@ function showDeleteAvailabilityForm(eventId, start, end) {
      $("#deleteStartDate").val(startDate);
      $("#deleteEndDate").val(endDate);
      $("#deleteEventId").val(eventId);
+     $("#editUserId").val(userId);  // Set the user_id in the form
+
   // Show the modal
   $('#deleteAvailabilityModal').modal('show');
 }

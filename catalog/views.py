@@ -49,12 +49,11 @@ def create_availability(request):
         
 @login_required
 def edit_availability(request, user_id):
+    
     if request.method == 'POST':
-        print("edit availability!")
         form = EditAvailabilityForm(request.POST)
         
         if form.is_valid():
-            print("edit avail valid form")
             # Process the form data
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
@@ -129,7 +128,7 @@ def edit_availability(request, user_id):
             
             return redirect('my_room')  # Redirect to a relevant page after saving
         else:
-            # Log form errors for debugging
+            # Log form errors for debugging FIXME this needs to redirect for different user types and print debug?
             return redirect('my_room')  # Redirect to a relevant page after saving
     
     return HttpResponse("Invalid request method", status=405)
@@ -137,7 +136,7 @@ def edit_availability(request, user_id):
 
 
 @login_required
-def delete_availability(request):
+def delete_availability(request, user_id):
     if request.method == 'POST':
         form = DeleteAvailabilityForm(request.POST)
         
@@ -146,7 +145,7 @@ def delete_availability(request):
             avail_event = get_object_or_404(CustomEvent, id=event_id)
             calendar = avail_event.calendar
   
-          # Original availability event's start and end dates
+            # Original availability event's start and end dates
             avail_start_date = avail_event.start
             avail_end_date = avail_event.end
 
@@ -159,19 +158,25 @@ def delete_availability(request):
             ).order_by('start')
 
             for event in occupancy_events:
-              start_date= event.start
-              end_date = event.end
-              owner = request.user
-              handle_reassign(event, start_date, end_date, owner)
-              event.delete()
+                start_date = event.start
+                end_date = event.end
+                owner = request.user
+                handle_reassign(event, start_date, end_date, owner)
+                event.delete()
 
-        avail_event.delete()
+            avail_event.delete()
+
+            if request.user.is_superuser:
+                return redirect('rooms_master_with_user', user_id=user_id)
+                
+            return redirect('my_room')
+        
+        # Handle form invalid case
         if request.user.is_superuser:
-              return redirect('rooms_master')
-        # Redirect to a success page or the same page
+            return redirect('rooms_master_with_user', user_id=user_id)
         return redirect('my_room') 
 
-    return redirect('my_room') 
+    return redirect('my_room')
 
 
 
@@ -780,6 +785,7 @@ def no_room(request):
 def rooms_master(request, user_id=None):
     form = UserSelectForm()
 
+    # Deal with dropdown selection
     # Determine the selected person
     if request.method == 'POST':
         form = UserSelectForm(request.POST)
@@ -788,14 +794,14 @@ def rooms_master(request, user_id=None):
           selected_user = form.cleaned_data['user']
           try:
                 selected_person = selected_user.person
-                print("WE HAVE A SELECTED PERSON")
-                print(selected_person)
+            
                 return redirect('rooms_master_with_user', user_id=selected_user.id)
           except Person.DoesNotExist:
-                print("NO PERSON")
                 # Handle case where user does not have an associated person
                 return redirect('no_person')  # or render a template with an error message
-
+          
+    # load initial page with noone selected
+    # or take the redirect after dropdown selection and pass on context
     else:
         selected_person = None
         if user_id:
