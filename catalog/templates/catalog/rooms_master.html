@@ -16,38 +16,34 @@
   <input type="hidden" name="room_form_submit" value="1">
 </form>
 
-{% if not selected_person and room %}
-
-    <h2>Room Details Test Title</h2>
-    {%endif%}
-{% if selected_person and room %}
-
-    <h2>{{ selected_person.name }}'s Room</h2>
-
+{% if room %}
+    <h2>{{room.name }}</h2>
     <table class="table">
       <tbody>
         <tr>
           <th>
             <div class="flex-container">
               <button class="btn-link"
-              onclick="showFloorplanModal('{{room_image_url }}')">{{ room.owner}}'s Room</button>
-              <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
+              onclick="showFloorplanModal('{{room_image_url }}')">{{ room_name}}</button>
+              <form id="preferenceForm-{{ room_id }}" method="post" action="{% url 'edit_guest_preferences' room_id %}">
                 {% csrf_token %}
                 <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% if room.owner.preference %}
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if room.owner and room.owner.preference %}
                       {{ room.owner.get_preference_display }}
                     {% else %}
                       Select Preference
-                    {% endif %}
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room.owner.id }}">
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room_id }}">
                     {% for value, display in room.owner.Preference.choices %}
-                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
+                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room_id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
+
                   </div>
+                  {% endif %}
+
                 </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
+                <input type="hidden" name="preference" id="preferenceInput-{{ room_id }}">
               </form>
             </div>
           </th>
@@ -58,8 +54,8 @@
               <div class="flex-container">
                 <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
-                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Edit</button>
-                  <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Delete</button>
+                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{room_id}}')">Edit</button>
+                  <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{room_id}}')">Delete</button>
                 </div>
               </div>
             </td>
@@ -105,7 +101,7 @@
         {% endfor %}
         <tr>
           <td>
-            <button type="button" onclick="showAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button>
+            <button type="button" onclick="showCreateAvailabilityForm(event, '{{ room_id }}', '{{ events.room_name }}')">+ Create new availability</button>
           </td>
         </tr>
       </tbody>
@@ -149,7 +145,7 @@
               <div class="flex-container">
                 <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
-                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{user_id}}')">Edit</button>
+                  <button type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{room_id}}')">Edit</button>
                   <button type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}')">Delete</button>
                 </div>
               </div>
@@ -193,7 +189,7 @@
         {% endfor %}
         <tr>
           <td>
-            <button type="button" onclick="showAvailabilityForm(event, '{{ child.room.id }}', '{{ child.name }}', '{{user_id}}')">+ Create new availability</button>
+            <button type="button" onclick="showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{room_name}}')">+ Create new availability</button>
           </td>
         </tr>
       </tbody>
@@ -223,9 +219,9 @@
     console.log("Script loaded!");
   
     document.getElementsByName('user')[0].onchange = function() {
-      const selectedUserId = this.value;
+      const selectedRoomId = this.value;
       const form = document.getElementById('userSelectForm');
-      const url = "{% url 'rooms_master_with_user' 1 %}".replace('1', selectedUserId);
+      const url = "{% url 'rooms_master_with_room' 1 %}".replace('1', selectedRoomId);
       form.action = url;
       form.submit();
     };
@@ -241,20 +237,20 @@
 
 
 /////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////
-  function showAvailabilityForm(event, roomId, name, userId) {
+  function showCreateAvailabilityForm(event, roomId, roomName) {
     event.preventDefault();
     // Set the form values
-    document.getElementById('availabilityRoomId').value = roomId;
-    document.getElementById('availabilityPersonName').innerText = 'Create Availability for ' + name + '\'s Room';
-    $("#createUserId").val(userId);  // Set the user_id in the form
+    document.getElementById('createAvailabilityRoomId').value = roomId;
+    document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + roomName;
+    $("#createAvailabilityRoomId").val(roomId);  // Set the user_id in the form
 
     
     // Show the modal
-    $('#availabilityModal').modal('show');
+    $('#createAvailabilityModal').modal('show');
   }
 
-  function submitAvailabilityForm() {
-    $("#availabilityForm").submit();
+  function submitCreateAvailabilityForm() {
+    $("#createAvailabilityForm").submit();
   }
 
 ////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
@@ -331,7 +327,7 @@ endDateInput.addEventListener("change", function () {
       return false;
   }
    //////////////////////////////////////EDIT AVAILABILITY///////////////////////////////////////////////////////////////////////
-  function showEditAvailabilityForm(eventId, start, end, userId) {
+  function showEditAvailabilityForm(eventId, start, end, roomId) {
     // Prevent default action if needed (e.g., if inside a form submission handler)
     // event.preventDefault();
     
@@ -339,16 +335,13 @@ endDateInput.addEventListener("change", function () {
   const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
   const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
     
-    console.log(eventId)
-    console.log(start)
-    console.log(end)
-    console.log(userId)
+
     
     // Set the form values
     $("#editStartDate").val(startDate);
     $("#editEndDate").val(endDate);
     $("#eventId").val(eventId);
-    $("#editUserId").val(userId);  // Set the user_id in the form
+    $("#editRoomId").val(roomId);  // Set the user_id in the form
   
     // Show the modal
     $('#editAvailabilityModal').modal('show');
@@ -430,28 +423,25 @@ endDateInput.addEventListener("change", function () {
 });
 
 
-function showDeleteAvailabilityForm(eventId, start, end, userId) {
+function showDeleteAvailabilityForm(eventId, start, end, roomId) {
   event.preventDefault();
   // Set the form values
    // Use moment.js to parse the custom date format
    const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
    const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
      
-   console.log(eventId)
-   console.log(start)
-   console.log(end)
      
      // Set the form values
      $("#deleteStartDate").val(startDate);
      $("#deleteEndDate").val(endDate);
      $("#deleteEventId").val(eventId);
-     $("#editUserId").val(userId);  // Set the user_id in the form
+     $("#editRoomId").val(roomId);  // Set the user_id in the form
 
   // Show the modal
   $('#deleteAvailabilityModal').modal('show');
 }
 
-function submitAvailabilityForm() {
+function submitDeleteAvailabilityForm() {
   $("#deleteAvailabilityForm").submit();
 }
 

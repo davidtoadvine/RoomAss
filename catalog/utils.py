@@ -1,5 +1,4 @@
 from catalog.models import Room, Building, Section, Person, CustomEvent
-from catalog.forms import BookingForm, AvailabilityForm, EditAvailabilityForm, GuestPreferencesForm, DateRangeForm, DeleteAvailabilityForm, UserSelectForm
 
 from datetime import timedelta, time
 from django.utils import timezone
@@ -58,12 +57,20 @@ def normalize_time(dt):
 
 
 
-def event_id_to_user_id(event_id):
+def event_id_to_redirect_room_id(event_id):
             occ_event = get_object_or_404(CustomEvent, id = event_id)
-            person = occ_event.calendar.room.owner
-            if person.parent:
+            
+            #for no owner
+            room_id = occ_event.calendar.room.id
+
+            #for owned room, check if kid
+            if occ_event.calendar.room.owner:
+              person = occ_event.calendar.room.owner
+              if person.parent:
                 person = person.parent
-            return person.user.id
+              room_id = person.room.id
+            
+            return room_id
 
 
 

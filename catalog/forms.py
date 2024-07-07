@@ -58,7 +58,7 @@ class DateRangeForm(forms.Form):
     guest_type = forms.ChoiceField(choices=GUEST_TYPE_CHOICES, required=True, initial=2)
 
 
-class AvailabilityForm(forms.Form):
+class CreateAvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     room_id = forms.IntegerField(widget=forms.HiddenInput())

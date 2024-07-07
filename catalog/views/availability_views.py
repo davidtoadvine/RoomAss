@@ -1,5 +1,5 @@
 from catalog.models import Room, CustomEvent, Person
-from catalog.forms import  AvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
+from catalog.forms import  CreateAvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
 from catalog.utils import date_to_aware_datetime, merge_overlapping_events, handle_reassign
 
 
@@ -12,9 +12,9 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required
-def create_availability(request, user_id):
+def create_availability(request, room_id):
       if request.method == 'POST':
-        form = AvailabilityForm(request.POST)
+        form = CreateAvailabilityForm(request.POST)
 
         if form.is_valid():
             # Process the form data
@@ -34,22 +34,22 @@ def create_availability(request, user_id):
                     end=end_date,
                     title= f"Availability, {request.user}",
                     description = "Meaningful Description",
-                    creator = room.owner.user
+                    creator = request.user
                 )
             availability_event.save()
             merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
 
             if request.user.is_superuser:
-              return redirect('rooms_master_with_user', user_id = user_id)
+              return redirect('rooms_master_with_room', room_id = room_id)
             return redirect('my_room')
         
         # Handle form invalid case
         if request.user.is_superuser:
-            return redirect('rooms_master_with_user', user_id=user_id)
+            return redirect('rooms_master_with_room', room_id=room_id)
         return redirect('my_room')
         
 @login_required
-def edit_availability(request, user_id):
+def edit_availability(request, room_id):
     
     if request.method == 'POST':
         form = EditAvailabilityForm(request.POST)
@@ -122,18 +122,18 @@ def edit_availability(request, user_id):
                   occ_event.delete()
 
             if request.user.is_superuser:
-              return redirect('rooms_master_with_user', user_id = user_id)
+              return redirect('rooms_master_with_room', room_id = room_id)
             
             return redirect('my_room')  # Redirect to a relevant page after saving
         # Handle form invalid case
         if request.user.is_superuser:
-            return redirect('rooms_master_with_user', user_id=user_id)
+            return redirect('rooms_master_with_room', room_id=room_id)
         return redirect('my_room')
     
     return HttpResponse("Invalid request method", status=405)
 
 @login_required
-def delete_availability(request, user_id):
+def delete_availability(request, room_id):
     if request.method == 'POST':
         form = DeleteAvailabilityForm(request.POST)
         
@@ -164,13 +164,13 @@ def delete_availability(request, user_id):
             avail_event.delete()
 
             if request.user.is_superuser:
-                return redirect('rooms_master_with_user', user_id=user_id)
+                return redirect('rooms_master_with_room', room_id=room_id)
                 
             return redirect('my_room')
         
         # Handle form invalid case
         if request.user.is_superuser:
-            return redirect('rooms_master_with_user', user_id=user_id)
+            return redirect('rooms_master_with_room', room_id=room_id)
         return redirect('my_room') 
 
     return redirect('my_room')
@@ -183,7 +183,7 @@ def edit_guest_preferences(request, person_id):
     redirect_person = person
     if redirect_person.parent:
       redirect_person = redirect_person.parent
-    user_id = redirect_person.user.id
+    room_id = redirect_person.room.id
 
     if request.method == 'POST':
       
@@ -192,7 +192,7 @@ def edit_guest_preferences(request, person_id):
             form.save()
 
             if request.user.is_superuser:
-              return redirect('rooms_master_with_user', user_id=user_id)
+              return redirect('rooms_master_with_room', room_id=room_id)
             return redirect('my_room') 
         
     # FIXME unsure if what is below here ever happens

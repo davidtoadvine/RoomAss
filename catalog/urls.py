@@ -13,15 +13,13 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', home, name='home'),  # Home page
-    # path('buildings/', views.building_list, name='building_list'),
-    # path('buildings/<int:building_id>/', views.building_detail, name='building_detail'),
-    # path('sections/<int:section_id>/', views.section_detail, name='section_detail'),
+    
     path('my_room/', my_room, name='my_room'),
     path('create_booking/', create_booking, name='create_booking'),
 
-    path('create_availability/<int:user_id>/', create_availability, name='create_availability'),
-    path('edit_availability/<int:user_id>/', edit_availability, name='edit_availability'),
-    path('delete_availability/<int:user_id>/', delete_availability, name='delete_availability'),
+    path('create_availability/<int:room_id>/', create_availability, name='create_availability'),
+    path('edit_availability/<int:room_id>/', edit_availability, name='edit_availability'),
+    path('delete_availability/<int:room_id>/', delete_availability, name='delete_availability'),
 
     path('edit_guest_preferences/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),
 
@@ -33,11 +31,12 @@ urlpatterns = [
     path('shorten_booking/<int:event_id>/', shorten_booking, name='shorten_booking'),
     path('extend_conflict/', extend_conflict, name='extend_conflict'),
     path('no_room/', no_room, name='no_room'),
-    path('rooms_master/', rooms_master, name='rooms_master'),
-    path('rooms_master/<int:user_id>/', rooms_master, name='rooms_master_with_user'),
 
-        path('rooms_master/room/<int:room_id>/', rooms_master, name='rooms_master_with_room'),  # New URL pattern for rooms without owners
-        
+    path('rooms_master/', rooms_master, name='rooms_master'),
+    path('rooms_master/<int:room_id>/', rooms_master, name='rooms_master_with_room'),
+
+        # path('rooms_master/room/<int:room_id>/', rooms_master, name='rooms_master_with_room'),  # New URL pattern for rooms without owners
+
     path('no_person/', no_person, name='no_person'),
 ]
 
