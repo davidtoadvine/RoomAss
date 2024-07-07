@@ -697,15 +697,20 @@ def my_guests(request):
 def delete_event(request, event_id):
     event = get_object_or_404(CustomEvent, id=event_id)
 
+    redirect_user_id = event_id_to_user_id(event_id)
+
+
     if event.creator != request.user:
         return HttpResponseForbidden("You are not allowed to delete this event.")
 
     if request.method == 'POST':
         event.delete()
         if request.user.is_superuser:
-            return redirect('rooms_master')
+              return redirect('rooms_master_with_user', user_id = redirect_user_id)
         return redirect('my_guests')
-
+    # unsure if needed / when is this a GET?
+    if request.user.is_superuser:
+              return redirect('rooms_master_with_user', user_id = redirect_user_id)
     return render(request, 'catalog/delete_event.html', {'event': event})
 
 @login_required
@@ -716,6 +721,9 @@ def extend_booking(request, event_id):
             event_id = form.cleaned_data['event_id']
             new_start_date = form.cleaned_data['start_date']
             new_end_date = form.cleaned_data['end_date']
+
+            redirect_user_id = event_id_to_user_id(event_id)
+
 
             # Convert dates to datetime objects with specific time (around noon)
             new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
@@ -749,10 +757,10 @@ def extend_booking(request, event_id):
                 return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end})
             else:
               if request.user.is_superuser:
-                  return redirect('rooms_master')
+                  return redirect('rooms_master_with_user', user_id = redirect_user_id)
               return redirect('my_guests')  # Redirect to the appropriate page after saving
     if request.user.is_superuser:
-                  return redirect('rooms_master')
+                  return redirect('rooms_master_with_user', user_id = redirect_user_id)
     return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
 
@@ -764,6 +772,9 @@ def shorten_booking(request, event_id):
             event_id = form.cleaned_data['event_id']
             new_start_date = form.cleaned_data['start_date']
             new_end_date = form.cleaned_data['end_date']
+
+            
+            redirect_user_id = event_id_to_user_id(event_id)
 
             # Convert dates to datetime objects with specific time (around noon)
             new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
@@ -782,10 +793,10 @@ def shorten_booking(request, event_id):
             event.end = new_end_date
             event.save()
             if request.user.is_superuser:
-                  return redirect('rooms_master')
+                  return redirect('rooms_master_with_user', user_id = redirect_user_id)
             return redirect('my_guests')  # Redirect to the appropriate page after saving
   if request.user.is_superuser:
-                  return redirect('rooms_master')
+                  return redirect('rooms_master_with_user', user_id = redirect_user_id)
   return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
 def extend_conflict(request):
@@ -877,3 +888,14 @@ def rooms_master(request, user_id=None):
 @login_required
 def no_person(request):
     return render(request, 'catalog/no_person.html')
+
+
+
+
+
+def event_id_to_user_id(event_id):
+            occ_event = get_object_or_404(CustomEvent, id = event_id)
+            person = occ_event.calendar.room.owner
+            if person.parent:
+                person = person.parent
+            return person.user.id
