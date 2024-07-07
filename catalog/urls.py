@@ -10,7 +10,6 @@ urlpatterns = [
     # path('buildings/<int:building_id>/', views.building_detail, name='building_detail'),
     # path('sections/<int:section_id>/', views.section_detail, name='section_detail'),
     path('my_room/', views.my_room, name='my_room'),
-    path('persons/<int:person_id>/', views.person_detail, name='person_detail'),
     path('create_booking/', create_booking, name='create_booking'),
 
         path('create_availability/<int:user_id>/', create_availability, name = 'create_availability'),
@@ -18,7 +17,7 @@ urlpatterns = [
         path('delete_availability/<int:user_id>/', delete_availability, name='delete_availability'),
 
     path('edit_guest_preferences/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),
-    
+
     path('all_guests/', all_guests, name='all_guests'),
     path('my_guests/', my_guests, name='my_guests'),
 
