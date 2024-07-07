@@ -6,11 +6,24 @@
 <h1>Rooms Master</h1>
 <form id="userSelectForm" method="post">
   {% csrf_token %}
-  {{ form.user.label_tag }} {{ form.user }}
+  {{ user_form.user.label_tag }} {{ user_form.user }}
+  <input type="hidden" name="user_form_submit" value="1">
 </form>
 
+<form id="roomSelectForm" method="post">
+  {% csrf_token %}
+  {{ room_form.room.label_tag }} {{ room_form.room }}
+  <input type="hidden" name="room_form_submit" value="1">
+</form>
+
+{% if not selected_person and room %}
+
+    <h2>Room Details Test Title</h2>
+    {%endif%}
 {% if selected_person and room %}
+
     <h2>{{ selected_person.name }}'s Room</h2>
+
     <table class="table">
       <tbody>
         <tr>
@@ -206,17 +219,25 @@
   console.log("Script loaded!");
 
 
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("Script loaded!");
   
-// Use the correct ID for the select element
-document.getElementsByName('user')[0].onchange = function() {
-  const selectedUserId = this.value;
-  const form = document.getElementById('userSelectForm');
-  const url = "{% url 'rooms_master' %}" + selectedUserId + "/";
-  form.action = url;
-  form.submit();
-};
-
-
+    document.getElementsByName('user')[0].onchange = function() {
+      const selectedUserId = this.value;
+      const form = document.getElementById('userSelectForm');
+      const url = "{% url 'rooms_master_with_user' 1 %}".replace('1', selectedUserId);
+      form.action = url;
+      form.submit();
+    };
+  
+    document.getElementsByName('room')[0].onchange = function() {
+      const selectedRoomId = this.value;
+      const form = document.getElementById('roomSelectForm');
+      const url = "{% url 'rooms_master_with_room' 1 %}".replace('1', selectedRoomId);
+      form.action = url;
+      form.submit();
+    };
+  });
 
 
 /////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////

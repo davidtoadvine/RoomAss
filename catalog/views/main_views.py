@@ -1,4 +1,4 @@
-from catalog.forms import DateRangeForm, UserSelectForm
+from catalog.forms import DateRangeForm, UserSelectForm, RoomSelectForm
 from catalog.models import CustomEvent, Room, Person
 
 from catalog.utils import date_to_aware_datetime
@@ -192,45 +192,69 @@ def my_guests(request):
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
-def rooms_master(request, user_id=None):
-    form = UserSelectForm()
+def rooms_master(request, user_id=None, room_id=None):
+    user_form = UserSelectForm()
+    room_form = RoomSelectForm()
 
-    # Deal with dropdown selection
-    # Determine the selected person
+    selected_person = None
+    selected_room = None
+
     if request.method == 'POST':
-        form = UserSelectForm(request.POST)
+        print("POST request received")
+        if 'user_form_submit' in request.POST:
+            print("User form submitted")
+            user_form = UserSelectForm(request.POST)
+            if user_form.is_valid():
+                selected_user = user_form.cleaned_data['user']
+                try:
+                    selected_person = selected_user.person
+                    return redirect('rooms_master_with_user', user_id=selected_user.id)
+                except Person.DoesNotExist:
+                    return redirect('no_person')
+            else:
+                print("User form is not valid")
+        elif 'room_form_submit' in request.POST:
+            print("Room form submitted")
+            room_form = RoomSelectForm(request.POST)
+            if room_form.is_valid():
+                selected_room = room_form.cleaned_data['room']
+                return redirect('rooms_master_with_room', room_id=selected_room.id)
+            else:
+                print("Room form is not valid")
+        else:
+            print("No form identified in POST request")
+            return redirect('rooms_master')
 
-        if form.is_valid():
-          selected_user = form.cleaned_data['user']
-          try:
-                selected_person = selected_user.person
-            
-                return redirect('rooms_master_with_user', user_id=selected_user.id)
-          except Person.DoesNotExist:
-                # Handle case where user does not have an associated person
-                return redirect('no_person')  # or render a template with an error message
-          
-    # load initial page with noone selected
-    # or take the redirect after dropdown selection and pass on context
-    else:
-        selected_person = None
-        if user_id:
-            user = get_object_or_404(User, id=user_id)
-            selected_person = get_object_or_404(Person, user=user)
-        
-        context = {
-            'form': form,
-            'selected_person': selected_person,
-            'user_id': user_id,
-        }
-        
-        if selected_person and hasattr(selected_person, 'room'):
-            room = selected_person.room
-            calendar = room.calendar
+    if user_id:
+        user = get_object_or_404(User, id=user_id)
+        selected_person = get_object_or_404(Person, user=user)
+        if hasattr(selected_person, 'room'):
+            selected_room = selected_person.room
+    elif room_id:
+        selected_room = get_object_or_404(Room, id=room_id)
 
-            availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
-            occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
+    context = {
+        'user_form': user_form,
+        'room_form': room_form,
+        'selected_person': selected_person,
+        'room': selected_room,
+        'user_id': user_id,
+        'room_id': room_id,
+    }
 
+    if selected_room:
+        calendar = selected_room.calendar
+        availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
+        occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
+
+        context.update({
+            'room': selected_room,
+            'room_image_url': selected_room.image.url if selected_room.image else '',
+            'availability_events': availability_events,
+            'occupancy_events': occupancy_events,
+        })
+
+        if selected_person:
             children = selected_person.children.all()
             children_events = {}
 
@@ -244,8 +268,6 @@ def rooms_master(request, user_id=None):
                         'availability': child_availability_events,
                         'occupancy': child_occupancy_events,
                         'room_image_url': child_room.image.url if child_room.image else '',
-
-                        
                     }
 
             local_now = timezone.localtime(timezone.now())
@@ -253,8 +275,6 @@ def rooms_master(request, user_id=None):
             dayafter = tomorrow + timedelta(days=1)
 
             context.update({
-                'room': room,
-                'room_image_url': room.image.url if room.image else '',
                 'availability_events': availability_events,
                 'occupancy_events': occupancy_events,
                 'children_events': children_events,
@@ -263,6 +283,4 @@ def rooms_master(request, user_id=None):
                 'end_date': dayafter.strftime('%Y-%m-%d'),
             })
 
-        return render(request, 'catalog/rooms_master.html', context)
-    
-    
+    return render(request, 'catalog/rooms_master.html', context)

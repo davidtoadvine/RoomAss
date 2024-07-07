@@ -35,6 +35,9 @@ urlpatterns = [
     path('no_room/', no_room, name='no_room'),
     path('rooms_master/', rooms_master, name='rooms_master'),
     path('rooms_master/<int:user_id>/', rooms_master, name='rooms_master_with_user'),
+
+        path('rooms_master/room/<int:room_id>/', rooms_master, name='rooms_master_with_room'),  # New URL pattern for rooms without owners
+        
     path('no_person/', no_person, name='no_person'),
 ]
 
