@@ -1,4 +1,3 @@
-<!-- rooms_master_occupancy_modals.html -->
 
 <!-- Extend Booking Modal -->
 <div class="modal fade" id="extendModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="extendModalLabel-{{ o_event.id }}" aria-hidden="true">
@@ -68,7 +67,7 @@
 <div class="modal fade" id="deleteModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteEventForm-{{ o_event.id }}" method="post" action="{% if o_event.id %}{% url 'delete_event' o_event.id %}{% else %}#{% endif %}">
+      <form id="deleteEventForm-{{ o_event.id }}" method="post" action="{% if o_event.id %}{% url 'delete_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="deleteModalLabel-{{ o_event.id }}">Delete Event?</h5>

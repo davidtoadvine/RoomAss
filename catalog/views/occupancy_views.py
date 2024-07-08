@@ -8,7 +8,6 @@ from datetime import datetime
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseForbidden
 
 
 
@@ -65,7 +64,7 @@ def create_booking(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.delete_customevent'))
 # used for occupany events at least
-def delete_event(request, event_id):
+def delete_booking(request, event_id):
     event = get_object_or_404(CustomEvent, id=event_id)
 
     redirect_room_id = event_id_to_redirect_room_id(event_id)
@@ -77,7 +76,7 @@ def delete_event(request, event_id):
               return redirect('rooms_master_with_room', room_id = redirect_room_id)
         return redirect('my_guests')
         # Render a confirmation page for GET request, if needed
-    return render(request, 'catalog/delete_event.html', {'event': event})
+    return render(request, 'catalog/delete_booking.html', {'event': event})
 
 @login_required
 def extend_booking(request, event_id):

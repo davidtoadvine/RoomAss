@@ -4,7 +4,7 @@ from catalog.views.main_views import (
     rooms_master, my_guests, my_room
 )
 from catalog.views.occupancy_views import(
-    delete_event, extend_booking, shorten_booking, extend_conflict,create_booking,
+    delete_booking, extend_booking, shorten_booking, extend_conflict,create_booking,
 )
 from catalog.views.availability_views import( create_availability, edit_availability, delete_availability,edit_guest_preferences)
 from catalog.views.error_views import (no_room, no_person)
@@ -26,7 +26,7 @@ urlpatterns = [
     path('all_guests/', all_guests, name='all_guests'),
     path('my_guests/', my_guests, name='my_guests'),
 
-    path('delete_event/<int:event_id>/', delete_event, name='delete_event'),
+    path('delete_booking/<int:event_id>/', delete_booking, name='delete_booking'),
     path('extend_booking/<int:event_id>/', extend_booking, name='extend_booking'),
     path('shorten_booking/<int:event_id>/', shorten_booking, name='shorten_booking'),
     path('extend_conflict/', extend_conflict, name='extend_conflict'),

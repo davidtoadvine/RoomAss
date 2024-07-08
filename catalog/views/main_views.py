@@ -174,8 +174,10 @@ def my_guests(request):
             'creator': event.creator,
             'start': event.start,
             'end': event.end,
+            'last_available': event.calendar.room.get_last_available_date(event.end),
             'room_info': None,
             'image_url': event.calendar.room.image.url if event.calendar.room.image else '',  # Store the image URL for each event
+
         }
         print(event_info)
         if event.calendar.room.owner:
@@ -244,6 +246,11 @@ def rooms_master(request, room_id=None):
               room_name = f"{selected_person}'s room"
               print(room_name)
       print('end')
+
+      local_now = timezone.localtime(timezone.now())
+      tomorrow = local_now.date() + timedelta(days=1)
+      dayafter = tomorrow + timedelta(days=1)
+  
   
       context = {
           'user_form': user_form,
@@ -252,6 +259,8 @@ def rooms_master(request, room_id=None):
           'room': selected_room,
           'room_name': room_name,
           'room_id': room_id,
+          'start_date': tomorrow.strftime('%Y-%m-%d'),
+          'end_date': dayafter.strftime('%Y-%m-%d'),
       }
   
       if selected_room:
@@ -284,17 +293,13 @@ def rooms_master(request, room_id=None):
                           'room_name': f"{child.name}'s Room"
                       }
   
-              local_now = timezone.localtime(timezone.now())
-              tomorrow = local_now.date() + timedelta(days=1)
-              dayafter = tomorrow + timedelta(days=1)
-  
+             
               context.update({
                   'availability_events': availability_events,
                   'occupancy_events': occupancy_events,
                   'children_events': children_events,
                   'children': children,
-                  'start_date': tomorrow.strftime('%Y-%m-%d'),
-                  'end_date': dayafter.strftime('%Y-%m-%d'),
+                 
               })
   
       return render(request, 'catalog/rooms_master.html', context)

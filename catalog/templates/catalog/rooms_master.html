@@ -98,7 +98,7 @@
               </td>
               </tr>
             {% endif %}
-            {% include "rooms_master_occ_modals.html" %}
+            {% include "occupation_modals.html" %}
           {% endfor %}
         {% endfor %}
 
@@ -188,7 +188,7 @@
               </td>
               </tr>
             {% endif %}
-            {% include "rooms_master_occ_modals.html" %}
+            {% include "occupation_modals.html" %}
           {% endfor %}
         {% endfor %}
         <tr>
@@ -210,9 +210,8 @@
 
 {% endif %}
 
-{%include "rooms_master_avail_modals.html"%}
-{%include "rooms_master_floorplan_modal.html"%}
-
+{%include "availability_modals.html"%}
+{%include "floorplan_img_modal.html"%}
 
 <script>
   // Ensure the script is loaded
