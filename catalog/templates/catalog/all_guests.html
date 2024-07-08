@@ -13,6 +13,9 @@
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Location</th>
+                {% if request.user.is_superuser%}
+                <th></th>
+                {%endif%}
             </tr>
         </thead>
         <tbody>
@@ -26,7 +29,22 @@
                     <td><button class="btn-link"
                       data-toggle="modal" 
                       data-target="#floorplanModal" 
-                    >{{event.room_name}}</button></td>
+                    >{{event.room_name}}</button>
+                    </td>
+
+
+                    {% if request.user.is_superuser%}
+                <td>
+                    <button class="btn"
+                    onclick="window.location.href='{% url 'rooms_master_with_room' event.room_id %}'">
+                Link to Rooms Master
+            </button>
+          </td>
+                  
+                  
+                  
+                  
+                {%endif%}
                   
                 </tr>
                 {% endfor %}

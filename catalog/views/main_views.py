@@ -102,6 +102,7 @@ def all_guests(request):
             'start': event.start,
             'end': event.end,
             'room_name': None,
+            'room_id': event.calendar.room.id
         }
         if event.calendar.room.owner:
             event_info['room_name'] = str( event.calendar.room.section) + f" / {event.calendar.room.owner}'s room"
