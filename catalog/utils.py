@@ -153,7 +153,7 @@ def create_stopgap_booking(room, event, start_date, end_date, guest_type, guest_
                               event_type='occupancy',
                               start=start_date,
                               end=end_date,
-                              title= f"Auto Booking: {guest_name} hosted by {str(event.creator)}",
+                              title= f"Booking: {guest_name} hosted by {str(event.creator)}",
                               description = "Meaningful Description",
                               creator = event.creator,
                               guest_type = guest_type,
