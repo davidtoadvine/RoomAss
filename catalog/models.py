@@ -46,7 +46,7 @@ class Section(models.Model):
   offline = models.BooleanField(default=False)
 
   def __str__(self):
-    return f"{self.building.name} / {self.name} Section"
+    return f"{self.building.name} / {self.name}"
 
 class Room(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='rooms')
@@ -57,7 +57,7 @@ class Room(models.Model):
     offline = models.BooleanField(default=False)
   
     def __str__(self):
-        return f"{self.section.building.name} Section {self.section.name} Room {self.number}"
+        return f"{self.section.building.name} / {self.section.name} / {self.number}"
 
     def is_available(self, start_date, end_date):
         if not self.calendar:

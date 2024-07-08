@@ -25,13 +25,12 @@
             <div class="flex-container">
               <button class="btn-link"
               onclick="showFloorplanModal('{{room_image_url }}')">{{ room_name}}</button>
+              {%if room.owner%}
               <form id="preferenceForm-{{ room_id }}" method="post" action="{% url 'edit_guest_preferences' room_id %}">
                 {% csrf_token %}
                 <div class="dropdown">
                   <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% if room.owner and room.owner.preference %}
                       {{ room.owner.get_preference_display }}
-                    {% else %}
                       Select Preference
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room_id }}">
@@ -40,11 +39,14 @@
                     {% endfor %}
 
                   </div>
-                  {% endif %}
+                  
 
                 </div>
                 <input type="hidden" name="preference" id="preferenceInput-{{ room_id }}">
               </form>
+              {%else%}
+                  <button class ="btn-secondary"> Anyone can stay here</button>
+              {%endif%}
             </div>
           </th>
         </tr>

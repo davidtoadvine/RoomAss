@@ -101,12 +101,12 @@ def all_guests(request):
             'creator': event.creator,
             'start': event.start,
             'end': event.end,
-            'room_info': None,
+            'room_name': None,
         }
         if event.calendar.room.owner:
-            event_info['room_info'] = f"{event.calendar.room.owner}'s room, {event.calendar.room.section.building}"
+            event_info['room_name'] = str( event.calendar.room.section) + f" / {event.calendar.room.owner}'s room"
         else:
-            event_info['room_info'] = f"Room #{event.calendar.room.number}, {event.calendar.room.section.building}"
+            event_info['room_name'] = str(event.calendar.room)
         processed_events.append(event_info)
 
     context = {
