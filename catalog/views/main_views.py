@@ -146,6 +146,7 @@ def my_room(request):
 
     context = {
         'room': room,
+        'room_id':room.id,
         'availability_events': availability_events,
         'occupancy_events': occupancy_events,
         'children_events': children_events,

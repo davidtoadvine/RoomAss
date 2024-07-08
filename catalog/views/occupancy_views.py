@@ -121,7 +121,7 @@ def extend_booking(request, event_id):
               conflict = True
 
             if conflict:
-                return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end, 'redirect_user_id':redirect_room_id})
+                return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end, 'redirect_room_id':redirect_room_id})
             else:
               if request.user.is_superuser:
                   return redirect('rooms_master_with_room', room_id = redirect_room_id)
