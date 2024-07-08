@@ -66,7 +66,7 @@
     {% endfor %}
     
       <tr>
-        <td ><button type = "submit" onclick = "showAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button></td>
+        <td ><button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button></td>
       </tr>
   </tbody>
 </table>
@@ -129,18 +129,19 @@
       {% endfor %}
       
       <tr>
-        <td ><button type = "submit" onclick = "showAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button></td>
+        <td ><button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button></td>
       </tr>
   </tbody>
 </table>
 {% endfor %}
 
+{% include "rooms_master_avail_modals.html" %}
 {% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
 <!-- Create Availability Modal -->
-<div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+{% comment %} <div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="availabilityForm" method="post" action="{% url 'create_availability' request.user.id %}"> 
+      <form id="availabilityForm" method="post" action="{% url 'create_availability' room_id %}"> 
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id ="availabilityPersonName"></h5>
@@ -173,10 +174,9 @@
 <div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' request.user.id %}"> 
+      <form id="editAvailabilityForm" method="post" action="{% url 'edit_availability' room_id %}"> 
         {% csrf_token %}
-        {% comment %} <input type="hidden" name="user_id" id="editUserId" value="{{ request.user.id }}"> {% endcomment %}
-
+        {% comment %} <input type="hidden" name="user_id" id="editUserId" value="{{ request.user.id }}">
         <div class="modal-header">
           <h5 class="modal-title" >Edit Availability</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -236,22 +236,22 @@
       </form>
     </div>
   </div>
-</div>
+</div> {% endcomment %}
 
 <script>
 /////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////
-  function showAvailabilityForm(event, roomId, name) {
+  function showCreateAvailabilityForm(event, roomId, name) {
     event.preventDefault();
     // Set the form values
-    document.getElementById('availabilityRoomId').value = roomId;
-    document.getElementById('availabilityPersonName').innerText = 'Create Availability for ' + name + '\'s Room';
+    document.getElementById('createAvailabilityRoomId').value = roomId;
+    document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + name + '\'s Room';
     
     // Show the modal
-    $('#availabilityModal').modal('show');
+    $('#createAvailabilityModal').modal('show');
   }
 
   function submitAvailabilityForm() {
-    $("#availabilityForm").submit();
+    $("#createAvailabilityForm").submit();
   }
 
 ////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////

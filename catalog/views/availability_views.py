@@ -16,6 +16,8 @@ def create_availability(request, room_id):
       if request.method == 'POST':
         form = CreateAvailabilityForm(request.POST)
 
+        redirect_room_id = room_id
+
         if form.is_valid():
             # Process the form data
             start_date = form.cleaned_data['start_date']
@@ -40,12 +42,12 @@ def create_availability(request, room_id):
             merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
 
             if request.user.is_superuser:
-              return redirect('rooms_master_with_room', room_id = room_id)
+              return redirect('rooms_master_with_room', room_id = redirect_room_id)
             return redirect('my_room')
         
         # Handle form invalid case
         if request.user.is_superuser:
-            return redirect('rooms_master_with_room', room_id=room_id)
+            return redirect('rooms_master_with_room', room_id=redirect_room_id)
         return redirect('my_room')
         
 @login_required
