@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 def create_booking(request):
 
     if request.method == 'POST':
+        
         form = BookingForm(request.POST)
 
         if form.is_valid():
@@ -71,8 +72,9 @@ def delete_booking(request, event_id):
 
 
     if request.method == 'POST':
+        source_page = request.POST.get('source_page', 'my_guests')
         event.delete()
-        if request.user.is_superuser:
+        if source_page == 'rooms_master':
               return redirect('rooms_master_with_room', room_id = redirect_room_id)
         return redirect('my_guests')
         # Render a confirmation page for GET request, if needed
@@ -81,6 +83,8 @@ def delete_booking(request, event_id):
 @login_required
 def extend_booking(request, event_id):
     if request.method == 'POST':
+        source_page = request.POST.get('source_page', 'my_guests')
+
         form = EditAvailabilityForm(request.POST)
         if form.is_valid():
             event_id = form.cleaned_data['event_id']
@@ -120,9 +124,9 @@ def extend_booking(request, event_id):
               conflict = True
 
             if conflict:
-                return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end, 'redirect_room_id':redirect_room_id})
+                return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end, 'redirect_room_id':redirect_room_id, 'source_page':source_page})
             else:
-              if request.user.is_superuser:
+              if source_page == 'rooms_master':
                   return redirect('rooms_master_with_room', room_id = redirect_room_id)
               return redirect('my_guests')  # Redirect to the appropriate page after saving
     if request.user.is_superuser:
@@ -133,6 +137,8 @@ def extend_booking(request, event_id):
 @login_required
 def shorten_booking(request, event_id):
   if request.method == 'POST':
+        source_page = request.POST.get('source_page', 'my_guests')
+
         form = EditAvailabilityForm(request.POST)
         if form.is_valid():
             event_id = form.cleaned_data['event_id']
@@ -159,7 +165,7 @@ def shorten_booking(request, event_id):
         
             event.end = new_end_date
             event.save()
-            if request.user.is_superuser:
+            if source_page == "rooms_master":
                   return redirect('rooms_master_with_room', room_id = redirect_room_id)
             return redirect('my_guests')  # Redirect to the appropriate page after saving
   if request.user.is_superuser:

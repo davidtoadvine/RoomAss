@@ -92,10 +92,10 @@ def home(request):
 
 
 def all_guests(request):
-    occupation_events = CustomEvent.objects.filter(event_type='occupancy')
+    occupancy_events = CustomEvent.objects.filter(event_type='occupancy')
 
     processed_events = []
-    for event in occupation_events:
+    for event in occupancy_events:
         event_info = {
             'guest_name': event.guest_name,
             'creator': event.creator,
@@ -110,7 +110,7 @@ def all_guests(request):
         processed_events.append(event_info)
 
     context = {
-        'occupation_events': processed_events,
+        'occupancy_events': processed_events,
     }
     return render(request, 'catalog/all_guests.html', context)
 
@@ -163,11 +163,11 @@ def my_room(request):
 
 @login_required
 def my_guests(request):
-    occupation_events = CustomEvent.objects.filter(event_type='occupancy', creator=request.user)
+    occupancy_events = CustomEvent.objects.filter(event_type='occupancy', creator=request.user)
 
     processed_events = []
 
-    for event in occupation_events:
+    for event in occupancy_events:
         event_info = {
             'id': event.id,
             'guest_name': event.guest_name,
@@ -188,7 +188,8 @@ def my_guests(request):
 
 
     context = {
-        'occupation_events': processed_events,
+        'occupancy_events': processed_events,
+        'source_page': 'my_guests'
     }
     return render(request, 'catalog/my_guests.html', context)
 
@@ -261,6 +262,7 @@ def rooms_master(request, room_id=None):
           'room_id': room_id,
           'start_date': tomorrow.strftime('%Y-%m-%d'),
           'end_date': dayafter.strftime('%Y-%m-%d'),
+          'source_page': 'rooms_master'
       }
   
       if selected_room:

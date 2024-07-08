@@ -16,12 +16,12 @@
             </tr>
         </thead>
         <tbody>
-            {% if not occupation_events %}
+            {% if not occupancy_events %}
                 <tr>
                     <td colspan="6">No guests currently booked.</td>
                 </tr>
             {% else %}
-                {% for o_event in occupation_events %}
+                {% for o_event in occupancy_events %}
                 <tr>
                     <td>{{ o_event.guest_name }}</td>
                     <td>{{ o_event.start|date:"F d" }}</td>
@@ -68,7 +68,7 @@
                     </td>
                 </tr>
 
-{%include "occupation_modals.html"%}
+{%include "occupancy_modals.html"%}
 {%include "floorplan_img_modal.html"%}
 
 {% endfor %}

@@ -5,6 +5,7 @@
     <div class="modal-content">
       <form id="extendForm-{{ o_event.id }}" method="post" action="{% if o_event.id %}{% url 'extend_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
+        <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
           <h5 class="modal-title" id="extendModalLabel-{{ o_event.id }}">Extend Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -37,6 +38,7 @@
     <div class="modal-content">
       <form id="shortenForm-{{ o_event.id }}" method="post" action="{% if o_event.id %}{% url 'shorten_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
+        <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
           <h5 class="modal-title" id="shortenModalLabel-{{ o_event.id }}">Shorten Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -69,6 +71,7 @@
     <div class="modal-content">
       <form id="deleteEventForm-{{ o_event.id }}" method="post" action="{% if o_event.id %}{% url 'delete_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
+        <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
           <h5 class="modal-title" id="deleteModalLabel-{{ o_event.id }}">Delete Event?</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
