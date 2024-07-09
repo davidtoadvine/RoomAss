@@ -46,6 +46,7 @@ class Section(models.Model):
   building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name='sections')
   name = models.CharField(max_length=255)
   is_offline = models.BooleanField(default=False)
+  image = models.ImageField(upload_to='room_images/', null=True, blank=True)
 
   def __str__(self):
     return f"{self.building.name} / {self.name}"

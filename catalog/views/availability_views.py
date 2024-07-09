@@ -4,7 +4,7 @@ from catalog.utils import date_to_aware_datetime, merge_overlapping_events, hand
 
 
 from django.shortcuts import  get_object_or_404, redirect, render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 
 from django.contrib.auth.decorators import login_required
 
@@ -24,6 +24,9 @@ def create_availability(request, room_id):
             end_date = form.cleaned_data['end_date']
             room_id = form.cleaned_data['room_id']
             room = get_object_or_404(Room, id=room_id)
+
+            if room.is_offline:
+              return HttpResponseForbidden("You cannot create availability for an offline room.")
 
             # Make timezone aware datetime object with time of day
             start_date = date_to_aware_datetime(start_date, 11,59)
@@ -160,7 +163,7 @@ def delete_availability(request, room_id):
                 start_date = event.start
                 end_date = event.end
                 room = event.calendar.room
-                
+
                 owner = 'Twin Oaks'
                 if room.owner:
                   owner = room.owner

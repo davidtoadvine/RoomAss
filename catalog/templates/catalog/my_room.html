@@ -66,7 +66,15 @@
     {% endfor %}
     
       <tr>
-        <td ><button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button></td>
+        <td >
+
+          {% if room.is_offline%}
+          <p>Room Is Offline</p>
+          {%else%}
+          <button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button>
+        {% endif%}
+
+      </td>
       </tr>
   </tbody>
 </table>
@@ -129,7 +137,15 @@
       {% endfor %}
       
       <tr>
-        <td ><button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button></td>
+        <td >
+          
+          {% if room.is_offline%}
+          <p>Room Is Offline</p>
+          {%else%}
+          <button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button>
+        {% endif%}
+        
+        </td>
       </tr>
   </tbody>
 </table>
@@ -140,11 +156,11 @@
 
 <script>
 /////////////////////////////////CREATE AVAILABILITY///////////////////////////////////////////////////////////////////////
-  function showCreateAvailabilityForm(event, roomId, name) {
+  function showCreateAvailabilityForm(event, roomId, owner) {
     event.preventDefault();
     // Set the form values
     document.getElementById('createAvailabilityRoomId').value = roomId;
-    document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + name + '\'s Room';
+    document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + owner + '\'s Room';
     
     // Show the modal
     $('#createAvailabilityModal').modal('show');

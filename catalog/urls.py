@@ -2,7 +2,7 @@ from django.urls import path
 from catalog.views.main_views import (
     home, all_guests, 
     rooms_master, my_guests, my_room,
-   buildings_offline_toggle
+   buildings_offline_toggle, toggle_offline_section
 )
 from catalog.views.occupancy_views import(
     delete_booking, extend_booking, shorten_booking, extend_conflict,create_booking,
@@ -37,6 +37,8 @@ urlpatterns = [
     path('rooms_master/<int:room_id>/', rooms_master, name='rooms_master_with_room'),
 
     path('buildings_offline_toggle/', buildings_offline_toggle, name='buildings_offline_toggle'),
+
+        path('toggle_offline_section/', toggle_offline_section, name='toggle_offline_section'),
         # path('rooms_master/room/<int:room_id>/', rooms_master, name='rooms_master_with_room'),  # New URL pattern for rooms without owners
 
     path('no_person/', no_person, name='no_person'),

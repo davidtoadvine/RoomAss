@@ -11,6 +11,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from catalog.models import Section
 
 def home(request):
     
@@ -313,24 +315,16 @@ def rooms_master(request, room_id=None):
 def buildings_offline_toggle(request):
     buildings = Building.objects.all()
 
-    if request.method == 'POST':
-        section_id = request.POST.get('section_id')
-        section = get_object_or_404(Section, id=section_id)
-        print(section)
-
-        print(section.is_offline)
-        section.is_offline = not section.is_offline
-        print(section.is_offline)
-
-        section.save()
-        print(section.is_offline)
-
-
-      
-        
-
-
-        
-        return redirect('buildings_offline_toggle')
-
     return render(request, 'catalog/buildings_offline_toggle.html', {'buildings': buildings})
+
+
+@require_POST
+def toggle_offline_section(request):
+    section_id = request.POST.get('section_id')
+    section = get_object_or_404(Section, id=section_id)
+
+    # Toggle the offline status
+    section.is_offline = not section.is_offline
+    section.save()
+
+    return redirect('buildings_offline_toggle')
