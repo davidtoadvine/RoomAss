@@ -86,3 +86,7 @@
   border: none;
   cursor: pointer;
 }
+
+.offline-room {
+  background-color: lightcoral;
+}

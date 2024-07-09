@@ -55,7 +55,8 @@ class Section(models.Model):
         if self.pk:  # This ensures we are updating an existing instance
             previous = Section.objects.get(pk=self.pk)
             if (previous.is_offline != self.is_offline) and self.is_offline:
-              self.delete_availability_events()                  
+              self.delete_availability_events()
+                          
                   
                 
         super().save(*args, **kwargs)  # Call the original save method

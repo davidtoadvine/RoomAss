@@ -278,6 +278,7 @@ def rooms_master(request, room_id=None):
               'room_image_url': selected_room.image.url if selected_room.image else '',
               'availability_events': availability_events,
               'occupancy_events': occupancy_events,
+                    
           })
   
           if selected_person:
@@ -307,7 +308,8 @@ def rooms_master(request, room_id=None):
   
       return render(request, 'catalog/rooms_master.html', context)
 
-
+@login_required
+@user_passes_test(lambda u: u.is_superuser or u.has_perm('app.buildings_offline_toggle'))
 def buildings_offline_toggle(request):
     buildings = Building.objects.all()
 
