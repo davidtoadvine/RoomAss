@@ -1,4 +1,4 @@
-from catalog.models import Room, Building, Section, Person, CustomEvent
+from catalog.models import Room, CustomEvent
 
 from datetime import timedelta, time
 from django.utils import timezone

@@ -1,7 +1,8 @@
 from catalog.forms import DateRangeForm, UserSelectForm, RoomSelectForm
-from catalog.models import CustomEvent, Room, Person
+from catalog.models import CustomEvent, Room, Person, Building, Section
 
 from catalog.utils import date_to_aware_datetime
+from catalog.views.availability_views import delete_availability
 
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -9,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.models import User
-
+from django.http import JsonResponse
 
 def home(request):
     
@@ -296,13 +297,38 @@ def rooms_master(request, room_id=None):
                           'room_name': f"{child.name}'s Room"
                       }
   
-             
               context.update({
                   'availability_events': availability_events,
                   'occupancy_events': occupancy_events,
                   'children_events': children_events,
                   'children': children,
-                 
+
               })
   
       return render(request, 'catalog/rooms_master.html', context)
+
+
+def buildings_offline_toggle(request):
+    buildings = Building.objects.all()
+
+    if request.method == 'POST':
+        section_id = request.POST.get('section_id')
+        section = get_object_or_404(Section, id=section_id)
+        print(section)
+
+        print(section.is_offline)
+        section.is_offline = not section.is_offline
+        print(section.is_offline)
+
+        section.save()
+        print(section.is_offline)
+
+
+      
+        
+
+
+        
+        return redirect('buildings_offline_toggle')
+
+    return render(request, 'catalog/buildings_offline_toggle.html', {'buildings': buildings})

@@ -159,7 +159,12 @@ def delete_availability(request, room_id):
             for event in occupancy_events:
                 start_date = event.start
                 end_date = event.end
-                owner = request.user
+                room = event.calendar.room
+                
+                owner = 'Twin Oaks'
+                if room.owner:
+                  owner = room.owner
+
                 handle_reassign(event, start_date, end_date, owner)
                 event.delete()
 

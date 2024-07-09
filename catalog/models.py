@@ -13,6 +13,8 @@ from schedule.models import Calendar
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
+
+
 class Person(models.Model):
   name = models.CharField(max_length=255)
   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
@@ -35,18 +37,41 @@ class Person(models.Model):
 # Create your models here.
 class Building(models.Model):
   name = models.CharField(max_length = 255)
-  offline = models.BooleanField(default=False)
+  is_offline = models.BooleanField(default=False)
   
   def __str__(self):
     return self.name
   
 class Section(models.Model):
-  building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name='floors')
+  building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name='sections')
   name = models.CharField(max_length=255)
-  offline = models.BooleanField(default=False)
+  is_offline = models.BooleanField(default=False)
 
   def __str__(self):
     return f"{self.building.name} / {self.name}"
+  
+  def save(self, *args, **kwargs):
+        # Check if is_offline has changed
+        if self.pk:  # This ensures we are updating an existing instance
+            previous = Section.objects.get(pk=self.pk)
+            if (previous.is_offline != self.is_offline) and self.is_offline:
+              self.delete_availability_events()                  
+                  
+                
+        super().save(*args, **kwargs)  # Call the original save method
+      
+
+  def delete_availability_events(self):
+      rooms = self.rooms.all()
+
+      for room in rooms:
+          calendar = room.calendar
+          if calendar:
+              CustomEvent.objects.filter( calendar=calendar).delete()
+
+            
+      
+
 
 class Room(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='rooms')
@@ -54,7 +79,7 @@ class Room(models.Model):
     calendar = models.OneToOneField(Calendar, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     owner = models.OneToOneField(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     image = models.ImageField(upload_to='room_images/', null=True, blank=True)
-    offline = models.BooleanField(default=False)
+    is_offline = models.BooleanField(default=False)
   
     def __str__(self):
         return f"{self.section.building.name} / {self.section.name} / {self.number}"
@@ -84,7 +109,7 @@ class Room(models.Model):
         )
 
         # Check for available and not occupied
-        return availability_events.exists() and not occupancy_events.exists()
+        return availability_events.exists() and not occupancy_events.exists() and not self.is_offline
   
     def get_last_available_date(self, start_date):
         if not self.calendar:
@@ -216,14 +241,14 @@ def delete_calendar_when_room_deleted(sender, instance, **kwargs):
 def set_sections_and_rooms_offline(sender, instance, **kwargs):
     sections = instance.sections.all()
     for section in sections:
-        if section.offline != instance.offline:
-            section.offline = instance.offline
+        if section.is_offline != instance.is_offline:
+            section.is_offline = instance.is_offline
             section.save()
 
 @receiver(post_save, sender=Section)
 def set_rooms_offline(sender, instance, **kwargs):
     rooms = instance.rooms.all()
     for room in rooms:
-        if room.offline != instance.offline:
-            room.offline = instance.offline
+        if room.is_offline != instance.is_offline:
+            room.is_offline = instance.is_offline
             room.save()
