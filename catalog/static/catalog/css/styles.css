@@ -10,6 +10,7 @@
   border-collapse: collapse;
   margin-bottom:25px;
   margin-top: 25px;
+  /* background-color: cornsilk; */
 
 }
 
@@ -29,7 +30,7 @@
 
 .btn {
   padding: 5px 10px;
-  background-color: cadetblue;
+  background-color: #286da6;
   color: white;
   border: none;
   border-radius: 3px;
@@ -37,9 +38,10 @@
 }
 
 .btn:hover {
-  background-color: #3e5369;
+  background-color: #ac3b61;
   color: white;
 }
+
 
 
 /* Flexbox container for aligning items within a table cell */ 
@@ -81,12 +83,52 @@
 }
 .btn-link{
   padding: 5px 10px;
-  background-color: burlywood;
-  color: black;
+  background-color: transparent;
+  color: #212529;
   border: none;
   cursor: pointer;
+  text-decoration: underline;
 }
 
 .offline-room {
   background-color: lightcoral;
+}
+
+body{
+  background-color: #eee2cb!important;
+}
+.navbar{
+  background-color: #123c69!important;
+}
+
+a{
+  color:#f1e8e6!important;
+}
+.navbar-brand{
+  color:#f1e8e6 !important;
+}
+
+/* Custom striped table colors */
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #eee2cb!important; /* Custom light grey for odd rows */
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+  background-color: #bab2b5; /* Custom light blue for even rows */
+}
+
+table, th, td {
+  border: 1px solid #212529 !important; /* Set the border color */
+  border-collapse: collapse; /* Ensure borders don't double up */
+}
+
+a:hover{
+  color:#f1e8e6!important}
+
+.nav-break:hover{
+  color:#f1e8e6!important;
+}
+
+.nav-link:hover{
+  background-color: #ac3b61!important;
 }

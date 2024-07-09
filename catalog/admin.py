@@ -31,6 +31,8 @@ class RoomAdmin(admin.ModelAdmin):
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     ordering = ('name',)  # Order by name alphabetically
+    list_display = ('name', 'room')
+
    
 
 # CustomEvent Admin

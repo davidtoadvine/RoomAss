@@ -313,7 +313,7 @@ def rooms_master(request, room_id=None):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.buildings_offline_toggle'))
 def buildings_offline_toggle(request):
-    buildings = Building.objects.all()
+    buildings = Building.objects.all().order_by('name')
 
     return render(request, 'catalog/buildings_offline_toggle.html', {'buildings': buildings})
 

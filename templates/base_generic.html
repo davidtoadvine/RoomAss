@@ -28,9 +28,9 @@
     <link rel="stylesheet" href="{% static 'catalog/css/styles.css' %}">
   </head>
   <body>
-    <header>
+    <header id = "header" class="header">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{% url 'home' %}"
+        <a  class="navbar-brand" href="{% url 'home' %}"
           >Twin Oaks Rooms</a
         >
         <button
@@ -56,7 +56,7 @@
             {%if user.is_authenticated %}
 
             <li class="nav-item">
-              <a class="nav-link"> | </a>
+              <a class="nav-link  nav-break"> | </a>
              </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'my_room' %}">My Room</a>
@@ -69,7 +69,7 @@
           {%endif%}
           {% if user.is_superuser %}
           <li class="nav-item">
-            <a class="nav-link"> | </a>
+            <a class="nav-link  nav-break"> | </a>
            </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'rooms_master' %}">Rooms Master</a>
@@ -100,4 +100,5 @@
     </header>
     <main class="container mt-4">{% block content %}{% endblock %}</main>
   </body>
+
 </html>
