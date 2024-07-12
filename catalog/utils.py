@@ -156,28 +156,25 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
                   buildings_in_same_area = Building.objects.filter(area=original_building.area).exclude(id=original_building.id)
                   buildings_in_other_area = Building.objects.exclude(area = original_building.area)
 
-                  rooms = []
-                  original_building_rooms = Room.objects.filter(section__building = original_building)
-                  rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area)
-                  rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area)
-                  rooms.append(original_building_rooms)
-                  rooms.append(rooms_in_same_area)
-                  rooms.append(rooms_outside_original_area)
+                  
+                  rooms_in_original_building = Room.objects.filter(section__building = original_building, is_available = True).order_by('?')
+                  rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area, is_available = True).order_by('?')
+                  rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area, is_available = True).order_by('?')
+
+                  rooms = list(rooms_in_original_building) + list(rooms_in_same_area) + list(rooms_outside_original_area)
 
                   event_assigned = False
 
-                  for roomset in rooms:
-                    print('ROOMSET')
-                    for room in roomset:
+                  for room in rooms:
                       print('ROOM')
                       email_start_date = start_date.strftime('%Y-%m-%d')
                       email_end_date = end_date.strftime('%Y-%m-%d')
 
-                      if (    (room.is_available(start_date, end_date))
-                              and
-                              ((room.owner and int(guest_type) >= int(room.owner.preference))
+                      if (    
+                              (room.owner and int(guest_type) >= int(room.owner.preference))
                               or
-                              (not room.owner))):
+                              (not room.owner)
+                              ):
                           
 
                               #occ_event.end = start_date

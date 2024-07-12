@@ -97,12 +97,15 @@ class Room(models.Model):
         if timezone.is_naive(end_date):
             end_date = timezone.make_aware(end_date, timezone.get_current_timezone())
       
-        occupancy_events = CustomEvent.objects.filter(
+        occupancy_events_exist = CustomEvent.objects.filter(
             calendar=self.calendar,
             event_type='occupancy',
             start__lt=end_date,
             end__gt=start_date
-        )
+        ).exists()
+
+        if occupancy_events_exist:
+            return False
 
         availability_events = CustomEvent.objects.filter(
             calendar=self.calendar,
@@ -112,7 +115,7 @@ class Room(models.Model):
         )
 
         # Check for available and not occupied
-        return availability_events.exists() and not occupancy_events.exists() and not self.is_offline
+        return availability_events.exists() and not self.is_offline
   
     def get_last_available_date(self, start_date):
         if not self.calendar:
