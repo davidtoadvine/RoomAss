@@ -1,18 +1,12 @@
-from django.db import models
-from schedule.models import Calendar, Event
-from django.utils import timezone
-import pytz
 from datetime import datetime
-from datetime import timedelta
+
 from django.contrib.auth.models import User
-from django.db import transaction
-
-from django.utils.text import slugify
-from schedule.models import Calendar
-
+from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
+from schedule.models import Calendar, Event
 
 
 class Person(models.Model):

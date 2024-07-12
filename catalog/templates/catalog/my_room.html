@@ -40,10 +40,10 @@
 
           <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
           <div>
-          <button type = "submit"
+          <button class = "btn-grey" type = "submit"
           onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}', '{{request.user.id}}')">Edit</button>
         
-        <button type = "submit"
+        <button class = "btn-grey" type = "submit"
           onclick = "showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
         </div>
       
@@ -66,12 +66,12 @@
     {% endfor %}
     
       <tr>
-        <td >
+        <td class = "cell-create-availability" >
 
           {% if room.is_offline%}
           <p>Room Is Offline</p>
           {%else%}
-          <button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button>
+          <button class = "btn-grey" type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button>
         {% endif%}
 
       </td>
@@ -116,10 +116,10 @@
           <td class = "availability-cell" ><div class="flex-container">
             <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
             <div>
-              <button type = "submit"
+              <button class = "btn-grey" type = "submit"
               onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
             
-            <button type = "submit"
+            <button class = "btn-grey" type = "submit"
               onclick = "showDeleteAvailabilityForm('{{a_event.id}}','{{a_event.start}}', '{{a_event.end}}')">Delete</button>
             </div>
           </div></td>
@@ -137,12 +137,12 @@
       {% endfor %}
       
       <tr>
-        <td >
+        <td class= "cell-create-availability">
           
           {% if room.is_offline%}
           <p>Room Is Offline</p>
           {%else%}
-          <button type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button>
+          <button class = "btn-grey" type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{child.name}}')">+ Create new availability</button>
         {% endif%}
         
         </td>

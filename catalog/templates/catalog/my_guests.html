@@ -24,8 +24,8 @@
                 {% for o_event in occupancy_events %}
                 <tr>
                     <td>{{ o_event.guest_name }}</td>
-                    <td>{{ o_event.start|date:"F d" }}</td>
-                    <td>{{ o_event.end|date:"F d" }}</td>
+                    <td>{{ o_event.start_date|date:"F d" }}</td>
+                    <td>{{ o_event.end_date|date:"F d" }}</td>
                     <td>
                         <button class="btn-link"
                                 data-toggle="modal" 
@@ -40,8 +40,8 @@
                               data-toggle="modal" 
                               data-target="#extendModal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
-                              data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                              data-end-date="{{ o_event.end|date:'Y-m-d' }}"
+                              data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
+                              data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
                               data-image-url="{{ o_event.image_url }}">
                           Extend
                       </button>
@@ -50,8 +50,8 @@
                               data-toggle="modal" 
                               data-target="#shortenModal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
-                              data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                              data-end-date="{{ o_event.end|date:'Y-m-d' }}"
+                              data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
+                              data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
                               data-image-url="{{ o_event.image_url }}">
                           Shorten
                       </button>
@@ -60,8 +60,8 @@
                             data-toggle="modal" 
                             data-target="#deleteModal-{{ o_event.id }}" 
                             data-id="{{ o_event.id }}" 
-                            data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                            data-end-date="{{ o_event.end|date:'Y-m-d' }}"
+                            data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
+                            data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
                             data-image-url="{{ o_event.image_url }}">
                         Delete
                     </button>

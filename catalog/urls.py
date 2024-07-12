@@ -1,16 +1,21 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
+
 from catalog.views.main_views import (
     home, all_guests, 
     rooms_master, my_guests, my_room,
-   buildings_offline_toggle, toggle_offline_section
+    buildings_offline_toggle, toggle_offline_section
 )
-from catalog.views.occupancy_views import(
-    delete_booking, extend_booking, shorten_booking, extend_conflict,create_booking,
+from catalog.views.occupancy_views import (
+    delete_booking, extend_booking, shorten_booking,
+    extend_conflict, create_booking
 )
-from catalog.views.availability_views import( create_availability, edit_availability, delete_availability,edit_guest_preferences)
-from catalog.views.error_views import (no_room, no_person)
-from django.conf import settings
-from django.conf.urls.static import static
+from catalog.views.availability_views import (
+    create_availability, edit_availability, delete_availability, edit_guest_preferences
+)
+from catalog.views.error_views import no_room, no_person
+
 
 urlpatterns = [
     path('', home, name='home'),  # Home page

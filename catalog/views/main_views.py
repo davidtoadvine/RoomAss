@@ -1,19 +1,15 @@
+from datetime import datetime, timedelta
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
 from catalog.forms import DateRangeForm, UserSelectForm, RoomSelectForm
 from catalog.models import CustomEvent, Room, Person, Building, Section
-
 from catalog.utils import date_to_aware_datetime
-from catalog.views.availability_views import delete_availability
 
-from datetime import datetime, timedelta
-from django.utils import timezone
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required,user_passes_test
-from django.contrib.auth.models import User
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from catalog.models import Section
-
+# available rooms page
 def home(request):
     
     # get and order rooms for sensible display later
@@ -45,7 +41,7 @@ def home(request):
             'guest_type': guest_type
         })
 
-# Get the current local date and the next day's date
+    # Get the current local date and the next day's date
     local_now = timezone.localtime(timezone.now())
     today = local_now.date()
     tomorrow = today + timedelta(days=1)
@@ -102,8 +98,8 @@ def all_guests(request):
         event_info = {
             'guest_name': event.guest_name,
             'creator': event.creator,
-            'start': event.start,
-            'end': event.end,
+            'start_date': event.start,
+            'end_date': event.end,
             'room_name': None,
             'room_id': event.calendar.room.id
         }
@@ -176,8 +172,8 @@ def my_guests(request):
             'id': event.id,
             'guest_name': event.guest_name,
             'creator': event.creator,
-            'start': event.start,
-            'end': event.end,
+            'start_date': event.start,
+            'end_date': event.end,
             'last_available': event.calendar.room.get_last_available_date(event.end),
             'room_info': None,
             'image_url': event.calendar.room.image.url if event.calendar.room.image else '',  # Store the image URL for each event
@@ -223,16 +219,13 @@ def rooms_master(request, room_id=None):
                 
                 return redirect('rooms_master_with_room', room_id=selected_room.id)
                 
-            else:
-                print("User form is not valid")
+          
         elif 'room_form_submit' in request.POST:
-            print("Room form submitted")
             room_form = RoomSelectForm(request.POST)
             if room_form.is_valid():
                 selected_room = room_form.cleaned_data['room']
                 return redirect('rooms_master_with_room', room_id=selected_room.id)
         else:
-            print("No form identified in POST request")
             return redirect('rooms_master')
 
 
@@ -240,17 +233,12 @@ def rooms_master(request, room_id=None):
 
     else:  
       room_name = None
-      print('room naming')
-      print(room_name)
       if room_id:
           selected_room = get_object_or_404(Room, id=room_id)
           room_name = str(selected_room)
-          print(room_name)
           if selected_room.owner:
               selected_person = selected_room.owner
               room_name = f"{selected_person}'s room"
-              print(room_name)
-      print('end')
 
       local_now = timezone.localtime(timezone.now())
       tomorrow = local_now.date() + timedelta(days=1)

@@ -31,7 +31,7 @@
                 <tr>
                     <td>{{ section.name }}</td>
                     <td> 
-                      <button type="button" class="btn {% if section.is_offline %}btn-danger{% else %}btn-success{% endif %}"
+                      <button type="button" class="btn {% if section.is_offline %}btn-offline{% else %}btn-online{% endif %}"
                       data-toggle="modal"
                       data-target="#toggleOfflineModal"
                       data-building-name = "{{building.name}}"

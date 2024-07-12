@@ -1,18 +1,13 @@
 
-from datetime import time, datetime
-from django.utils import timezone
-from django.shortcuts import get_object_or_404
-
-from django.core.mail import send_mail
-# from django.contrib.auth.decorators import login_required,user_passes_test
-
-from catalog.models import CustomEvent, Room, Building
+from datetime import datetime, time
 
 import pytz
 
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
-######### Non View Helper Functions############
-############################################################################################################
+from catalog.models import CustomEvent, Room, Building
 
 def merge_overlapping_events(calendar):
     
@@ -86,6 +81,10 @@ def ensure_timezone_aware(date, tz_name='America/New_York'):
 
     return converted_date
 
+
+# this if for after editing or deleting availability events
+# attempts to find another room that is available for the missing chunk of time
+# calls create_stopgap_booking if possible, sends emails regardless
 def handle_reassign(occ_event, start_date, end_date, owner, room):
                   
                   guest_type = occ_event.guest_type
@@ -94,7 +93,7 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
 
                   original_room = room
 
-                  # getting available rooms with using simple geographic preference
+                  # getting available rooms in order of geographic preference
                   original_building = original_room.section.building
                   buildings_in_same_area = Building.objects.filter(area=original_building.area).exclude(id=original_building.id)
                   buildings_in_other_area = Building.objects.exclude(area = original_building.area)
@@ -112,10 +111,8 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
                       email_end_date = end_date.strftime('%Y-%m-%d')
 
                       if room.is_available(start_date, end_date) and (
-            (room.owner and int(guest_type) >= int(room.owner.preference)) or not room.owner
-        ):
+                        (room.owner and int(guest_type) >= int(room.owner.preference)) or not room.owner):
 
-                              print('creating stopgap booking')
                               create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
                               event_assigned = True
 
@@ -139,9 +136,7 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
                                         [f"{host_email}"],
                                         fail_silently=False
                                         )
-                        
-
-
+# for automatic reassign
 def create_stopgap_booking(room, event, start_date, end_date, guest_type, guest_name):
                               
                             #book it

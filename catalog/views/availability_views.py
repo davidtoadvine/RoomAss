@@ -1,12 +1,12 @@
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
+
 from catalog.models import Room, CustomEvent, Person
-from catalog.forms import  CreateAvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
+from catalog.forms import CreateAvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
 from catalog.utils import date_to_aware_datetime, merge_overlapping_events, handle_reassign
 
 
-from django.shortcuts import  get_object_or_404, redirect, render
-from django.http import HttpResponse, HttpResponseForbidden
-
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def create_availability(request, room_id):
@@ -111,11 +111,8 @@ def edit_availability(request, room_id):
                   occ_event.save()
               
                   if new_avail_end_date > occ_event.start:
-                    print('calling reassing 1')
                     handle_reassign(occ_event, new_avail_end_date, end_date,owner_name,room )
                   else:
-                    print('calling reassing 2')
-
                     handle_reassign(occ_event, start_date,end_date,owner_name,room)
                     full_reassign = True
 
@@ -124,12 +121,8 @@ def edit_availability(request, room_id):
                   occ_event.save()                
 
                   if new_avail_start_date < occ_event.end:
-                      print('calling reassing 3')
-
                       handle_reassign(occ_event, start_date, new_avail_start_date, owner_name,room)
                   else:
-                      print('calling reassing 4')
-
                       handle_reassign(occ_event, start_date, end_date,owner_name,room)
 
               if occ_event.start >= occ_event.end:
@@ -141,12 +134,9 @@ def edit_availability(request, room_id):
             return redirect('my_room')  # Redirect to a relevant page after saving
         # Handle form invalid case
         if request.user.is_superuser:
-            print('superuser, not valid form')
             return redirect('rooms_master_with_room', room_id=room_id)
-        print('not valid form, not superuser')
         return redirect('my_room')
     
-    print('method not post?')
     return HttpResponse("Invalid request method", status=405)
 
 @login_required

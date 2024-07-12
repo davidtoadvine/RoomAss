@@ -155,10 +155,24 @@ a:hover{
 }
 #nav-user-name{
   color: #f1e8e6!important;
+  margin-right: 5px;
 }
 .dropdown-item{
   color:#212529 !important;
 }
 .dropdown-item:hover{
 background-color: #ac3b61!important;
+}
+
+.cell-create-availability{
+  background-color: #bab2b5!important;
+}
+.btn-offline{
+  background-color: #ac3b61;
+}
+.btn-grey{
+  padding-left:5px !important ;
+  padding-right:5px !important ;
+
+
 }

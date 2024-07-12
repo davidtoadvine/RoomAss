@@ -1,14 +1,12 @@
 
-from catalog.forms import EditAvailabilityForm, BookingForm
-from catalog.models import CustomEvent, Room
-
-from catalog.utils import  ensure_timezone_aware, event_id_to_redirect_room_id
-
 from datetime import datetime
 
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
 
+from catalog.forms import EditAvailabilityForm, BookingForm
+from catalog.models import CustomEvent, Room
+from catalog.utils import ensure_timezone_aware, event_id_to_redirect_room_id
 
 
 @login_required

@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+
 from .models import Building, Section, Room, Person, CustomEvent
 from .forms import CustomEventForm
-from django_celery_beat.models import PeriodicTask, CrontabSchedule
+
 
 # Inline for Sections in Building
 class SectionInline(admin.TabularInline):
@@ -33,7 +34,6 @@ class PersonAdmin(admin.ModelAdmin):
     ordering = ('name',)  # Order by name alphabetically
     list_display = ('name', 'room')
 
-   
 
 # CustomEvent Admin
 @admin.register(CustomEvent)

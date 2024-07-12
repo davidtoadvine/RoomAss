@@ -51,7 +51,7 @@
               <a class="nav-link" href="{% url 'home' %}">Available Rooms</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'all_guests' %}">View All Scheduled Bookings</a>
+              <a class="nav-link" href="{% url 'all_guests' %}">All Scheduled Bookings</a>
             </li>
             {%if user.is_authenticated %}
 
@@ -86,7 +86,7 @@
             <li>
               <form id="logout-form" method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" >Logout</button>
+                <button class = "btn-grey" type="submit" >Logout</button>
               </form>
             </li>
           {% else %}
