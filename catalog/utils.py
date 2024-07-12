@@ -1,21 +1,15 @@
-from catalog.models import Room, CustomEvent
 
-from datetime import timedelta, time
+from datetime import time, datetime
 from django.utils import timezone
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from django.core.mail import send_mail
-import pytz
-from django.contrib.auth.decorators import login_required,user_passes_test
-from django.contrib.auth.models import User
+# from django.contrib.auth.decorators import login_required,user_passes_test
 
-from django.shortcuts import render, get_object_or_404, redirect
-from catalog.models import CustomEvent
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from datetime import datetime, timedelta
-from catalog.models import CustomEvent, Room, Person, Building
+from catalog.models import CustomEvent, Room, Building
+
+import pytz
+
 
 ######### Non View Helper Functions############
 ############################################################################################################
@@ -44,17 +38,12 @@ def merge_overlapping_events(calendar):
             else:
                 merged_events.append(event)
 
-
     for event in merged_events:
         event.save()
 
 
-
-
-
 def normalize_time(dt):
     return dt.replace(hour=12, minute=0, second=0, microsecond=0)
-
 
 
 def event_id_to_redirect_room_id(event_id):
@@ -98,87 +87,34 @@ def ensure_timezone_aware(date, tz_name='America/New_York'):
     return converted_date
 
 def handle_reassign(occ_event, start_date, end_date, owner, room):
-                  print('in handle reassign')
-                
-                  # rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
-                  
-                  # guest_type = occ_event.guest_type
-                  # guest_name = occ_event.guest_name
-                  # host_email = occ_event.creator.email
-
-                  # for room in rooms:
-                    
-                  #   email_start_date = (start_date.__str__())[:-15]
-                  #   email_end_date = (end_date.__str__())[:-15]
-                  #   event_assigned = False
-
-                  #   if (    (room.is_available(start_date, end_date))
-                  #           and
-                  #           ((room.owner and int(guest_type) >= int(room.owner.preference))
-                  #           or
-                  #           (not room.owner))):
-                        
-
-                  #           #occ_event.end = start_date
-                  #           #occ_event.save()
-                  #           create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
-                  #           event_assigned = True
-
-                  #           send_mail(
-                  #                     "Your room booking has changed",
-                  #                     f"{owner} has had an availability change. Your guest {guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
-                  #                     "autoRoomAss@email.com",
-                  #                     [f"{host_email}"],
-                  #                     fail_silently=False
-                  #                     )
-
-                  #           break
-                        
-                            
-                  # if not event_assigned:
-                  #     send_mail(
-                  #                     "Your room booking has changed",
-                  #                     f"{owner} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
-                  #                     "autoRoomAss@email.com",
-                  #                     [f"{host_email}"],
-                  #                     fail_silently=False
-                  #                     )
-                  ###################################################################    
                   
                   guest_type = occ_event.guest_type
                   guest_name = occ_event.guest_name
                   host_email = occ_event.creator.email
 
-                  # original_room = Room.objects.get(id = owner.room.id)
                   original_room = room
 
+                  # getting available rooms with using simple geographic preference
                   original_building = original_room.section.building
                   buildings_in_same_area = Building.objects.filter(area=original_building.area).exclude(id=original_building.id)
                   buildings_in_other_area = Building.objects.exclude(area = original_building.area)
 
-                  
-                  rooms_in_original_building = Room.objects.filter(section__building = original_building, is_available = True).order_by('?')
-                  rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area, is_available = True).order_by('?')
-                  rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area, is_available = True).order_by('?')
+                  rooms_in_original_building = Room.objects.filter(section__building = original_building).order_by('?')
+                  rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area).order_by('?')
+                  rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area).order_by('?')
 
                   rooms = list(rooms_in_original_building) + list(rooms_in_same_area) + list(rooms_outside_original_area)
 
                   event_assigned = False
 
                   for room in rooms:
-                      print('ROOM')
                       email_start_date = start_date.strftime('%Y-%m-%d')
                       email_end_date = end_date.strftime('%Y-%m-%d')
 
-                      if (    
-                              (room.owner and int(guest_type) >= int(room.owner.preference))
-                              or
-                              (not room.owner)
-                              ):
-                          
+                      if room.is_available(start_date, end_date) and (
+            (room.owner and int(guest_type) >= int(room.owner.preference)) or not room.owner
+        ):
 
-                              #occ_event.end = start_date
-                              #occ_event.save()
                               print('creating stopgap booking')
                               create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
                               event_assigned = True
@@ -195,6 +131,7 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
                           
                               
                   if not event_assigned:
+                        print('event not reassigned')
                         send_mail(
                                         "Your room booking has changed",
                                         f"{owner} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
