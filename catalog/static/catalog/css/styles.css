@@ -2,7 +2,6 @@
   display: inline;
 }
 #logout-form button {
-  padding: 0;
   margin: 0;
 }
 .table {
@@ -10,8 +9,6 @@
   border-collapse: collapse;
   margin-bottom:25px;
   margin-top: 25px;
-  /* background-color: cornsilk; */
-
 }
 
 .table th, .table td {
@@ -174,5 +171,12 @@ background-color: #ac3b61!important;
   padding-left:5px !important ;
   padding-right:5px !important ;
 
+}
+.nav-link-admin{
+  color: gold!important;
+}
+.nav-link-admin:hover{
+  color: gold!important;
 
+  background-color: #212529!important;
 }
