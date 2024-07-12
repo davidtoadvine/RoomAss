@@ -82,7 +82,7 @@
           </ul>
           <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
-            <li>User: {{ user.get_username }}</li>
+            <li id = "nav-user-name" >User: {{ user.get_username }}</li>
             <li>
               <form id="logout-form" method="post" action="{% url 'logout' %}">
                 {% csrf_token %}

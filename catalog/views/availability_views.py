@@ -8,9 +8,6 @@ from django.http import HttpResponse, HttpResponseForbidden
 
 from django.contrib.auth.decorators import login_required
 
-
-
-
 @login_required
 def create_availability(request, room_id):
       if request.method == 'POST':

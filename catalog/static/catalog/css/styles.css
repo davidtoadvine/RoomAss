@@ -153,3 +153,12 @@ a:hover{
 .offline-table{
   background-color: rgb(247, 228, 193);
 }
+#nav-user-name{
+  color: #f1e8e6!important;
+}
+.dropdown-item{
+  color:#212529 !important;
+}
+.dropdown-item:hover{
+background-color: #ac3b61!important;
+}
