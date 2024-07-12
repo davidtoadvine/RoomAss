@@ -90,12 +90,20 @@
   text-decoration: underline;
 }
 
+.btn-link:hover{
+  background-color: #ac3b61;
+  color: #f1e8e6
+
+}
+
 .offline-room {
   background-color: lightcoral;
 }
 
 body{
-  background-color: #eee2cb!important;
+  /* background-color: #eee2cb!important; */
+  background-color: rgba(238, 218, 195, 0.836)  !important;
+
 }
 .navbar{
   background-color: #123c69!important;
@@ -110,11 +118,11 @@ a{
 
 /* Custom striped table colors */
 .table-striped tbody tr:nth-of-type(odd) {
-  background-color: #eee2cb!important; /* Custom light grey for odd rows */
+  background-color: rgb(247, 228, 193) !important; /* Custom light grey for odd rows */
 }
 
 .table-striped tbody tr:nth-of-type(even) {
-  background-color: #bab2b5; /* Custom light blue for even rows */
+  background-color: #bab2b5 !important; /* Custom light blue for even rows */
 }
 
 table, th, td {
@@ -125,10 +133,23 @@ table, th, td {
 a:hover{
   color:#f1e8e6!important}
 
-.nav-break:hover{
-  color:#f1e8e6!important;
-}
+
 
 .nav-link:hover{
   background-color: #ac3b61!important;
+}
+
+.nav-break:hover{
+  color:#f1e8e6!important;
+  background-color: #123c69!important;
+
+}
+
+.table-divider{
+  background-color: #bab2b5 !important;
+
+}
+
+.offline-table{
+  background-color: rgb(247, 228, 193);
 }

@@ -57,9 +57,11 @@ def create_availability(request, room_id):
 def edit_availability(request, room_id):
     
     if request.method == 'POST':
+        print('method is post')
         form = EditAvailabilityForm(request.POST)
         
         if form.is_valid():
+            print('edit for is valid')
             # Process the form data
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
@@ -100,7 +102,10 @@ def edit_availability(request, room_id):
             for occ_event in occupancy_events:
               start_date= occ_event.start
               end_date = occ_event.end
-              owner = request.user
+              owner_name = "Twin Oaks"
+              if occ_event.calendar.room.owner:
+                owner_name = occ_event.calendar.room.owner
+              room = occ_event.calendar.room
               full_reassign = False
 
               #Deal with new end date, new start date, completely delete original occupancy if needed
@@ -109,9 +114,12 @@ def edit_availability(request, room_id):
                   occ_event.save()
               
                   if new_avail_end_date > occ_event.start:
-                    handle_reassign(occ_event, new_avail_end_date, end_date,owner )
+                    print('calling reassing 1')
+                    handle_reassign(occ_event, new_avail_end_date, end_date,owner_name,room )
                   else:
-                    handle_reassign(occ_event, start_date,end_date,owner)
+                    print('calling reassing 2')
+
+                    handle_reassign(occ_event, start_date,end_date,owner_name,room)
                     full_reassign = True
 
               if not full_reassign and occ_event.start < new_avail_start_date: 
@@ -119,9 +127,13 @@ def edit_availability(request, room_id):
                   occ_event.save()                
 
                   if new_avail_start_date < occ_event.end:
-                      handle_reassign(occ_event, start_date, new_avail_start_date, owner)
+                      print('calling reassing 3')
+
+                      handle_reassign(occ_event, start_date, new_avail_start_date, owner_name,room)
                   else:
-                      handle_reassign(occ_event, start_date, end_date,owner)
+                      print('calling reassing 4')
+
+                      handle_reassign(occ_event, start_date, end_date,owner_name,room)
 
               if occ_event.start >= occ_event.end:
                   occ_event.delete()
@@ -132,9 +144,12 @@ def edit_availability(request, room_id):
             return redirect('my_room')  # Redirect to a relevant page after saving
         # Handle form invalid case
         if request.user.is_superuser:
+            print('superuser, not valid form')
             return redirect('rooms_master_with_room', room_id=room_id)
+        print('not valid form, not superuser')
         return redirect('my_room')
     
+    print('method not post?')
     return HttpResponse("Invalid request method", status=405)
 
 @login_required
@@ -168,7 +183,7 @@ def delete_availability(request, room_id):
                 if room.owner:
                   owner = room.owner
 
-                handle_reassign(event, start_date, end_date, owner)
+                handle_reassign(event, start_date, end_date, owner, room)
                 event.delete()
 
             avail_event.delete()
@@ -190,6 +205,8 @@ def delete_availability(request, room_id):
 def edit_guest_preferences(request, person_id):
 
     person = get_object_or_404(Person, id=person_id)  # Adjust the model accordingly
+    print("redirect person is...")
+    print(person)
     redirect_person = person
     if redirect_person.parent:
       redirect_person = redirect_person.parent

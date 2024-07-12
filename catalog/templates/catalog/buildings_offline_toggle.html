@@ -7,7 +7,7 @@
     <p> *taking sections offline will delete all availabilities and bookings associated with rooms in that section</p>
     <p> *the system will not attempt to automatically reassign existing bookings from this page </p>
     <p> *rooms will not be stripped of their owners by this function</p>
-    <table class="table table-striped">
+    <table class="table offline-table">
         <thead>
             <tr>
                 <th>Building Name</th>
@@ -17,6 +17,13 @@
         </thead>
         <tbody>
             {% for building in buildings %}
+            <tr> 
+              <td class="table-divider"></td>
+              <td class="table-divider"></td>
+
+              <td class="table-divider"></td>
+
+            </tr>
                 <tr>
                     <td rowspan="{{ building.sections.count|add:'1' }}">{{ building.name }}</td>
                 </tr>
@@ -31,7 +38,7 @@
                       data-section-id="{{ section.id }}"
                       data-section-name="{{ section.name }}"
                       data-section-image-url="{% if section.image %}{{ section.image.url }}{% else %}#{% endif %}">
-                                        {% if section.is_offline %}Go Online{% else %}Go Offline{% endif %}
+                                        {% if section.is_offline %}Offline{% else %}Online{% endif %}
               </button>
                     </td>
                 </tr>

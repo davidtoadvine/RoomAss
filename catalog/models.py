@@ -38,6 +38,7 @@ class Person(models.Model):
 class Building(models.Model):
   name = models.CharField(max_length = 255)
   is_offline = models.BooleanField(default=False)
+  area = models.CharField(max_length = 255)
   
   def __str__(self):
     return self.name

@@ -15,10 +15,12 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 def create_booking(request):
 
     if request.method == 'POST':
+        print('post')
         
         form = BookingForm(request.POST)
 
         if form.is_valid():
+            print('valid')
             room_id = form.cleaned_data['room_id']
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
@@ -37,6 +39,7 @@ def create_booking(request):
             end_date = ensure_timezone_aware(end_date)
 
             if room.is_available(start_date, end_date):
+                print('room available')
                 booking_event = CustomEvent(
                     calendar=room.calendar,
                     event_type='occupancy',
@@ -57,13 +60,16 @@ def create_booking(request):
             
                 return redirect('home')
             else:
+                print('not available')
                 return render(request, 'catalog/home.html', {'error': 'Room is not available'})
         else:
+            print('not valid')
             return render(request, 'catalog/home.html', {'error': 'Form is invalid', 'form_errors': form.errors})
+    print('not post')
     return redirect('home')
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser or u.has_perm('app.delete_customevent'))
+# @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.delete_customevent'))
 # used for occupany events at least
 def delete_booking(request, event_id):
     event = get_object_or_404(CustomEvent, id=event_id)

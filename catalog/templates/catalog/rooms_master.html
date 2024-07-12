@@ -26,23 +26,23 @@
               <button class="btn-link"
               onclick="showFloorplanModal('{{room_image_url }}')">{{ room_name}}</button>
               {%if room.owner%}
-              <form id="preferenceForm-{{ room_id }}" method="post" action="{% url 'edit_guest_preferences' room_id %}">
+              <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
                 {% csrf_token %}
                 <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if room.owner.preference %}
                       {{ room.owner.get_preference_display }}
+                    {% else %}
                       Select Preference
+                    {% endif %}
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room_id }}">
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room.owner.id }}">
                     {% for value, display in room.owner.Preference.choices %}
-                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room_id }}" data-value="{{ value }}">{{ display }}</a>
+                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
-
                   </div>
-                  
-
                 </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{ room_id }}">
+                <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
               </form>
               {%else%}
                   <button class ="btn-secondary"> Anyone can stay here</button>
