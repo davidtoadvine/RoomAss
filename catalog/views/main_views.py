@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from catalog.forms import DateRangeForm, UserSelectForm, RoomSelectForm
+from catalog.forms import DateRangeForm, PersonSelectForm, RoomSelectForm
 from catalog.models import CustomEvent, Room, Person, Building, Section
 from catalog.utils import date_to_aware_datetime
 
@@ -197,21 +197,21 @@ def my_guests(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request, room_id=None):
-    user_form = UserSelectForm()
+    person_form = PersonSelectForm()
     room_form = RoomSelectForm()
 
     selected_person = None
     selected_room = None
 
     if request.method == 'POST':
-        if 'user_form_submit' in request.POST:
-            user_form = UserSelectForm(request.POST)
-            if user_form.is_valid():
-                selected_user = user_form.cleaned_data['user']
-                try:
-                    selected_person = selected_user.person
-                except Person.DoesNotExist:
-                    return redirect('no_person')
+        if 'person_form_submit' in request.POST:
+            person_form = PersonSelectForm(request.POST)
+            if person_form.is_valid():
+                selected_person = person_form.cleaned_data['person']
+                # try:
+                #     selected_person = selected_user.person
+                # except Person.DoesNotExist:
+                #     return redirect('no_person')
                 try:
                     selected_room = selected_person.room
                 except Room.DoesNotExist:
@@ -246,7 +246,7 @@ def rooms_master(request, room_id=None):
   
   
       context = {
-          'user_form': user_form,
+          'person_form': person_form,
           'room_form': room_form,
           'selected_person': selected_person,
           'room': selected_room,

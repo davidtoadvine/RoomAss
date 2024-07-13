@@ -4,10 +4,10 @@
 {% load custom_filters %}
 
 <h1>Rooms Master</h1>
-<form id="userSelectForm" method="post">
+<form id="personSelectForm" method="post">
   {% csrf_token %}
-  {{ user_form.user.label_tag }} {{ user_form.user }}
-  <input type="hidden" name="user_form_submit" value="1">
+  {{ person_form.person.label_tag }} {{ person_form.person }}
+  <input type="hidden" name="person_form_submit" value="1">
 </form>
 
 <form id="roomSelectForm" method="post">
@@ -73,21 +73,21 @@
                   Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}
                   </span>
                   <div>
-                    <button class="btn btn-primary btn-occ"
+                    <button class="btn-grey"
                       data-toggle="modal" 
                       data-target="#extendModal-{{ o_event.id }}" 
                       data-id="{{ o_event.id }}" 
                       data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
                       data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
       
-                    <button class="btn btn-primary btn-occ" 
+                    <button class="btn-grey" 
                       data-toggle="modal" 
                       data-target="#shortenModal-{{ o_event.id }}" 
                       data-id="{{ o_event.id }}" 
                       data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
                       data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
       
-                    <button class="btn btn-danger btn-occ" 
+                    <button class="bt-grey" 
                       data-toggle="modal" 
                       data-target="#deleteModal-{{ o_event.id }}" 
                       data-id="{{ o_event.id }}" 
@@ -163,21 +163,21 @@
 
                   <span>Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</span>
                 <div>
-                  <button class="btn btn-primary btn-occ"
+                  <button class="btn-grey"
                     data-toggle="modal" 
                     data-target="#extendModal-{{ o_event.id }}" 
                     data-id="{{ o_event.id }}" 
                     data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
                     data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
     
-                  <button class="btn btn-primary btn-occ" 
+                  <button class="btn-grey" 
                     data-toggle="modal" 
                     data-target="#shortenModal-{{ o_event.id }}" 
                     data-id="{{ o_event.id }}" 
                     data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
                     data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
     
-                  <button class="btn btn-danger btn-occ" 
+                  <button class="btn-grey" 
                     data-toggle="modal" 
                     data-target="#deleteModal-{{ o_event.id }}" 
                     data-id="{{ o_event.id }}" 
@@ -205,8 +205,8 @@
 {% else %}
 <p></p>
 <p>There is currently no room information to display.</p>
-<p>Please select a User to view their room details. (Childrens' rooms are accessible via a parent User.)</p>
-<p>If you have already selected a User, they appear to not have a room.</p>
+<p>Please select a person to view their room details.</p>
+<p>If you have already selected a person, they appear to not have a room.</p>
 
 {% endif %}
 
@@ -219,9 +219,9 @@
 
   document.addEventListener('DOMContentLoaded', function() {
   
-    document.getElementsByName('user')[0].onchange = function() {
+    document.getElementsByName('person')[0].onchange = function() {
       const selectedRoomId = this.value;
-      const form = document.getElementById('userSelectForm');
+      const form = document.getElementById('personSelectForm');
       const url = "{% url 'rooms_master_with_room' 1 %}".replace('1', selectedRoomId);
       form.action = url;
       form.submit();
@@ -243,7 +243,7 @@
     // Set the form values
     document.getElementById('createAvailabilityRoomId').value = roomId;
     document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + roomName;
-    $("#createAvailabilityRoomId").val(roomId);  // Set the user_id in the form
+    $("#createAvailabilityRoomId").val(roomId);  
 
     
     // Show the modal
@@ -342,7 +342,7 @@ endDateInput.addEventListener("change", function () {
     $("#editStartDate").val(startDate);
     $("#editEndDate").val(endDate);
     $("#eventId").val(eventId);
-    $("#editRoomId").val(roomId);  // Set the user_id in the form
+    $("#editRoomId").val(roomId);  
   
     // Show the modal
     $('#editAvailabilityModal').modal('show');
@@ -436,7 +436,7 @@ function showDeleteAvailabilityForm(eventId, start, end, roomId) {
      $("#deleteStartDate").val(startDate);
      $("#deleteEndDate").val(endDate);
      $("#deleteEventId").val(eventId);
-     $("#editRoomId").val(roomId);  // Set the user_id in the form
+     $("#editRoomId").val(roomId);  
 
   // Show the modal
   $('#deleteAvailabilityModal').modal('show');

@@ -9,6 +9,7 @@
   border-collapse: collapse;
   margin-bottom:25px;
   margin-top: 25px;
+
 }
 
 .table th, .table td {
@@ -16,9 +17,13 @@
   padding: 8px;
   text-align: left;
 }
-
-.table th {
+.table th{
   background-color: #f2f2f2;
+
+}
+#th-my-room{
+  border: 2px solid #212529 !important;
+  
 }
 
 .align-right {
@@ -98,7 +103,6 @@
 }
 
 body{
-  /* background-color: #eee2cb!important; */
   background-color: rgba(238, 218, 195, 0.836)  !important;
 
 }

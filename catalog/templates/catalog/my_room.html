@@ -7,7 +7,7 @@
 <table class="table">
   <tbody>
     <tr>
-      <th><div class="flex-container">
+      <th id = "th-my-room"><div class="flex-container">
         <span>{{ room.owner }}'s Room</span>
 
         <form id="preferenceForm-{{room_id}}" method="post" action="{% url 'edit_guest_preferences' room_id %}">
@@ -260,7 +260,6 @@ endDateInput.addEventListener("change", function () {
     $("#editStartDate").val(startDate);
     $("#editEndDate").val(endDate);
     $("#eventId").val(eventId);
-      // Set the user_id in the form
 
   
     // Show the modal

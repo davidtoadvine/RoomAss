@@ -97,10 +97,10 @@ class CustomEventForm(forms.ModelForm):
 
         return cleaned_data
     
-class UserSelectForm(forms.Form):
-    user = forms.ModelChoiceField(
-        queryset=User.objects.filter(person__room__is_offline=False),
-        label="Select Room by Owner (for children, select parent)"
+class PersonSelectForm(forms.Form):
+    person = forms.ModelChoiceField(
+        queryset=Person.objects.filter(room__is_offline=False),
+        label="Select Room by Owner"
     )
 class RoomSelectForm(forms.Form):
     room = forms.ModelChoiceField(queryset=Room.objects.filter(owner__isnull=True, is_offline=False), label="Select Room without Owner")
