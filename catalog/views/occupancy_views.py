@@ -76,7 +76,7 @@ def delete_booking(request, event_id):
 
 
     if request.method == 'POST':
-        source_page = request.POST.get('source_page', 'my_guests')
+        source_page = request.session.get('source_page', 'my_guests')
         event.delete()
         if source_page == 'rooms_master':
               return redirect('rooms_master_with_room', room_id = redirect_room_id)
@@ -87,7 +87,7 @@ def delete_booking(request, event_id):
 @login_required
 def extend_booking(request, event_id):
     if request.method == 'POST':
-        source_page = request.POST.get('source_page', 'my_guests')
+        source_page = request.session.get('source_page', 'my_guests')
 
         form = EditAvailabilityForm(request.POST)
         if form.is_valid():
@@ -141,7 +141,7 @@ def extend_booking(request, event_id):
 @login_required
 def shorten_booking(request, event_id):
   if request.method == 'POST':
-        source_page = request.POST.get('source_page', 'my_guests')
+        source_page = request.session.get('source_page', 'my_guests')
 
         form = EditAvailabilityForm(request.POST)
         if form.is_valid():
@@ -170,6 +170,7 @@ def shorten_booking(request, event_id):
             event.end = new_end_date
             event.save()
             if source_page == "rooms_master":
+                  print('source page is rooms master')
                   return redirect('rooms_master_with_room', room_id = redirect_room_id)
             return redirect('my_guests')  # Redirect to the appropriate page after saving
   if request.user.is_superuser:

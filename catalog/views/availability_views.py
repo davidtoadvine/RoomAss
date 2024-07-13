@@ -11,6 +11,7 @@ from catalog.utils import date_to_aware_datetime, merge_overlapping_events, hand
 @login_required
 def create_availability(request, room_id):
       if request.method == 'POST':
+        source_page = request.session.get('source_page', 'my_room')
         form = CreateAvailabilityForm(request.POST)
 
         redirect_room_id = room_id
@@ -41,12 +42,12 @@ def create_availability(request, room_id):
             availability_event.save()
             merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
 
-            if request.user.is_superuser:
+            if source_page == 'rooms_master':
               return redirect('rooms_master_with_room', room_id = redirect_room_id)
             return redirect('my_room')
         
         # Handle form invalid case
-        if request.user.is_superuser:
+        if source_page == 'rooms_master':
             return redirect('rooms_master_with_room', room_id=redirect_room_id)
         return redirect('my_room')
         
@@ -55,6 +56,7 @@ def edit_availability(request, room_id):
     
     if request.method == 'POST':
         print('method is post')
+        source_page = request.session.get('source_page', 'my_room')
         form = EditAvailabilityForm(request.POST)
         
         if form.is_valid():
@@ -128,20 +130,24 @@ def edit_availability(request, room_id):
               if occ_event.start >= occ_event.end:
                   occ_event.delete()
 
-            if request.user.is_superuser:
+            print('edits source page before redirect is...')
+            print(source_page)
+            if source_page == 'rooms_master':
               return redirect('rooms_master_with_room', room_id = room_id)
             
             return redirect('my_room')  # Redirect to a relevant page after saving
         # Handle form invalid case
-        if request.user.is_superuser:
+        if source_page == 'rooms_master':
             return redirect('rooms_master_with_room', room_id=room_id)
         return redirect('my_room')
     
+    print('method not post?')
     return HttpResponse("Invalid request method", status=405)
 
 @login_required
 def delete_availability(request, room_id):
     if request.method == 'POST':
+        source_page = request.session.get('source_page', 'my_room')
         form = DeleteAvailabilityForm(request.POST)
         
         if form.is_valid():
@@ -175,13 +181,13 @@ def delete_availability(request, room_id):
 
             avail_event.delete()
 
-            if request.user.is_superuser:
+            if source_page == 'rooms_master':
                 return redirect('rooms_master_with_room', room_id=room_id)
                 
             return redirect('my_room')
         
         # Handle form invalid case
-        if request.user.is_superuser:
+        if source_page == 'rooms_master':
             return redirect('rooms_master_with_room', room_id=room_id)
         return redirect('my_room') 
 
@@ -190,7 +196,7 @@ def delete_availability(request, room_id):
 
 @login_required
 def edit_guest_preferences(request, person_id):
-
+    source_page = request.session.get('source_page', 'my_room')
     person = get_object_or_404(Person, id=person_id)  # Adjust the model accordingly
     print("redirect person is...")
     print(person)
@@ -205,7 +211,7 @@ def edit_guest_preferences(request, person_id):
         if form.is_valid():
             form.save()
 
-            if request.user.is_superuser:
+            if source_page == 'rooms_master':
               return redirect('rooms_master_with_room', room_id=room_id)
             return redirect('my_room') 
         

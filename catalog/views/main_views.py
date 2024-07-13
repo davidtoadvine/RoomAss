@@ -117,6 +117,8 @@ def all_guests(request):
 
 @login_required
 def my_room(request):
+  request.session['source_page'] = 'my_room'
+
   person = request.user.person
     # Using hasattr
   if hasattr(person, 'room'):
@@ -153,6 +155,7 @@ def my_room(request):
         'children': children,
         'start_date': tomorrow.strftime('%Y-%m-%d'),
         'end_date': dayafter.strftime('%Y-%m-%d'),
+        'source_page': 'my_room'
     }
     return render(request, 'catalog/my_room.html', context)
   else:
@@ -163,6 +166,7 @@ def my_room(request):
 
 @login_required
 def my_guests(request):
+    request.session['source_page'] = 'my_guests'
     occupancy_events = CustomEvent.objects.filter(event_type='occupancy', creator=request.user)
 
     processed_events = []
@@ -197,6 +201,8 @@ def my_guests(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request, room_id=None):
+    request.session['source_page'] = 'rooms_master'
+
     person_form = PersonSelectForm()
     room_form = RoomSelectForm()
 
@@ -204,6 +210,7 @@ def rooms_master(request, room_id=None):
     selected_room = None
 
     if request.method == 'POST':
+
         if 'person_form_submit' in request.POST:
             person_form = PersonSelectForm(request.POST)
             if person_form.is_valid():
@@ -217,7 +224,7 @@ def rooms_master(request, room_id=None):
                 except Room.DoesNotExist:
                     return redirect('no_room')
                 
-                return redirect('rooms_master_with_room', room_id=selected_room.id)
+                return redirect('rooms_master_with_room', room_id=selected_room.id )
                 
           
         elif 'room_form_submit' in request.POST:
@@ -232,7 +239,13 @@ def rooms_master(request, room_id=None):
 
 
     else:  
+      print('rooms master NOT A POST')
+
       room_name = None
+      context = {
+          'source_page': 'rooms_master'
+      }
+
       if room_id:
           selected_room = get_object_or_404(Room, id=room_id)
           room_name = str(selected_room)
@@ -245,7 +258,7 @@ def rooms_master(request, room_id=None):
       dayafter = tomorrow + timedelta(days=1)
   
   
-      context = {
+      context.update( {
           'person_form': person_form,
           'room_form': room_form,
           'selected_person': selected_person,
@@ -254,8 +267,7 @@ def rooms_master(request, room_id=None):
           'room_id': room_id,
           'start_date': tomorrow.strftime('%Y-%m-%d'),
           'end_date': dayafter.strftime('%Y-%m-%d'),
-          'source_page': 'rooms_master'
-      }
+      })
   
       if selected_room:
           calendar = selected_room.calendar
