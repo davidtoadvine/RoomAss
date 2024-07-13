@@ -120,18 +120,41 @@
     let newStartDate = new Date(startDateInput.value);
     let newEndDate = new Date(endDateInput.value);
 
+    var now = new Date();
+    // Create a new date object for the limit date, starting with today
+    var limitDateObj = new Date(now);
+
+// Add 3 months to the limit date
+limitDateObj.setMonth(limitDateObj.getMonth() + 3);
+
+// Adjust for potential month overflow (if adding 3 months to a date exceeds the month's days, it will correct itself)
+if (limitDateObj.getDate() < now.getDate()) {
+  limitDateObj.setDate(0); // Set to last day of the previous month
+}
+
 
     if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
       alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
       startDateInput.value = startDateInput.getAttribute('data-original-start');
       endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
     }
+    else if (newEndDate > limitDateObj){
+      alert("You cannot schedule more than 3 months out.")
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
+
+    }
+    return true;
   }
   // Attach change event listeners to the date inputs
   $(document).on('change', '.extend-start-date, .extend-end-date', function() {
     const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
     validateExtendDate(eventId);
   });
+
+
   ////////////////////////////////////////////////////////////////////////////
   // Function to validate date selection
   function validateShortenDate(eventId) {
@@ -146,12 +169,15 @@
       alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
       startDateInput.value = startDateInput.getAttribute('data-original-start');
       endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
     }
     else if (newStartDate >= originalEndDate || newEndDate<= originalStartDate){
       alert("The start date cannot occur on or after the end date. If you wish to delete this event, please use the 'Delete' button.");
       startDateInput.value = startDateInput.getAttribute('data-original-start');
       endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
     }
+    return true;
   } 
   /////////////////////////////////////////////////////////////////////////////////
 
@@ -166,5 +192,20 @@
         console.log('Image src:', $('#floorplanModal img').attr('src'));
     });
   });
+
+
+
+   // Prevent form submission if validation fails
+   $(document).on('submit', 'form', function(e) {
+    const eventId = $(this).find('input[name="event_id"]').val();
+    const formType = $(this).attr('data-form-type'); // Assuming you have a way to distinguish form types
+
+    if (formType === 'extend' && !validateExtendDate(eventId)) {
+      e.preventDefault(); // Prevent form submission for extend form
+    } else if (formType === 'shorten' && !validateShortenDate(eventId)) {
+      e.preventDefault(); // Prevent form submission for shorten form
+    }
+  });
+
 </script>
 {% endblock %}
