@@ -222,7 +222,8 @@
   var guestTypeInput = document.getElementById("guestType")
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
-
+  console.log("previous End date set at...")
+  console.log(previousEndDate)
   guestTypeInput.addEventListener("change", function(){
     validateAndSubmitDate();
   });
@@ -237,6 +238,7 @@
     }
     if (!validateAndSubmitDate()) {
       startDateInput.value = previousStartDate;
+      endDateInput.value = previousEndDate;
     } else {
       previousStartDate = startDateInput.value;
     }
@@ -248,6 +250,8 @@
       endDateInput.value = previousEndDate;
     } else {
       previousEndDate = endDateInput.value;
+      print("end date change, not valid, previous end date is")
+      print(previousEndDate)
     }
   });
 
@@ -255,6 +259,20 @@
     var startDate = startDateInput.value;
     var endDate = endDateInput.value;
     var now = new Date();
+    // Create a new date object for the limit date, starting with today
+    var limitDateObj = new Date(now);
+
+// Add 3 months to the limit date
+limitDateObj.setMonth(limitDateObj.getMonth() + 3);
+
+// Adjust for potential month overflow (if adding 3 months to a date exceeds the month's days, it will correct itself)
+if (limitDateObj.getDate() < now.getDate()) {
+    limitDateObj.setDate(0); // Set to last day of the previous month
+}
+
+// Print the limitDateObj to verify
+console.log("Limit Date Object: ", limitDateObj);
+
     var yesterday = now.setDate(now.getDate() - 1);
 
     if (startDate && endDate) {
@@ -266,6 +284,9 @@
         return false;
       } else if (startDateObj > endDateObj) {
         alert("Invalid date range.");
+        return false;
+      } else if(endDateObj > limitDateObj){
+        alert("You cannot schedule more than 3 months out.")
         return false;
       } else {
         document.getElementById("dateRangeForm").submit();
