@@ -23,33 +23,51 @@
         <tr>
           <th>
             <div class="flex-container">
-              <button class="btn-link"
-              onclick="showFloorplanModal('{{room_image_url }}')">{{ room_name}}</button>
-              {%if room.owner%}
-              <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
-                {% csrf_token %}
-                <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% if room.owner.preference %}
-                      {{ room.owner.get_preference_display }}
-                    {% else %}
-                      Select Preference
-                    {% endif %}
-                  </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room.owner.id }}">
-                    {% for value, display in room.owner.Preference.choices %}
-                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room.owner.id }}" data-value="{{ value }}">{{ display }}</a>
-                    {% endfor %}
+              
+              <button class="btn-link" onclick="showFloorplanModal('{{ room_image_url }}')">{{ room_name }}</button>
+              {% if room.owner %}
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
+                
+                <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
+                  {% csrf_token %}
+                  <div class="dropdown preference-dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      {% if room.owner.preference %}
+                        {{ room.owner.get_preference_display }}
+                      {% else %}
+                        Select Preference
+                      {% endif %}
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="preferencesDropdownButton-{{ room.owner.id }}">
+                      {% for value, display in room.owner.Preference.choices %}
+                        <a class="dropdown-item preference-dropdown-item" href="#" onclick="selectPreference('{{ value }}', '{{ room.owner.id }}')">{{ display }}</a>
+                      {% endfor %}
+                    </div>
                   </div>
-                </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
-              </form>
-              {%else%}
-                  <button class ="btn-secondary"> Anyone can stay here</button>
-              {%endif%}
+                  <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
+                </form>
+              {% else %}
+                <form id="assignOwnerForm" method="post" action="{% url 'assign_owner' room.id%}">
+                  {% csrf_token %}
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Assign Roomless Member
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown">
+                      {% for member in roomless_members %}
+                        <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}')">{{ member.name }}</a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <input type="hidden" name="room_id" value="{{ room.id }}">
+                  <input type="hidden" name="member_id" id="memberIdInput">
+                </form>
+                <button class="btn btn-secondary">Anyone can stay here</button>
+              {% endif %}
             </div>
           </th>
         </tr>
+        
         {% for a_event in availability_events %}
           <tr>
             <td class="availability-cell">
@@ -212,6 +230,60 @@
 
 {%include "availability_modals.html"%}
 {%include "floorplan_img_modal.html"%}
+
+
+
+<!-- Modal HTML -->
+<div class="modal fade" id="removeOwnerModal" tabindex="-1" role="dialog" aria-labelledby="removeOwnerModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="removeOwnerModalLabel">Remove Owner</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to remove the owner from this room?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <form method="POST" action="{% url 'remove_owner' %}" id="removeOwnerForm">
+          {% csrf_token %}
+          <input type="hidden" name="room_id" id="room_id">
+          <button type="submit" class="btn btn-danger">Remove Owner</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal HTML -->
+<div class="modal fade" id="removeOwnerModal" tabindex="-1" role="dialog" aria-labelledby="removeOwnerModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="removeOwnerModalLabel">Remove Owner</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to add the owner from this room?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <form method="POST" action="{% url 'remove_owner' %}" id="removeOwnerForm">
+          {% csrf_token %}
+          <input type="hidden" name="room_id" id="room_id">
+          <button type="submit" class="btn btn-danger">Remove Owner</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
   // Ensure the script is loaded
@@ -407,13 +479,10 @@ endDateInput.addEventListener("change", function () {
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-  $(document).ready(function() {
-    $('.dropdown-item').click(function(e) {
+   $(document).ready(function() {
+    $('.preference-dropdown-item').click(function(e) {
         e.preventDefault();
-        alert("Submitting your preference. \nNote: Any change to your preferences will not affect guests already scheduled for your room.");
+        //alert("Submitting your preference. \nNote: Any change to your preferences will not affect guests already scheduled for your room.");
 
         var preference = $(this).data('value');
         var formId = $(this).data('target');
@@ -603,6 +672,30 @@ function submitExtendForm(eventId) {
 
 function submitShortenForm(eventId) {
   document.getElementById(`shortenForm-${eventId}`).submit();
+}
+
+
+
+
+
+$('#removeOwnerModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget); // Button that triggered the modal
+  var roomId = button.data('room-id'); // Extract info from data-* attributes
+  var modal = $(this);
+  modal.find('#room_id').val(roomId);
+});
+
+
+
+function selectMember(memberId) {
+  document.getElementById('memberIdInput').value = memberId;
+  document.getElementById('assignOwnerForm').submit();
+}
+
+function selectPreference(value, ownerId) {
+  var input = document.getElementById('preferenceInput-' + ownerId);
+  input.value = value;
+  document.getElementById('preferenceForm-' + ownerId).submit();
 }
 </script>
 {% endblock %}

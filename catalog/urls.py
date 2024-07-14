@@ -5,7 +5,8 @@ from django.urls import path
 from catalog.views.main_views import (
     home, all_guests, 
     rooms_master, my_guests, my_room,
-    buildings_offline_toggle, toggle_offline_section
+    buildings_offline_toggle, toggle_offline_section,
+    remove_owner, assign_owner
 )
 from catalog.views.occupancy_views import (
     delete_booking, extend_booking, shorten_booking,
@@ -47,6 +48,9 @@ urlpatterns = [
         # path('rooms_master/room/<int:room_id>/', rooms_master, name='rooms_master_with_room'),  # New URL pattern for rooms without owners
 
     path('no_person/', no_person, name='no_person'),
+        path('remove_owner/', remove_owner, name='remove_owner'),
+        path('assign_owner/<int:room_id>', assign_owner, name='assign_owner'),
+
 ]
 
 if settings.DEBUG:

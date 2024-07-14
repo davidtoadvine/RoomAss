@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -202,6 +203,7 @@ def my_guests(request):
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request, room_id=None):
     request.session['source_page'] = 'rooms_master'
+    roomless_members = Person.objects.filter(room__isnull=True)
 
     person_form = PersonSelectForm()
     room_form = RoomSelectForm()
@@ -215,10 +217,7 @@ def rooms_master(request, room_id=None):
             person_form = PersonSelectForm(request.POST)
             if person_form.is_valid():
                 selected_person = person_form.cleaned_data['person']
-                # try:
-                #     selected_person = selected_user.person
-                # except Person.DoesNotExist:
-                #     return redirect('no_person')
+                
                 try:
                     selected_room = selected_person.room
                 except Room.DoesNotExist:
@@ -243,7 +242,8 @@ def rooms_master(request, room_id=None):
 
       room_name = None
       context = {
-          'source_page': 'rooms_master'
+          'source_page': 'rooms_master',
+          'roomless_members':roomless_members
       }
 
       if room_id:
@@ -328,3 +328,33 @@ def toggle_offline_section(request):
     section.save()
 
     return redirect('buildings_offline_toggle')
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+
+def remove_owner(request):
+    if request.method == 'POST':
+        room_id = request.POST.get('room_id')
+        room = get_object_or_404(Room, id=room_id)
+
+        if request.user.is_superuser or request.user.has_perm('app.change_room'):
+            room.owner = None
+            room.save()
+            return redirect('rooms_master_with_room', room_id=room.id)
+        else:
+            return HttpResponseForbidden("You do not have permission to remove the owner.")
+    return redirect('rooms_master')
+
+def assign_owner(request, room_id):
+    print("ASSIGN OWNER")
+    if request.method == 'POST':
+        member_id = request.POST.get('member_id')
+
+        room = get_object_or_404(Room, id=room_id)
+        member = get_object_or_404(Person, id=member_id)
+
+        room.owner = member
+        room.save()
+
+        return redirect('rooms_master_with_room', room_id=room.id)
+    return redirect('rooms_master')
