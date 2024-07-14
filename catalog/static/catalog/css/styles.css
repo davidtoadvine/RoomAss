@@ -1,15 +1,28 @@
-#logout-form {
-  display: inline;
+
+
+/* General*/
+
+body{
+  background-color: rgba(238, 218, 195, 0.836)  !important;
+
 }
-#logout-form button {
-  margin: 0;
+
+
+a{
+  color:#f1e8e6!important;
+}
+a:hover{
+  color:#f1e8e6!important}
+
+table, th, td {
+  border: 1px solid #212529 !important; /* Set the border color */
+  border-collapse: collapse; /* Ensure borders don't double up */
 }
 .table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom:25px;
   margin-top: 25px;
-
 }
 
 .table th, .table td {
@@ -17,17 +30,9 @@
   padding: 8px;
   text-align: left;
 }
+
 .table th{
-  background-color: #f2f2f2;
-
-}
-#th-my-room{
-  border: 2px solid #212529 !important;
-  
-}
-
-.align-right {
-  text-align: right;
+  background-color: #f1e8e6 ;
 }
 
 .btn {
@@ -43,35 +48,6 @@
   background-color: #ac3b61;
   color: white;
 }
-
-
-
-/* Flexbox container for aligning items within a table cell */ 
-.flex-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.availability-cell {
-  background-color: lightblue;
-}
-.booked-cell {
-  background-color: lightcoral;
-}
-.hover-image {
-  display: none;
-  position: absolute;
-  z-index: 10;
-  max-width: 600px;  /* Set a maximum width for the image */
-  max-height: 600px; /* Set a maximum height for the image */
-}
-
-.button-container {
-  position: relative;
-  display: inline-block;
-}
-
 .booking-room-image {
   width: auto; /* Adjust the width as needed */
   height: auto;
@@ -98,25 +74,6 @@
 
 }
 
-.offline-room {
-  background-color: lightcoral;
-}
-
-body{
-  background-color: rgba(238, 218, 195, 0.836)  !important;
-
-}
-.navbar{
-  background-color: #123c69!important;
-}
-
-a{
-  color:#f1e8e6!important;
-}
-.navbar-brand{
-  color:#f1e8e6 !important;
-}
-
 /* Custom striped table colors */
 .table-striped tbody tr:nth-of-type(odd) {
   background-color: rgb(247, 228, 193) !important; /* Custom light grey for odd rows */
@@ -126,38 +83,11 @@ a{
   background-color: #bab2b5 !important; /* Custom light blue for even rows */
 }
 
-table, th, td {
-  border: 1px solid #212529 !important; /* Set the border color */
-  border-collapse: collapse; /* Ensure borders don't double up */
-}
-
-a:hover{
-  color:#f1e8e6!important}
-
-
-
-.nav-link:hover{
-  background-color: #ac3b61!important;
-}
-
-.nav-break:hover{
-  color:#f1e8e6!important;
-  background-color: #123c69!important;
-
-}
-
 .table-divider{
   background-color: #bab2b5 !important;
 
 }
 
-.offline-table{
-  background-color: rgb(247, 228, 193);
-}
-#nav-user-name{
-  color: #f1e8e6!important;
-  margin-right: 5px;
-}
 .dropdown-item{
   color:#212529 !important;
 }
@@ -165,15 +95,95 @@ a:hover{
 background-color: #ac3b61!important;
 }
 
+
+
+
+
+
+/* Logout form?*/
+#logout-form {
+  display: inline;
+}
+#logout-form button {
+  margin: 0;
+}
+
+
+
+/* my Room*/
+/* #th-my-room{
+  border: 2px solid #212529 !important;
+  
+} */
+
+/* Unsure*/
+.align-right {
+  text-align: right;
+}
+
+
+/* Flexbox container for aligning items within a table cell */ 
+/*  my room and rooms master?*/
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.availability-cell {
+  background-color: lightblue;
+}
+.booked-cell {
+  background-color: lightcoral;
+}
+
+
+.button-container {
+  position: relative;
+  display: inline-block;
+}
+
 .cell-create-availability{
   background-color: #bab2b5!important;
 }
+
+
+
+/* Toggle page*/
+
 .btn-offline{
   background-color: #ac3b61;
 }
+.offline-table{
+  background-color: rgb(247, 228, 193);
+}
+
 .btn-grey{
   padding-left:5px !important ;
   padding-right:5px !important ;
+
+}
+
+
+
+/* Default template*/
+.navbar{
+  background-color: #123c69!important;
+}
+.navbar-brand{
+  color:#f1e8e6 !important;
+}
+#nav-user-name{
+  color: #f1e8e6!important;
+  margin-right: 5px;
+}
+.nav-link:hover{
+  background-color: #ac3b61!important;
+}
+
+.nav-break:hover{
+  color:#f1e8e6!important;
+  background-color: #123c69!important;
 
 }
 .nav-link-admin{

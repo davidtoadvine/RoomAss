@@ -10,7 +10,7 @@
       <th id = "th-my-room"><div class="flex-container">
         <span>{{ room.owner }}'s Room</span>
 
-        <form id="preferenceForm-{{room_id}}" method="post" action="{% url 'edit_guest_preferences' room_id %}">
+        <form id="preferenceForm-{{room_id}}" method="post" action="{% url 'edit_guest_preferences' room_id room.owner.id %}">
           {% csrf_token %}
           <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{room_id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -89,7 +89,7 @@
         <th ><div class="flex-container">
           <span>{{ child.name }}'s Room</span>
 
-          <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
+          <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
             {% csrf_token %}
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{child.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

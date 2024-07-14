@@ -28,7 +28,7 @@
               {% if room.owner %}
                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
                 
-                <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.owner.id %}">
+                <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.id room.owner.id %}">
                   {% csrf_token %}
                   <div class="dropdown preference-dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -140,9 +140,9 @@
               onclick="showFloorplanModal('{{ events.room_image_url }}')"
             >{{ child.name}}'s Room
           </button>
-              <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' child.id %}">
+              <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
                 {% csrf_token %}
-                <div class="dropdown">
+                <div class="dropdown preference-dropdown">
                   <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ child.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if child.preference %}
                       {{ child.get_preference_display }}
@@ -152,7 +152,7 @@
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ child.id }}">
                     {% for value, display in child.Preference.choices %}
-                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
+                      <a class="dropdown-item preference-dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                   </div>
                 </div>
@@ -479,7 +479,7 @@ endDateInput.addEventListener("change", function () {
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   $(document).ready(function() {
+  $(document).ready(function() {
     $('.preference-dropdown-item').click(function(e) {
         e.preventDefault();
         //alert("Submitting your preference. \nNote: Any change to your preferences will not affect guests already scheduled for your room.");

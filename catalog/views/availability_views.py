@@ -195,15 +195,18 @@ def delete_availability(request, room_id):
 
 
 @login_required
-def edit_guest_preferences(request, person_id):
+def edit_guest_preferences(request, room_id, person_id):
+    
     source_page = request.session.get('source_page', 'my_room')
     person = get_object_or_404(Person, id=person_id)  # Adjust the model accordingly
-    print("redirect person is...")
-    print(person)
-    redirect_person = person
-    if redirect_person.parent:
-      redirect_person = redirect_person.parent
-    room_id = redirect_person.room.id
+    # print("redirect person is...")
+    # print(person)
+    # redirect_person = person
+
+
+    # if redirect_person.parent:
+    #   redirect_person = redirect_person.parent
+    # room_id = redirect_person.room.id
 
     if request.method == 'POST':
       

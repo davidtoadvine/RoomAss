@@ -28,7 +28,7 @@ urlpatterns = [
     path('edit_availability/<int:room_id>/', edit_availability, name='edit_availability'),
     path('delete_availability/<int:room_id>/', delete_availability, name='delete_availability'),
 
-    path('edit_guest_preferences/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),
+    path('edit_guest_preferences/<int:room_id>/<int:person_id>/', edit_guest_preferences, name='edit_guest_preferences'),
 
     path('all_guests/', all_guests, name='all_guests'),
     path('my_guests/', my_guests, name='my_guests'),
