@@ -1,13 +1,11 @@
 
-
-/* General*/
-
 body{
   background-color: rgba(238, 218, 195, 0.836)  !important;
-
+  font-size: 1rem;
 }
-
-
+h1{
+  margin-bottom: 1.5rem;
+}
 a{
   color:#f1e8e6!important;
 }
@@ -66,6 +64,7 @@ table, th, td {
   border: none;
   cursor: pointer;
   text-decoration: underline;
+
 }
 
 .btn-link:hover{
@@ -80,7 +79,7 @@ table, th, td {
 }
 
 .table-striped tbody tr:nth-of-type(even) {
-  background-color: #bab2b5 !important; /* Custom light blue for even rows */
+  background-color: #c4baba !important; /* Custom light blue for even rows */
 }
 
 .table-divider{
@@ -95,12 +94,6 @@ table, th, td {
 background-color: #ac3b61!important;
 }
 
-
-
-
-
-
-/* Logout form?*/
 #logout-form {
   display: inline;
 }
@@ -108,55 +101,6 @@ background-color: #ac3b61!important;
   margin: 0;
 }
 
-
-
-/* my Room*/
-/* #th-my-room{
-  border: 2px solid #212529 !important;
-  
-} */
-
-/* Unsure*/
-.align-right {
-  text-align: right;
-}
-
-
-/* Flexbox container for aligning items within a table cell */ 
-/*  my room and rooms master?*/
-.flex-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.availability-cell {
-  background-color: lightblue;
-}
-.booked-cell {
-  background-color: lightcoral;
-}
-
-
-.button-container {
-  position: relative;
-  display: inline-block;
-}
-
-.cell-create-availability{
-  background-color: #bab2b5!important;
-}
-
-
-
-/* Toggle page*/
-
-.btn-offline{
-  background-color: #ac3b61;
-}
-.offline-table{
-  background-color: rgb(247, 228, 193);
-}
 
 .btn-grey{
   padding-left:5px !important ;
@@ -166,7 +110,6 @@ background-color: #ac3b61!important;
 
 
 
-/* Default template*/
 .navbar{
   background-color: #123c69!important;
 }
@@ -193,4 +136,12 @@ background-color: #ac3b61!important;
   color: gold!important;
 
   background-color: #212529!important;
+}
+
+
+
+
+label {
+  font-size: 1.1rem;
+  font-weight: 600;
 }

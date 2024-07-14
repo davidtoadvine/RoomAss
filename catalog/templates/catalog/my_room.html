@@ -1,8 +1,18 @@
-{% extends "base_generic.html" %} {% block content %}
-<h1>{{room.owner}}'s Room{%if children%}s{%endif%}</h1>
+
+{% extends "base_generic.html" %}
 
 {%load static%}
 {% load custom_filters %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'catalog/css/my_room.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>{{room.owner}}'s Room{%if children%}s{%endif%}</h1>
+
+
 
 <table class="table">
   <tbody>

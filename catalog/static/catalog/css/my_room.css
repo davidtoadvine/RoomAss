@@ -1,0 +1,44 @@
+
+/* my Room*/
+#th-my-room{
+  font-size: 1.25rem !important;
+  font-weight: 600;
+  
+}
+
+/* Unsure*/
+.align-right {
+  text-align: right;
+}
+
+
+/* Flexbox container for aligning items within a table cell */ 
+/*  my room and rooms master?*/
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.availability-cell {
+  background-color: lightblue;
+  font-size: 1rem;
+}
+.booked-cell {
+  background-color: lightcoral;
+}
+
+
+.button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.cell-create-availability{
+  background-color: #bab2b5!important;
+}
+
+.btn-link{
+  font-size: 1.25rem !important;
+  font-weight: 600;
+}

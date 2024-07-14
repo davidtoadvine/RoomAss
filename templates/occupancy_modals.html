@@ -80,9 +80,10 @@
         </div>
         <div class="modal-body">
           <p>Are you sure you want to delete this event?</p>
-          <p>--{{o_event.guest_name}} staying in {{o_event.room_info}}--</p>
-          <p>--Start: {{o_event.start}}--</p>
-          <p>--End: {{o_event.end}}--</p>
+          <p>-------------------------------------------</p>
+          <p>{{o_event.guest_name}} staying in {{o_event.room_info}}</p>
+          <p>Start: {{o_event.start_date}}</p>
+          <p>End: {{o_event.end_date}}</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

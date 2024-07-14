@@ -26,6 +26,7 @@
 
     {%load static%}
     <link rel="stylesheet" href="{% static 'catalog/css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
   </head>
   <body>
     <header id = "header" class="header">

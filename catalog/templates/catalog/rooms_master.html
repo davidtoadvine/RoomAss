@@ -3,6 +3,13 @@
 {% load static %}
 {% load custom_filters %}
 
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'catalog/css/my_room.css' %}">
+{% endblock %}
+
+
 <h1>Rooms Master</h1>
 <form id="personSelectForm" method="post">
   {% csrf_token %}
