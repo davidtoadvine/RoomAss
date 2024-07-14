@@ -1,0 +1,13 @@
+#login-again-link{
+  color:#212529!important;
+}
+#reset-password-link{
+  color:#212529!important;
+
+}
+label{
+  font-size: 1.25rem!important;
+}
+table, th, tr, td{
+  border-color: transparent!important;
+}

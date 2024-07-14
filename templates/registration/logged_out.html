@@ -1,4 +1,14 @@
-{% extends "base_generic.html" %} {% block content %}
+{% extends "base_generic.html" %}
+
+
+{%load static%}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'catalog/css/logged_out.css' %}">
+{% endblock %}
+
+{% block content %}
 <p>Logged out!</p>
-<a href="{% url 'login'%}">Click here to login again.</a>
+<a id = "login-again-link" href="{% url 'login'%}">Click here to login again.</a>
 {% endblock %}

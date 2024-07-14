@@ -1,4 +1,15 @@
-{% extends "base_generic.html" %} {% block content %} {% if form.errors %}
+{% extends "base_generic.html" %}
+
+
+{%load static%}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'catalog/css/logged_out.css' %}">
+{% endblock %}
+
+
+{% block content %} {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %} {% if next %} {% if user.is_authenticated %}
 <p>
@@ -26,6 +37,6 @@
 </form>
 
 {# Assumes you set up the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+<p><a id= "login-again-link"href="{% url 'password_reset' %}">Lost password?</a></p>
 
 {% endblock %}
