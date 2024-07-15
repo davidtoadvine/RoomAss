@@ -49,3 +49,6 @@
   border: 1px solid black;
   display: inline-block;
 }
+#user-title{
+  margin-top: 2rem;
+}

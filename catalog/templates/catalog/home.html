@@ -62,14 +62,15 @@
       </td>
     </tr>
     {%endif%}
-    {% for room, availability_date, room_image_url in available_rooms_info %}
+    {% for room, availability_date, room_image_url,room_name in available_rooms_info %}
     <tr>
       
       <td>
         <button class="btn-link"
                       data-toggle="modal" 
                       data-target="#floorplanModal" 
-                    >{{ room.section.building.name }} / {{ room.section.name }} / {{room.number}}</button>
+                      onclick="showFloorplanModal('{{ room_image_url }}' , '{{room_name}}')"
+                    >{{room_name}}</button>
         
       </td>
  
@@ -122,13 +123,12 @@
 
 
 
-
 <!-- Floorplan Modal -->
-<div class="modal fade" id="floorplanModal" tabindex="-1" role="dialog" aria-labelledby="floorplanModalLabel" aria-hidden="true">
+{% comment %} <div class="modal fade" id="floorplanModal" tabindex="-1" role="dialog" aria-labelledby="floorplanModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="floorplanModalLabel">Room View</h5>
+        <h5 class="modal-title" id="floorplanModalLabel">{{room_name}}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -141,12 +141,14 @@
       </div>
     </div>
   </div>
-</div>
+</div>  {% endcomment %}
 
 
 
 
     {% endfor %}
+    {%include "floorplan_img_modal.html"%}
+
   </tbody>
 </table>
 
@@ -161,7 +163,7 @@
       <form id="bookingForm" method="post" action="{% url 'create_booking' %}">
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title" id="bookingModalLabel">Confirm Booking</h5>
+          <h5 class="modal-title label" id="bookingModalLabel">Confirm Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -185,9 +187,9 @@
                 <label for="hostName">Host Name</label>
                 <input type="text" class="form-control" id="hostName" name="host_name" value="{{user}}" readonly required />
               </div>
-              <p>Start Date: <span id="bookingStartDate"></span></p>
+              <p id = 'test'>Start Date: <span id="bookingStartDate"></span></p>
               <p>End Date: <span id="bookingEndDate"></span></p>
-
+              <p>--------------------------</p>
               <p>Building: <span id="bookingBuildingName"></span></p>
               <p>Section: <span id="bookingSectionName"></span></p>
               <p>Room Number: <span id="bookingRoomNumber"></span></p>
@@ -222,6 +224,9 @@
   // gathering date information
   var startDateInput = document.getElementById("start_date");
   var endDateInput = document.getElementById("end_date");
+
+  var startDateObj = new Date(startDateInput.value);
+  var endDateObj = new Date(endDateInput.value);
   var guestTypeInput = document.getElementById("guestType")
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
@@ -260,7 +265,8 @@
 
   function validateAndSubmitDate() {
     var startDate = startDateInput.value;
-    var endDate = endDateInput.value;
+    var endDate = endDateInput.value;  
+
     var now = new Date();
     // Create a new date object for the limit date, starting with today
     var limitDateObj = new Date(now);
@@ -319,8 +325,8 @@ console.log("Limit Date Object: ", limitDateObj);
     $("#bookingRoomNumber").text(roomNumber);
     $("#bookingBuildingName").text(buildingName);
     $("#bookingSectionName").text(sectionName);
-    $("#bookingStartDate").text(startDate);
-    $("#bookingEndDate").text(endDate);
+    $("#bookingStartDate").text(startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+    $("#bookingEndDate").text(endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
     $("bookingGuestType").val(guestType);
     // Set the room image
     if (roomImageUrl) {
@@ -351,6 +357,13 @@ console.log("Limit Date Object: ", limitDateObj);
 
 
 
+ // Function to show the floorplan modal with the correct image
+ function showFloorplanModal(imageUrl, roomName) {
+  document.getElementById('floorplanImage').src = imageUrl;
+  document.getElementById('floorplanModalLabel').innerText = roomName;
+  console.log("roomname" + roomName)
+  $('#floorplanModal').modal('show');
+}
 
 
 </script>

@@ -69,14 +69,15 @@ def home(request):
 
     available_rooms_info = []
     for room in rooms:
-          
+        
         if room.is_available(start_date, end_date) and (not room.owner or int(guest_type) >= int(room.owner.preference)):
           potential_end_date = room.get_last_available_date(start_date)
           if room.image:
             room_image_url = room.image.url
           else:
             room_image_url = "" 
-          available_rooms_info.append((room, potential_end_date, room_image_url))
+          room_name = str(room)
+          available_rooms_info.append((room, potential_end_date, room_image_url, room_name))
 
     context = {
         'available_rooms_info': available_rooms_info,
@@ -104,12 +105,12 @@ def all_guests(request):
             'creator': event.creator,
             'start_date': event.start,
             'end_date': event.end,
-            'room_name': None,
+            'room_name': str(event.calendar.room),
             'room_id': event.calendar.room.id,
             'room_owner': room_owner
             }
       
-        event_info['room_name'] = str(event.calendar.room)
+      
         
         processed_events.append(event_info)
 
@@ -137,13 +138,19 @@ def my_room(request):
 
     children_events = {}
     for child in children:
-        child_calendar = Room.objects.filter(owner=child).first().calendar
-        child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
-        child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
-        children_events[child] = {
-            'availability': child_availability_events,
-            'occupancy': child_occupancy_events
-        }
+                  child_room = Room.objects.get(owner=child)
+                  if child_room and child_room.calendar:
+                      child_calendar = child_room.calendar
+                      child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
+                      child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
+                      children_events[child] = {
+                          'availability': child_availability_events,
+                          'occupancy': child_occupancy_events,
+                          'room_image_url': child_room.image.url if child_room.image else '',
+                          'room_name': str(child.room)
+                      }
+
+        
 
     # Get the current local date and the next day's date
     local_now = timezone.localtime(timezone.now())
@@ -159,7 +166,10 @@ def my_room(request):
         'children': children,
         'start_date': tomorrow.strftime('%Y-%m-%d'),
         'end_date': dayafter.strftime('%Y-%m-%d'),
-        'source_page': 'my_room'
+        'source_page': 'my_room',
+        'room_image_url': room.image.url if room.image else '',
+        'room_name': room
+
     }
     return render(request, 'catalog/my_room.html', context)
   else:
@@ -255,7 +265,7 @@ def rooms_master(request, room_id=None):
           room_name = str(selected_room)
           if selected_room.owner:
               selected_person = selected_room.owner
-              room_name = f"{selected_person}'s room"
+              room_name = str(selected_room)
 
       local_now = timezone.localtime(timezone.now())
       tomorrow = local_now.date() + timedelta(days=1)
@@ -292,7 +302,7 @@ def rooms_master(request, room_id=None):
               children_events = {}
   
               for child in children:
-                  child_room = Room.objects.filter(owner=child).first()
+                  child_room = Room.objects.get(owner=child)
                   if child_room and child_room.calendar:
                       child_calendar = child_room.calendar
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
@@ -301,7 +311,7 @@ def rooms_master(request, room_id=None):
                           'availability': child_availability_events,
                           'occupancy': child_occupancy_events,
                           'room_image_url': child_room.image.url if child_room.image else '',
-                          'room_name': f"{child.name}'s Room"
+                          'room_name': str(child_room),
                       }
   
               context.update({

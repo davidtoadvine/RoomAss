@@ -29,14 +29,14 @@
 </div>
 
 {% if room %}
-    <h2>{{room.name }}</h2>
+    <h2 id = "user-title">{{room.owner }}'s Room</h2>
     <table class="table">
       <tbody>
         <tr>
           <th>
             <div class="flex-container">
               
-              <button class="btn-link" onclick="showFloorplanModal('{{ room_image_url }}')">{{ room_name }}</button>
+              <button class="btn-link" onclick="showFloorplanModal( '{{ room_image_url }}' , '{{room_name}}')">{{ room.owner }}'s Room</button>
               {% if room.owner %}
                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
                 
@@ -84,7 +84,7 @@
           <tr>
             <td class="availability-cell">
               <div class="flex-container">
-                <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+                <span><em>Made Available:</em> {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
                   <button class = "btn-grey" type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{room_id}}')">Edit</button>
                   <button class = "btn-grey" type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{room_id}}')">Delete</button>
@@ -99,8 +99,8 @@
                 <td class="booked-cell" style="padding-left: 50px;">
                   <div class = "flex-container">
 
-                  <span>
-                  Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}
+                  <span><em>
+                  Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
                   </span>
                   <div>
                     <button class="btn-grey"
@@ -149,7 +149,7 @@
             <div class="flex-container">
               <button
               class="btn-link"
-              onclick="showFloorplanModal('{{ events.room_image_url }}')"
+              onclick="showFloorplanModal('{{ events.room_image_url }}', '{{events.room_name}}')"
             >{{ child.name}}'s Room
           </button>
               <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
@@ -177,7 +177,7 @@
           <tr>
             <td class="availability-cell">
               <div class="flex-container">
-                <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+                <span><em>Made Available:</em> {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
                 <div>
                   <button class = "btn-grey" type="button" onclick="showEditAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}', '{{room_id}}')">Edit</button>
                   <button class = "btn-grey" type="button" onclick="showDeleteAvailabilityForm('{{ a_event.id }}', '{{ a_event.start }}', '{{ a_event.end }}')">Delete</button>
@@ -191,7 +191,7 @@
                 <td class="booked-cell" style="padding-left: 50px;">
                   <div class = "flex-container">
 
-                  <span>Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</span>
+                  <span><em>Booked:</em> [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</span>
                 <div>
                   <button class="btn-grey"
                     data-toggle="modal" 
@@ -535,8 +535,10 @@ $(document).ready(function() {
 
 
  // Function to show the floorplan modal with the correct image
- function showFloorplanModal(imageUrl) {
+ function showFloorplanModal(imageUrl, roomName) {
   document.getElementById('floorplanImage').src = imageUrl;
+  document.getElementById('floorplanModalLabel').innerText = roomName;
+
   $('#floorplanModal').modal('show');
 }
 

@@ -30,6 +30,8 @@
                     <td><button class="btn-link"
                       data-toggle="modal" 
                       data-target="#floorplanModal" 
+                      onclick="showFloorplanModal('{{ event.room_image_url }}' , '{{event.room_name}}')"
+
                     >{{event.room_name}}</button>
                     </td>
                     <td>{{event.room_owner}}</td>
@@ -58,24 +60,16 @@
     </table>
 </div>
 
-<!-- Floorplan Modal -->
-<div class="modal fade" id="floorplanModal" tabindex="-1" role="dialog" aria-labelledby="floorplanModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="floorplanModalLabel">Room View</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <img src="{{ image_url }}" alt="Room Image" class = "img-fluid">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+ {%include "floorplan_img_modal.html"%}
 
+
+<script>
+
+  // Function to show the floorplan modal with the correct image
+  function showFloorplanModal(imageUrl, roomName) {
+   document.getElementById('floorplanImage').src = imageUrl;
+   document.getElementById('floorplanModalLabel').innerText = roomName;
+   console.log("roomname" + roomName)
+   $('#floorplanModal').modal('show');
+ }</script>
 {% endblock %}

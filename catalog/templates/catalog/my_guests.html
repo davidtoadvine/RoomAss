@@ -31,12 +31,13 @@
                         <button class="btn-link"
                                 data-toggle="modal" 
                                 data-target="#floorplanModal" 
-                                data-image-url="{{ o_event.image_url }}">
-                            {{ o_event.room_name }}
+                                data-image-url="{{ o_event.image_url }}"
+                                onclick="showFloorplanModal('{{ o_event.room_image_url }}' , '{{o_event.room_name}}')">
+                                {{ o_event.room_name }}
                         </button>
                     </td>
                     <td>{{o_event.room_owner}}</td>
-                    <td>{{o_event.last_available|date:"F d"}}</td>
+                    <td>{{o_event.last_available|date:"F d, Y"}}</td>
                     <td>
                       <button class="btn btn-primary"
                               data-toggle="modal" 
@@ -209,5 +210,12 @@ if (limitDateObj.getDate() < now.getDate()) {
     }
   });
 
+ // Function to show the floorplan modal with the correct image
+ function showFloorplanModal(imageUrl, roomName) {
+  document.getElementById('floorplanImage').src = imageUrl;
+  document.getElementById('floorplanModalLabel').innerText = roomName;
+  console.log("roomname" + roomName)
+  $('#floorplanModal').modal('show');
+}
 </script>
 {% endblock %}

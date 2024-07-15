@@ -18,7 +18,11 @@
   <tbody>
     <tr>
       <th id = "th-my-room"><div class="flex-container">
-        <span>{{ room.owner }}'s Room</span>
+        <button
+        class="btn-link"
+        onclick="showFloorplanModal('{{ room_image_url }}' , '{{room_name}}')"
+      >{{ room.owner}}'s Room
+    </button>
 
         <form id="preferenceForm-{{room_id}}" method="post" action="{% url 'edit_guest_preferences' room_id room.owner.id %}">
           {% csrf_token %}
@@ -48,7 +52,7 @@
 
           <div class="flex-container">
 
-          <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+          <span><em>Made Available:</em> {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
           <div>
           <button class = "btn-grey" type = "submit"
           onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}', '{{request.user.id}}')">Edit</button>
@@ -64,7 +68,7 @@
       {% for o_event in occupancy_events %}
         {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
           <tr>
-            <td class = "booked-cell" style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+            <td class = "booked-cell" style="padding-left: 50px;" ><em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}</td>
           </tr>
           
           
@@ -97,8 +101,11 @@
     <tbody>
       <tr>
         <th ><div class="flex-container">
-          <span>{{ child.name }}'s Room</span>
-
+          <button
+          class="btn-link"
+          onclick="showFloorplanModal('{{ events.room_image_url }}', '{{events.room_name}}' )"
+        >{{ child.name}}'s Room
+      </button>
           <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
             {% csrf_token %}
             <div class="dropdown">
@@ -124,7 +131,7 @@
       {% for a_event in events.availability %}
         <tr >
           <td class = "availability-cell" ><div class="flex-container">
-            <span>Available: {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
+            <span><em>Made Available:</em> {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
             <div>
               <button class = "btn-grey" type = "submit"
               onclick = "showEditAvailabilityForm('{{a_event.id}}', '{{a_event.start}}', '{{a_event.end}}')">Edit</button>
@@ -139,7 +146,7 @@
       {% for o_event in events.occupancy %}
         {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
           <tr>
-              <td class = "booked-cell" style="padding-left: 50px;" >Booked: [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
+              <td class = "booked-cell" style="padding-left: 50px;" ><em>Booked:</em> [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</td>
             
           </tr>
           {%endif%}
@@ -162,6 +169,7 @@
 {% endfor %}
 
 {% include "availability_modals.html" %}
+{%include "floorplan_img_modal.html"%}
 
 
 <script>
@@ -376,6 +384,23 @@ function submitAvailabilityForm() {
 }
 
 
+
+
+
+$(document).ready(function() {
+  $('#floorplanModal').on('shown.bs.modal', function () {
+      console.log('Image src:', $('#floorplanModal img').attr('src'));
+  });
+});
+
+
+ // Function to show the floorplan modal with the correct image
+  function showFloorplanModal(imageUrl, roomName) {
+  document.getElementById('floorplanImage').src = imageUrl;
+  document.getElementById('floorplanModalLabel').innerText = roomName;
+  console.log("roomname" + roomName)
+  $('#floorplanModal').modal('show');
+}
 
 </script>
 
