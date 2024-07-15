@@ -11,6 +11,9 @@
 
 
 <h1>Rooms Master</h1>
+
+<div id = "box-rooms-master-forms">
+
 <form id="personSelectForm" method="post">
   {% csrf_token %}
   {{ person_form.person.label_tag }} {{ person_form.person }}
@@ -22,6 +25,8 @@
   {{ room_form.room.label_tag }} {{ room_form.room }}
   <input type="hidden" name="room_form_submit" value="1">
 </form>
+
+</div>
 
 {% if room %}
     <h2>{{room.name }}</h2>

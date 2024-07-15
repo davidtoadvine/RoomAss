@@ -96,18 +96,21 @@ def all_guests(request):
 
     processed_events = []
     for event in occupancy_events:
+        room_owner = "Unassigned"
+        if event.calendar.room.owner:
+            room_owner = event.calendar.room.owner
         event_info = {
             'guest_name': event.guest_name,
             'creator': event.creator,
             'start_date': event.start,
             'end_date': event.end,
             'room_name': None,
-            'room_id': event.calendar.room.id
-        }
-        if event.calendar.room.owner:
-            event_info['room_name'] = str( event.calendar.room.section) + f" / {event.calendar.room.owner}'s room"
-        else:
-            event_info['room_name'] = str(event.calendar.room)
+            'room_id': event.calendar.room.id,
+            'room_owner': room_owner
+            }
+      
+        event_info['room_name'] = str(event.calendar.room)
+        
         processed_events.append(event_info)
 
     context = {
@@ -173,6 +176,9 @@ def my_guests(request):
     processed_events = []
 
     for event in occupancy_events:
+        room_owner = "Unassigned"
+        if event.calendar.room.owner:
+            room_owner = event.calendar.room.owner
         event_info = {
             'id': event.id,
             'guest_name': event.guest_name,
@@ -180,15 +186,13 @@ def my_guests(request):
             'start_date': event.start,
             'end_date': event.end,
             'last_available': event.calendar.room.get_last_available_date(event.end),
-            'room_info': None,
+            'room_name': str(event.calendar.room),
             'image_url': event.calendar.room.image.url if event.calendar.room.image else '',  # Store the image URL for each event
-
+            'room_owner': room_owner
         }
         print(event_info)
-        if event.calendar.room.owner:
-            event_info['room_info'] = f"{event.calendar.room.owner}'s room, {event.calendar.room.section.building}"
-        else:
-            event_info['room_info'] = f"Room #{event.calendar.room.number}, {event.calendar.room.section.building}"
+    
+        event_info['room_name'] = str(event.calendar.room)
         processed_events.append(event_info)
 
 

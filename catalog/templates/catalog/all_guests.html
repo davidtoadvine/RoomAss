@@ -12,7 +12,8 @@
                 <th>Host Name</th>
                 <th>Start Date</th>
                 <th>End Date</th>
-                <th>Location</th>
+                <th>Building / Section / Room #</th>
+                <th>Owner</th>
                 {% if request.user.is_superuser%}
                 <th></th>
                 {%endif%}
@@ -31,7 +32,7 @@
                       data-target="#floorplanModal" 
                     >{{event.room_name}}</button>
                     </td>
-
+                    <td>{{event.room_owner}}</td>
 
                     {% if request.user.is_superuser%}
                 <td>

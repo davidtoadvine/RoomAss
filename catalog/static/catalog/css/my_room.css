@@ -42,3 +42,10 @@
   font-size: 1.25rem !important;
   font-weight: 600;
 }
+
+#box-rooms-master-forms{
+  background-color: #bab2b5!important;
+  padding: .5rem;
+  border: 1px solid black;
+  display: inline-block;
+}

@@ -31,6 +31,8 @@ table, th, td {
 
 .table th{
   background-color: #f1e8e6 ;
+  background-color: #c4baba ;
+
 }
 
 .btn {
@@ -79,7 +81,8 @@ table, th, td {
 }
 
 .table-striped tbody tr:nth-of-type(even) {
-  background-color: #c4baba !important; /* Custom light blue for even rows */
+  background-color: #f1e8e6 !important; /* Custom light blue for even rows */
+
 }
 
 .table-divider{
@@ -144,4 +147,11 @@ background-color: #ac3b61!important;
 label {
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+
+#box-home-forms{
+  background-color: #f1e8e6!important;
+  padding: .5rem!important;
+  border: 1px solid black!important;
 }

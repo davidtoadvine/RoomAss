@@ -1,6 +1,7 @@
 {% extends "base_generic.html" %} {% block content %}
 <h1>Available Guest Rooms</h1>
 
+<div id = "box-home-forms">
 <form method="post" action="{% url 'home' %}" id="dateRangeForm">
   {% csrf_token %}
   <div class="form-row">
@@ -34,6 +35,8 @@
   </div>
   </div>
 </form>
+</div>
+
 
 <table class="table table-striped">
   <thead>
