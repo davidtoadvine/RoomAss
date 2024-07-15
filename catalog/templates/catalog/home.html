@@ -123,31 +123,10 @@
 
 
 
-<!-- Floorplan Modal -->
-{% comment %} <div class="modal fade" id="floorplanModal" tabindex="-1" role="dialog" aria-labelledby="floorplanModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="floorplanModalLabel">{{room_name}}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <img src="{{ room_image_url }}" alt="Room Image" class = "img-fluid">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>  {% endcomment %}
-
-
-
 
     {% endfor %}
     {%include "floorplan_img_modal.html"%}
+    {%include "occupancy_modals.html"%}
 
   </tbody>
 </table>
@@ -156,60 +135,6 @@
 
 
 
-<!-- Booking Modal -->
-<div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <form id="bookingForm" method="post" action="{% url 'create_booking' %}">
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title label" id="bookingModalLabel">Confirm Booking</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <!-- Form Column -->
-            <div class="col-md-4">
-              <input type="hidden" name="room_id" id="bookingRoomId" />
-              <input type="hidden" name="guest_type" id="bookingGuestType" value="{{guest_type}}" />
-
-              <input type="hidden" name="start_date" id="bookingStartDateHidden" />
-              <input type="hidden" name="end_date" id="bookingEndDateHidden" />
-
-              <div class="form-group">
-                <label for="guestName">Guest Name</label>
-                <input type="text" class="form-control" id="guestName" name="guest_name" required />
-              </div>
-
-              <div class="form-group">
-                <label for="hostName">Host Name</label>
-                <input type="text" class="form-control" id="hostName" name="host_name" value="{{user}}" readonly required />
-              </div>
-              <p id = 'test'>Start Date: <span id="bookingStartDate"></span></p>
-              <p>End Date: <span id="bookingEndDate"></span></p>
-              <p>--------------------------</p>
-              <p>Building: <span id="bookingBuildingName"></span></p>
-              <p>Section: <span id="bookingSectionName"></span></p>
-              <p>Room Number: <span id="bookingRoomNumber"></span></p>
-              
-           
-            </div>
-            <!-- Image Column -->
-            <div class="col-md-8">
-              <img id="bookingRoomImage" src="" alt="Room Image" class="img-fluid booking-room-image" />
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="submitBookingForm()">Confirm Booking</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 {% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
     </div>
   </div>

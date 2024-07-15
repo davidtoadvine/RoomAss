@@ -52,3 +52,20 @@
 #user-title{
   margin-top: 2rem;
 }
+
+#assignOwnerForm{
+  display: inline-block;
+}
+
+.owner-button{
+  display:inline-block;
+  
+}
+
+#btn-preference-grey{
+  background-color: rgba(128, 128, 128, 0.836);
+}
+
+.booked-text{
+  margin-left: .9rem;
+}

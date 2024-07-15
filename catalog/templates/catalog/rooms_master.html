@@ -29,17 +29,24 @@
 </div>
 
 {% if room %}
+    {%if room.owner%}
     <h2 id = "user-title">{{room.owner }}'s Room</h2>
+    {%else%}
+    <h2 id = "user-title">{{room_name}}</h2>
+    {%endif%}
     <table class="table">
       <tbody>
         <tr>
           <th>
+            
             <div class="flex-container">
               
-              <button class="btn-link" onclick="showFloorplanModal( '{{ room_image_url }}' , '{{room_name}}')">{{ room.owner }}'s Room</button>
+
               {% if room.owner %}
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
-                
+              <div>
+              <button class="btn-link" onclick="showFloorplanModal( '{{ room_image_url }}' , '{{room_name}}')">{{ room.owner }}'s Room</button>
+              <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
+              </div>
                 <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.id room.owner.id %}">
                   {% csrf_token %}
                   <div class="dropdown preference-dropdown">
@@ -58,12 +65,17 @@
                   </div>
                   <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
                 </form>
+
+
               {% else %}
-                <form id="assignOwnerForm" method="post" action="{% url 'assign_owner' room.id%}">
+              <div >
+              <button class=" btn-link" onclick="showFloorplanModal( '{{ room_image_url }}' , '{{room_name}}')">{{ room_name }}</button>
+
+              <form id="assignOwnerForm" method="post" action="{% url 'assign_owner' room.id%}">
                   {% csrf_token %}
                   <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Assign Roomless Member
+                    <button class="btn btn-secondary dropdown-toggle owner-button" type="button" id="roomlessMembersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Assign to a Roomless Member
                     </button>
                     <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown">
                       {% for member in roomless_members %}
@@ -74,9 +86,18 @@
                   <input type="hidden" name="room_id" value="{{ room.id }}">
                   <input type="hidden" name="member_id" id="memberIdInput">
                 </form>
-                <button class="btn btn-secondary">Anyone can stay here</button>
+
+              </div>
+
+                <button id = "btn-preference-grey" class="btn btn-secondary">Anyone can stay here</button>
               {% endif %}
+
+
+              
             </div>
+
+
+
           </th>
         </tr>
         
@@ -99,7 +120,7 @@
                 <td class="booked-cell" style="padding-left: 50px;">
                   <div class = "flex-container">
 
-                  <span><em>
+                  <span class = "booked-text"><em>
                   Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
                   </span>
                   <div>
@@ -191,7 +212,7 @@
                 <td class="booked-cell" style="padding-left: 50px;">
                   <div class = "flex-container">
 
-                  <span><em>Booked:</em> [{{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}] --- {{ o_event.title|slice:"9:" }}</span>
+                  <span class = "booked-text"><em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}</span>
                 <div>
                   <button class="btn-grey"
                     data-toggle="modal" 

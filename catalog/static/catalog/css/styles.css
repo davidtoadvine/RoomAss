@@ -1,6 +1,6 @@
 
 body{
-  background-color: rgba(238, 218, 195, 0.836)  !important;
+  background-color: rgba(238, 218, 195, 0.479)  !important;
   font-size: 1rem;
 }
 h1{
@@ -158,4 +158,8 @@ label, #bookingModalLabel {
   background-color: #f1e8e6!important;
   padding: .5rem!important;
   border: 1px solid black!important;
+}
+
+.test{
+  display:inline-block;
 }
