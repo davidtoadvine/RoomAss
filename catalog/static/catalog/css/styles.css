@@ -1,9 +1,11 @@
 
 body{
   background-color: rgba(238, 218, 195, 0.479)  !important;
+  background-color: rgb(211, 216, 223)  !important;
+
   font-size: 1rem;
 }
-h1{
+h1, h2{
   margin-bottom: 1.5rem;
 }
 a{

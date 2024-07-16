@@ -9,7 +9,7 @@ from catalog.utils import date_to_aware_datetime, merge_overlapping_events, hand
 
 
 @login_required
-def create_availability(request, room_id):
+def create_availability(request, room_id = None, section_id = None):
       if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_room')
         form = CreateAvailabilityForm(request.POST)
@@ -42,17 +42,23 @@ def create_availability(request, room_id):
             availability_event.save()
             merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
 
-            if source_page == 'rooms_master':
-              return redirect('rooms_master_with_room', room_id = redirect_room_id)
+            if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+            elif source_page == 'rooms_master' and room_id:
+              return redirect('rooms_master_with_room', room_id = room_id)
+         
+            
             return redirect('my_room')
         
         # Handle form invalid case
-        if source_page == 'rooms_master':
-            return redirect('rooms_master_with_room', room_id=redirect_room_id)
+        if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+        elif source_page == 'rooms_master' and room_id:
+              return redirect('rooms_master_with_room', room_id = room_id)
         return redirect('my_room')
         
 @login_required
-def edit_availability(request, room_id):
+def edit_availability(request, room_id = None, section_id = None):
     
     if request.method == 'POST':
         print('method is post')
@@ -132,20 +138,27 @@ def edit_availability(request, room_id):
 
             print('edits source page before redirect is...')
             print(source_page)
-            if source_page == 'rooms_master':
+            if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+            elif source_page == 'rooms_master' and room_id:
               return redirect('rooms_master_with_room', room_id = room_id)
+
             
             return redirect('my_room')  # Redirect to a relevant page after saving
         # Handle form invalid case
-        if source_page == 'rooms_master':
-            return redirect('rooms_master_with_room', room_id=room_id)
+        if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+        elif source_page == 'rooms_master' and room_id:
+              return redirect('rooms_master_with_room', room_id = room_id)
+        
+
         return redirect('my_room')
     
     print('method not post?')
     return HttpResponse("Invalid request method", status=405)
 
 @login_required
-def delete_availability(request, room_id):
+def delete_availability(request, room_id = None, section_id = None):
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_room')
         form = DeleteAvailabilityForm(request.POST)
@@ -181,32 +194,28 @@ def delete_availability(request, room_id):
 
             avail_event.delete()
 
-            if source_page == 'rooms_master':
-                return redirect('rooms_master_with_room', room_id=room_id)
+            if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+            elif source_page == 'rooms_master' and room_id:
+              return redirect('rooms_master_with_room', room_id = room_id)
                 
             return redirect('my_room')
         
         # Handle form invalid case
-        if source_page == 'rooms_master':
-            return redirect('rooms_master_with_room', room_id=room_id)
+        if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+        elif source_page == 'rooms_master' and room_id:
+              return redirect('rooms_master_with_room', room_id = room_id)
         return redirect('my_room') 
 
     return redirect('my_room')
 
 
 @login_required
-def edit_guest_preferences(request, room_id, person_id):
+def edit_guest_preferences(request, room_id, person_id, section_id = None):
     
     source_page = request.session.get('source_page', 'my_room')
     person = get_object_or_404(Person, id=person_id)  # Adjust the model accordingly
-    # print("redirect person is...")
-    # print(person)
-    # redirect_person = person
-
-
-    # if redirect_person.parent:
-    #   redirect_person = redirect_person.parent
-    # room_id = redirect_person.room.id
 
     if request.method == 'POST':
       
@@ -214,8 +223,10 @@ def edit_guest_preferences(request, room_id, person_id):
         if form.is_valid():
             form.save()
 
-            if source_page == 'rooms_master':
-              return redirect('rooms_master_with_room', room_id=room_id)
+            if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+            elif source_page == 'rooms_master' and room_id:
+              return redirect('rooms_master_with_room', room_id = room_id)
             return redirect('my_room') 
         
     # FIXME unsure if what is below here ever happens

@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from catalog.forms import DateRangeForm, PersonSelectForm, RoomSelectForm
+from catalog.forms import DateRangeForm, PersonSelectForm, RoomSelectForm, SectionSelectForm
 from catalog.models import CustomEvent, Room, Person, Building, Section
 from catalog.utils import date_to_aware_datetime
 
@@ -221,12 +221,14 @@ def my_guests(request):
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
-def rooms_master(request, room_id=None):
+def rooms_master(request, room_id=None, section_id=None):
+    print("ROOMS MASTER")
     request.session['source_page'] = 'rooms_master'
     roomless_members = Person.objects.filter(room__isnull=True)
 
     person_form = PersonSelectForm()
     room_form = RoomSelectForm()
+    section_form = SectionSelectForm()
 
     selected_person = None
     selected_room = None
@@ -251,6 +253,15 @@ def rooms_master(request, room_id=None):
             if room_form.is_valid():
                 selected_room = room_form.cleaned_data['room']
                 return redirect('rooms_master_with_room', room_id=selected_room.id)
+            
+        elif 'section_form_submit' in request.POST:
+            print("SECTION FORM")
+            section_form = SectionSelectForm(request.POST)
+            if section_form.is_valid():
+                selected_room = section_form.cleaned_data['section']
+                return redirect('rooms_master_with_section', section_id=selected_room.id)
+            
+        
         else:
             return redirect('rooms_master')
 
@@ -258,7 +269,6 @@ def rooms_master(request, room_id=None):
 
 
     else:  
-      print('rooms master NOT A POST')
 
       room_name = None
       context = {
@@ -266,30 +276,41 @@ def rooms_master(request, room_id=None):
           'roomless_members':roomless_members
       }
 
-      if room_id:
-          selected_room = get_object_or_404(Room, id=room_id)
-          room_name = str(selected_room)
-          if selected_room.owner:
-              selected_person = selected_room.owner
-              room_name = str(selected_room)
-
       local_now = timezone.localtime(timezone.now())
       tomorrow = local_now.date() + timedelta(days=1)
       dayafter = tomorrow + timedelta(days=1)
-  
-  
+    
+    
       context.update( {
-          'person_form': person_form,
-          'room_form': room_form,
-          'selected_person': selected_person,
-          'room': selected_room,
-          'room_name': room_name,
-          'room_id': room_id,
-          'start_date': tomorrow.strftime('%Y-%m-%d'),
-          'end_date': dayafter.strftime('%Y-%m-%d'),
+            'person_form': person_form,
+            'room_form': room_form,
+            'section_form':section_form,
+            'start_date': tomorrow.strftime('%Y-%m-%d'),
+            'end_date': dayafter.strftime('%Y-%m-%d'),
       })
-  
-      if selected_room:
+
+      if room_id:
+        print("ROOM ID")
+        selected_room = get_object_or_404(Room, id=room_id)
+        room_name = str(selected_room)
+        if selected_room.owner:
+              selected_person = selected_room.owner
+              room_name = str(selected_room)
+
+        local_now = timezone.localtime(timezone.now())
+        tomorrow = local_now.date() + timedelta(days=1)
+        dayafter = tomorrow + timedelta(days=1)
+    
+    
+        context.update( {
+            'selected_person': selected_person,
+            'room': selected_room,
+            'room_name': room_name,
+            'room_id': room_id,
+            
+        })
+    
+        if selected_room:
           calendar = selected_room.calendar
           availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
           occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
@@ -331,7 +352,52 @@ def rooms_master(request, room_id=None):
                   'children': children,
 
               })
+      
+      elif section_id:
+        print("SECTION ID")
+        selected_section = get_object_or_404(Section, id=section_id)
+        rooms_in_section = Room.objects.filter(section=selected_section)
+
+        section_events = {}
   
+        for room in rooms_in_section:
+            print(room.id)
+            print(room.owner)
+            if room and room.calendar:
+                calendar = room.calendar
+                availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
+                occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start')
+                events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
+                room_title = str(room)
+                if room.owner:
+                    room_title = str(room.owner) + "'s Room"
+                section_events[room] = {
+                    'availability_events': availability_events,
+                    'occupancy_events': occupancy_events,
+                    'room_image_url': room.image.url if room.image else '',
+                    'room_name': str(room),
+                    'events_exist':events_exist,
+                    'room_id':room.id,
+                    'owner_id':room.owner.id if room.owner else None,
+                    'room_title' : room_title
+                    
+                    
+            
+                }
+
+        context.update({
+            'selected_section': selected_section,
+            'section_title': str(selected_section) + " Section",
+            'section_id':section_id,
+            'rooms_in_section': rooms_in_section,
+            'test_text': 'HERE IS SOME TEXT'
+        })
+        context.update({
+              
+                  'section_events': section_events,
+              })
+
+      print("Room Master Bottom")
       return render(request, 'catalog/rooms_master.html', context)
 
 @login_required
@@ -356,7 +422,7 @@ def toggle_offline_section(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 
-def remove_owner(request):
+def remove_owner(request,section_id = None):
     if request.method == 'POST':
         room_id = request.POST.get('room_id')
         room = get_object_or_404(Room, id=room_id)
@@ -364,21 +430,29 @@ def remove_owner(request):
         if request.user.is_superuser or request.user.has_perm('app.change_room'):
             room.owner = None
             room.save()
-            return redirect('rooms_master_with_room', room_id=room.id)
+            if section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+            else:
+              return redirect('rooms_master_with_room', room_id = room_id)
         else:
             return HttpResponseForbidden("You do not have permission to remove the owner.")
     return redirect('rooms_master')
 
-def assign_owner(request, room_id):
-    print("ASSIGN OWNER")
+def assign_owner(request, room_id, section_id = None):
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     if request.method == 'POST':
         member_id = request.POST.get('member_id')
 
         room = get_object_or_404(Room, id=room_id)
+        print(str(room))
         member = get_object_or_404(Person, id=member_id)
+        print(str(member))
 
         room.owner = member
         room.save()
 
-        return redirect('rooms_master_with_room', room_id=room.id)
+        if section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+        else:
+              return redirect('rooms_master_with_room', room_id = room_id)
     return redirect('rooms_master')

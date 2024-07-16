@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 import bleach
-from .models import Person, CustomEvent, Room
+from .models import Person, CustomEvent, Room, Section
 from django.contrib.auth.models import User
 class BookingForm(forms.Form):
     
@@ -103,4 +103,9 @@ class PersonSelectForm(forms.Form):
         label="Select Room by Owner"
     )
 class RoomSelectForm(forms.Form):
-    room = forms.ModelChoiceField(queryset=Room.objects.filter(owner__isnull=True, is_offline=False), label="Select Room without Owner")
+    room = forms.ModelChoiceField(
+        queryset=Room.objects.filter(owner__isnull=True, is_offline=False),
+          label="Select Room without Owner")
+
+class SectionSelectForm(forms.Form):
+    section = forms.ModelChoiceField(queryset=Section.objects.all(), label = "Select Rooms by Section")

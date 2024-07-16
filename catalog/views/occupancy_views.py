@@ -69,23 +69,30 @@ def create_booking(request):
 @login_required
 # @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.delete_customevent'))
 # used for occupany events at least
-def delete_booking(request, event_id):
+def delete_booking(request, event_id, section_id = None):
     event = get_object_or_404(CustomEvent, id=event_id)
 
-    redirect_room_id = event_id_to_redirect_room_id(event_id)
+    
+    room_id = event_id_to_redirect_room_id(event_id)
+    
+
 
 
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_guests')
         event.delete()
-        if source_page == 'rooms_master':
-              return redirect('rooms_master_with_room', room_id = redirect_room_id)
+        if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+        elif source_page == 'rooms_master':
+              return redirect('rooms_master_with_room', room_id = room_id)
+        
+        
         return redirect('my_guests')
         # Render a confirmation page for GET request, if needed
     return render(request, 'catalog/delete_booking.html', {'event': event})
 
 @login_required
-def extend_booking(request, event_id):
+def extend_booking(request, event_id, section_id = None):
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_guests')
 
@@ -129,9 +136,14 @@ def extend_booking(request, event_id):
 
             if conflict:
                 return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end, 'redirect_room_id':redirect_room_id, 'source_page':source_page})
+          
             else:
-              if source_page == 'rooms_master':
-                  return redirect('rooms_master_with_room', room_id = redirect_room_id)
+              if source_page == 'rooms_master' and section_id:
+                return redirect('rooms_master_with_section', section_id = section_id)
+              elif source_page == 'rooms_master':
+                return redirect('rooms_master_with_room', room_id = redirect_room_id)
+              
+
               return redirect('my_guests')  # Redirect to the appropriate page after saving
     if request.user.is_superuser:
                   return redirect('rooms_master_with_room', room_id = redirect_room_id)
@@ -139,7 +151,7 @@ def extend_booking(request, event_id):
 
 
 @login_required
-def shorten_booking(request, event_id):
+def shorten_booking(request, event_id, section_id = None):
   if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_guests')
 
@@ -169,9 +181,12 @@ def shorten_booking(request, event_id):
         
             event.end = new_end_date
             event.save()
-            if source_page == "rooms_master":
-                  print('source page is rooms master')
-                  return redirect('rooms_master_with_room', room_id = redirect_room_id)
+            if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+            elif source_page == 'rooms_master':
+              return redirect('rooms_master_with_room', room_id = redirect_room_id)
+            
+
             return redirect('my_guests')  # Redirect to the appropriate page after saving
   if request.user.is_superuser:
                   return redirect('rooms_master_with_room', room_id = redirect_room_id)

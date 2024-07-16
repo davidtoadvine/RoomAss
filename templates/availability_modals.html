@@ -2,9 +2,13 @@
 <div class="modal fade" id="createAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="createAvailabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="createAvailabilityForm" method="post" action="{% if room_id %}{% url 'create_availability' room_id %}{% else %}#{% endif %}"> 
+      <form id="createAvailabilityForm" method="post"
+       action="{% if room_id %}{% url 'create_availability_with_room_redirect' room_id %}
+              {% elif section_id%}{% url 'create_availability_with_section_redirect' section_id %}
+
+       {% else %}#{% endif %}"> 
         {% csrf_token %}
-        <input type="hidden" name="room_id" id="createRoomId" value="{{ room_id }}">
+        {% comment %} <input type="hidden" name="room_id" id="createRoomId" value="{{ room_id }}"> {% endcomment %}
 
         <div class="modal-header">
           <h5 class="modal-title" id="createAvailabilityPersonName"></h5>
@@ -37,9 +41,13 @@
 <div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="editAvailabilityForm" method="post" action="{% if room_id %}{% url 'edit_availability' room_id %}{% else %}#{% endif %}"> 
+      <form id="editAvailabilityForm" method="post"
+       action="{% if room_id %}{% url 'edit_availability_with_room_redirect' room_id %}
+               {% elif section_id%}{% url 'edit_availability_with_section_redirect' section_id %}
+                {% else %}#{% endif %}">
+
                 {% csrf_token %}
-        <input type="hidden" name="room_id" id="editRoomId" value="{{ room_id }}">
+        {% comment %} <input type="hidden" name="redirect_id" id="editRedirectId"> {% endcomment %}
         <div class="modal-header">
           <h5 class="modal-title">Edit Availability</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -72,9 +80,12 @@
 <div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteAvailabilityForm" method="post" action="{% if room_id %}{% url 'delete_availability' room_id %}{% else %}#{% endif %}">
+      <form id="deleteAvailabilityForm" method="post"
+       action="{% if room_id %}{% url 'delete_availability_with_room_redirect' room_id %}
+       {% elif section_id%}{% url 'delete_availability_with_section_redirect' section_id %}
+       {% else %}#{% endif %}">
         {% csrf_token %}
-        <input type="hidden" name="room_id" id="deleteRoomId" value="{{ room_id }}">
+        {% comment %} <input type="hidden" name="room_id" id="deleteRoomId" value="{{ room_id }}"> {% endcomment %}
 
         <div class="modal-header">
           <h5 class="modal-title">Delete Availability?</h5>

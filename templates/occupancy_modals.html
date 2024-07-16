@@ -57,7 +57,11 @@
 <div class="modal fade" id="extendModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="extendModalLabel-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="extendForm-{{ o_event.id }}" method="post" data-form-type="extend" action="{% if o_event.id %}{% url 'extend_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="extendForm-{{ o_event.id }}" method="post" data-form-type="extend"
+      action="{% if section_id %}{% url 'extend_booking_with_section' o_event.id section_id%}
+      {% elif o_event.id %}{% url 'extend_booking' o_event.id %}
+      {% else %}#{% endif %}">
+       {% csrf_token %}
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
@@ -90,7 +94,11 @@
 <div class="modal fade" id="shortenModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="shortenModalLabel-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="shortenForm-{{ o_event.id }}" method="post" data-form-type="shorten" action="{% if o_event.id %}{% url 'shorten_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="shortenForm-{{ o_event.id }}" method="post" data-form-type="shorten"
+      action="{% if section_id %}{% url 'shorten_booking_with_section' o_event.id section_id%}
+      {% elif o_event.id %}{% url 'shorten_booking' o_event.id %}
+      {% else %}#{% endif %}">
+       {% csrf_token %}
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
@@ -123,7 +131,10 @@
 <div class="modal fade" id="deleteModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteEventForm-{{ o_event.id }}" method="post" action="{% if o_event.id %}{% url 'delete_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="deleteEventForm-{{ o_event.id }}" method="post"
+       action="{% if section_id %}{% url 'delete_booking_with_section' o_event.id section_id%}
+       {% elif o_event.id %}{% url 'delete_booking' o_event.id %}
+       {% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
