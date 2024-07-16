@@ -130,7 +130,10 @@ def my_room(request):
     room = person.room
     calendar = room.calendar
 
+    events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
+    print(events_exist)
     availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
+    
     occupancy_events = CustomEvent.objects.filter(calendar = calendar, event_type = 'occupancy').order_by('start')
 
     # Get events for each child
@@ -141,13 +144,15 @@ def my_room(request):
                   child_room = Room.objects.get(owner=child)
                   if child_room and child_room.calendar:
                       child_calendar = child_room.calendar
+                      child_events_exist = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').exists()
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
                       child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
                       children_events[child] = {
                           'availability': child_availability_events,
                           'occupancy': child_occupancy_events,
                           'room_image_url': child_room.image.url if child_room.image else '',
-                          'room_name': str(child.room)
+                          'room_name': str(child.room),
+                          'child_events_exist':child_events_exist
                       }
 
         
@@ -168,7 +173,8 @@ def my_room(request):
         'end_date': dayafter.strftime('%Y-%m-%d'),
         'source_page': 'my_room',
         'room_image_url': room.image.url if room.image else '',
-        'room_name': room
+        'room_name': room,
+        'events_exist': events_exist
 
     }
     return render(request, 'catalog/my_room.html', context)
