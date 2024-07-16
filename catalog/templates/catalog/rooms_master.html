@@ -91,7 +91,7 @@
 
           </th>
         </tr>
-        
+        {%if events_exist%}
         {% for a_event in availability_events %}
           <tr>
             <td class="availability-cell">
@@ -144,6 +144,9 @@
           {% endfor %}
         {% endfor %}
 
+        {%else%}
+        <tr><td class = "no-availabilities-cell">No scheduled availabilities.</td></tr>
+        {%endif%}
 
         <tr>
           <td class= "cell-create-availability">
@@ -185,6 +188,7 @@
             </div>
           </th>
         </tr>
+        {%if events.events_exist%}
         {% for a_event in events.availability %}
           <tr>
             <td class="availability-cell">
@@ -233,6 +237,10 @@
             {% include "occupancy_modals.html" %}
           {% endfor %}
         {% endfor %}
+        
+      {%else%}
+      <tr><td class = "no-availabilities-cell">No scheduled availabilities.</td></tr>
+      {%endif%}
         <tr>
           <td class= "cell-create-availability">
                         <button class = "btn-grey" type="button" onclick="showCreateAvailabilityForm(event, '{{ child.room.id }}', '{{ child.name }}')">+ Create new availability</button>

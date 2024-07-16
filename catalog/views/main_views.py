@@ -293,6 +293,7 @@ def rooms_master(request, room_id=None):
           calendar = selected_room.calendar
           availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
           occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
+          events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
   
           context.update({
               'room': selected_room,
@@ -300,6 +301,7 @@ def rooms_master(request, room_id=None):
               'room_image_url': selected_room.image.url if selected_room.image else '',
               'availability_events': availability_events,
               'occupancy_events': occupancy_events,
+              'events_exist': events_exist
                     
           })
   
@@ -313,11 +315,13 @@ def rooms_master(request, room_id=None):
                       child_calendar = child_room.calendar
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
                       child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
+                      events_exist = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').exists()
                       children_events[child] = {
                           'availability': child_availability_events,
                           'occupancy': child_occupancy_events,
                           'room_image_url': child_room.image.url if child_room.image else '',
                           'room_name': str(child_room),
+                          'events_exist':events_exist
                       }
   
               context.update({
