@@ -69,3 +69,16 @@
 .booked-text{
   margin-left: .9rem;
 }
+
+.flex-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Optional: Adjust gap between elements */
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Optional: Adjust gap between buttons */
+}
+

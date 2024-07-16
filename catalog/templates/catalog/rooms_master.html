@@ -40,61 +40,51 @@
           <th>
             
             <div class="flex-container">
-              
-
               {% if room.owner %}
-              <div>
-              <button class="btn-link" onclick="showFloorplanModal( '{{ room_image_url }}' , '{{room_name}}')">{{ room.owner }}'s Room</button>
-              <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
+              <div class="button-group">
+                  <button class="btn-link" onclick="showFloorplanModal('{{ room_image_url }}', '{{ room_name }}')">{{ room.owner }}'s Room</button>
+                  <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
               </div>
-                <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.id room.owner.id %}">
+              <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.id room.owner.id %}">
                   {% csrf_token %}
                   <div class="dropdown preference-dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      {% if room.owner.preference %}
-                        {{ room.owner.get_preference_display }}
-                      {% else %}
-                        Select Preference
-                      {% endif %}
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="preferencesDropdownButton-{{ room.owner.id }}">
-                      {% for value, display in room.owner.Preference.choices %}
-                        <a class="dropdown-item preference-dropdown-item" href="#" onclick="selectPreference('{{ value }}', '{{ room.owner.id }}')">{{ display }}</a>
-                      {% endfor %}
-                    </div>
+                      <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          {% if room.owner.preference %}
+                          {{ room.owner.get_preference_display }}
+                          {% else %}
+                          Select Preference
+                          {% endif %}
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="preferencesDropdownButton-{{ room.owner.id }}">
+                          {% for value, display in room.owner.Preference.choices %}
+                          <a class="dropdown-item preference-dropdown-item" href="#" onclick="selectPreference('{{ value }}', '{{ room.owner.id }}')">{{ display }}</a>
+                          {% endfor %}
+                      </div>
                   </div>
                   <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
-                </form>
-
-
+              </form>
               {% else %}
-              <div >
-              <button class=" btn-link" onclick="showFloorplanModal( '{{ room_image_url }}' , '{{room_name}}')">{{ room_name }}</button>
-
-              <form id="assignOwnerForm" method="post" action="{% url 'assign_owner' room.id%}">
-                  {% csrf_token %}
-                  <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle owner-button" type="button" id="roomlessMembersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Assign to a Roomless Member
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown">
-                      {% for member in roomless_members %}
-                        <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}')">{{ member.name }}</a>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  <input type="hidden" name="room_id" value="{{ room.id }}">
-                  <input type="hidden" name="member_id" id="memberIdInput">
-                </form>
-
+              <div class="button-group">
+                  <button class="btn-link" onclick="showFloorplanModal('{{ room_image_url }}', '{{ room_name }}')">{{ room_name }}</button>
+                  <form id="assignOwnerForm" method="post" action="{% url 'assign_owner' room.id %}" style="display: inline;">
+                      {% csrf_token %}
+                      <div class="dropdown" style="display: inline;">
+                          <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Assign Roomless Member
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown">
+                              {% for member in roomless_members %}
+                              <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}')">{{ member.name }}</a>
+                              {% endfor %}
+                          </div>
+                      </div>
+                      <input type="hidden" name="room_id" value="{{ room.id }}">
+                      <input type="hidden" name="member_id" id="memberIdInput">
+                  </form>
+                  <button class="btn btn-secondary">Anyone can stay here</button>
               </div>
-
-                <button id = "btn-preference-grey" class="btn btn-secondary">Anyone can stay here</button>
               {% endif %}
-
-
-              
-            </div>
+          </div>
 
 
 
