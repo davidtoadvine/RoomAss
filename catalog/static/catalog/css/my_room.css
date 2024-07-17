@@ -28,6 +28,9 @@
   background-color: lightcoral;
 }
 
+.not-booked-cell{
+  background-color: blanchedalmond;
+}
 
 .button-container {
   position: relative;

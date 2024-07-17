@@ -38,26 +38,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{% comment %}  FOR SELECTION BY BUILDING SECTION {% endcomment %}
 
 </div>
 {% if selected_section%}
@@ -69,11 +50,7 @@
       <tbody>
         <tr>
           <th>
-
-
             <div class="flex-container">
-
-
 
               {%if room.owner%}
               <div class="button-group">
@@ -136,9 +113,7 @@
             </div>
 
 
-            
-                  
-      
+
 
 
           </th>
@@ -157,39 +132,55 @@
             </td>
           </tr>
           {% for o_event in events.occupancy_events %}
-            {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
-              <tr>
-                <td class="booked-cell" style="padding-left: 50px;">
-                  <div class = "flex-container">
+          {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
 
-                  <span class = "booked-text"><em>Booked:</em> {{ o_event.start|split_at_second_comma }} - {{ o_event.end|split_at_second_comma }} --- {{ o_event.title|slice:"9:" }}</span>
-                <div>
-                  <button class="btn-grey"
-                    data-toggle="modal" 
-                    data-target="#extendModal-{{ o_event.id }}" 
-                    data-id="{{ o_event.id }}" 
-                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
-    
-                  <button class="btn-grey" 
-                    data-toggle="modal" 
-                    data-target="#shortenModal-{{ o_event.id }}" 
-                    data-id="{{ o_event.id }}" 
-                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
-    
-                  <button class="btn-grey" 
-                    data-toggle="modal" 
-                    data-target="#deleteModal-{{ o_event.id }}" 
-                    data-id="{{ o_event.id }}" 
-                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Delete</button>
-                </div>
+              {% if o_event.type == "Booked"%}
+              <tr>
+              <td class = "booked-cell" style="padding-left: 50px;" >
+                <div class = "flex-container">
+
+                <span class ="booked-text">
+                <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}  --- {{ o_event.title|slice:"9:" }}
+              </span>
+              <div>
+                <button class="btn-grey"
+                data-toggle="modal" 
+                data-target="#extendModal-{{ o_event.event.id }}" 
+                data-id="{{ o_event.event.id }}" 
+                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
+
+            <button class="btn-grey" 
+                data-toggle="modal" 
+                data-target="#shortenModal-{{ o_event.event.id }}" 
+                data-id="{{ o_event.event.id }}" 
+                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
+
+            <button class="bt-grey" 
+                data-toggle="modal" 
+                data-target="#deleteModal-{{ o_event.event.id }}" 
+                data-id="{{ o_event.event.id }}" 
+                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
               </div>
+            </div>
+            </td>
+          </tr>
+          {% include "occupancy_modals.html" %}
+
+              {%else%}
+              <tr>
+                <td class = "not-booked-cell" style="padding-left: 50px;" >
+
+                  <span class ="booked-text">
+                  <em> Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}   
+                </span>
               </td>
-              </tr>
+            </tr>
             {% endif %}
-            {% include "occupancy_modals.html" %}
+
+            {% endif %}
           {% endfor %}
         {% endfor %}
         
@@ -220,7 +211,7 @@
 
 
 
-
+{% comment %}  FOR SELECTION BY ROOM {% endcomment %}
 {% elif room %}
     {%if room.owner%}
     <h2 id = "user-title">{{room.owner }}'s Room</h2>
@@ -297,43 +288,59 @@
             </td>
           </tr>
           
-          {% for o_event in occupancy_events %}
-            {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
-              <tr>
-                  
-                <td class="booked-cell" style="padding-left: 50px;">
-                  <div class = "flex-container">
 
-                  <span class = "booked-text"><em>
-                  Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
-                  </span>
-                  <div>
-                    <button class="btn-grey"
-                      data-toggle="modal" 
-                      data-target="#extendModal-{{ o_event.id }}" 
-                      data-id="{{ o_event.id }}" 
-                      data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                      data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
-      
-                    <button class="btn-grey" 
-                      data-toggle="modal" 
-                      data-target="#shortenModal-{{ o_event.id }}" 
-                      data-id="{{ o_event.id }}" 
-                      data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                      data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
-      
-                    <button class="bt-grey" 
-                      data-toggle="modal" 
-                      data-target="#deleteModal-{{ o_event.id }}" 
-                      data-id="{{ o_event.id }}" 
-                      data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                      data-end-date="{{ o_event.end|date:'Y-m-d' }}">Delete</button>
-                  </div>
-                </div>
+
+
+
+          {% for o_event in occupancy_events %}
+          {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
+
+              {% if o_event.type == "Booked"%}
+              <tr>
+              <td class = "booked-cell" style="padding-left: 50px;" >
+                <div class = "flex-container">
+
+                <span class ="booked-text">
+                <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}  --- {{ o_event.title|slice:"9:" }}
+              </span>
+              <div>
+                <button class="btn-grey"
+                  data-toggle="modal" 
+                  data-target="#extendModal-{{ o_event.event.id }}" 
+                  data-id="{{ o_event.event.id }}" 
+                  data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                  data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
+  
+                <button class="btn-grey" 
+                  data-toggle="modal" 
+                  data-target="#shortenModal-{{ o_event.event.id }}" 
+                  data-id="{{ o_event.event.id }}" 
+                  data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                  data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
+  
+                <button class="bt-grey" 
+                  data-toggle="modal" 
+                  data-target="#deleteModal-{{ o_event.event.id }}" 
+                  data-id="{{ o_event.event.id }}" 
+                  data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                  data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
+              </div>
+            </div>
+            </td>
+          </tr>
+          {% include "occupancy_modals.html" %}
+
+              {%else%}
+              <tr>
+                <td class = "not-booked-cell" style="padding-left: 50px;" >
+
+                  <span class ="booked-text">
+                  <em> Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}   
+                </span>
               </td>
-              </tr>
+            </tr>
+            {%endif%}
             {% endif %}
-            {% include "occupancy_modals.html" %}
           {% endfor %}
         {% endfor %}
 
@@ -396,36 +403,51 @@
           </tr>
           {% for o_event in events.occupancy %}
             {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
-              <tr>
-                <td class="booked-cell" style="padding-left: 50px;">
-                  <div class = "flex-container">
+            {% if o_event.type == "Booked"%}
+            <tr>
+            <td class = "booked-cell" style="padding-left: 50px;" >
+              <div class = "flex-container">
 
-                  <span class = "booked-text"><em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}</span>
-                <div>
-                  <button class="btn-grey"
-                    data-toggle="modal" 
-                    data-target="#extendModal-{{ o_event.id }}" 
-                    data-id="{{ o_event.id }}" 
-                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Extend</button>
-    
-                  <button class="btn-grey" 
-                    data-toggle="modal" 
-                    data-target="#shortenModal-{{ o_event.id }}" 
-                    data-id="{{ o_event.id }}" 
-                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Shorten</button>
-    
-                  <button class="btn-grey" 
-                    data-toggle="modal" 
-                    data-target="#deleteModal-{{ o_event.id }}" 
-                    data-id="{{ o_event.id }}" 
-                    data-start-date="{{ o_event.start|date:'Y-m-d' }}" 
-                    data-end-date="{{ o_event.end|date:'Y-m-d' }}">Delete</button>
-                </div>
-              </div>
-              </td>
-              </tr>
+              <span class ="booked-text">
+              <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}  --- {{ o_event.title|slice:"9:" }}
+            </span>
+            <div>
+              <button class="btn-grey"
+                data-toggle="modal" 
+                data-target="#extendModal-{{ o_event.event.id }}" 
+                data-id="{{ o_event.event.id }}" 
+                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
+
+              <button class="btn-grey" 
+                data-toggle="modal" 
+                data-target="#shortenModal-{{ o_event.event.id }}" 
+                data-id="{{ o_event.event.id }}" 
+                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
+
+              <button class="bt-grey" 
+                data-toggle="modal" 
+                data-target="#deleteModal-{{ o_event.event.id }}" 
+                data-id="{{ o_event.event.id }}" 
+                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
+            </div>
+          </div>
+          </td>
+        </tr>
+        {% include "occupancy_modals.html" %}
+
+            {%else%}
+            <tr>
+              <td class = "not-booked-cell" style="padding-left: 50px;" >
+
+                <span class ="booked-text">
+                <em> Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}   
+              </span>
+            </td>
+          </tr>
+          {%endif%}
             {% endif %}
             {% include "occupancy_modals.html" %}
           {% endfor %}
@@ -459,32 +481,6 @@
 {%include "availability_modals.html"%}
 {%include "floorplan_img_modal.html"%}
 
-
-
- <!-- Modal HTML -->
-{% comment %} <div class="modal fade" id="removeOwnerModal" tabindex="-1" role="dialog" aria-labelledby="removeOwnerModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="removeOwnerModalLabel">Remove Owner</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to remove the owner from this room?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <form method="POST" action="{% url 'remove_owner' %}" id="removeOwnerForm">
-          {% csrf_token %}
-          <input type="hidden" name="room_id" id="room_id">
-          <button type="submit" class="btn btn-danger">Remove Owner</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>  {% endcomment %}
 
 
 <!-- Modal HTML -->

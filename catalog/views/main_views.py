@@ -131,10 +131,11 @@ def my_room(request):
     calendar = room.calendar
 
     events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
-    print(events_exist)
     availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
-    
     occupancy_events = CustomEvent.objects.filter(calendar = calendar, event_type = 'occupancy').order_by('start')
+
+
+    occupancy_events_processed = processOccupancyEvents(availability_events,occupancy_events)
 
     # Get events for each child
     children = person.children.all()
@@ -147,15 +148,17 @@ def my_room(request):
                       child_events_exist = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').exists()
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
                       child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
+
+                      child_occupancy_events_processed = processOccupancyEvents(child_availability_events,child_occupancy_events)
+
                       children_events[child] = {
                           'availability': child_availability_events,
-                          'occupancy': child_occupancy_events,
+                          'occupancy': child_occupancy_events_processed,
                           'room_image_url': child_room.image.url if child_room.image else '',
                           'room_name': str(child.room),
-                          'child_events_exist':child_events_exist
+                          'child_events_exist':child_events_exist,
                       }
 
-        
 
     # Get the current local date and the next day's date
     local_now = timezone.localtime(timezone.now())
@@ -166,7 +169,7 @@ def my_room(request):
         'room': room,
         'room_id':room.id,
         'availability_events': availability_events,
-        'occupancy_events': occupancy_events,
+        'occupancy_events': occupancy_events_processed,
         'children_events': children_events,
         'children': children,
         'start_date': tomorrow.strftime('%Y-%m-%d'),
@@ -174,7 +177,8 @@ def my_room(request):
         'source_page': 'my_room',
         'room_image_url': room.image.url if room.image else '',
         'room_name': room,
-        'events_exist': events_exist
+        'events_exist': events_exist,
+        # 'gaps':gaps
 
     }
     return render(request, 'catalog/my_room.html', context)
@@ -208,7 +212,6 @@ def my_guests(request):
         }
         print(event_info)
     
-        event_info['room_name'] = str(event.calendar.room)
         processed_events.append(event_info)
 
 
@@ -314,14 +317,17 @@ def rooms_master(request, room_id=None, section_id=None):
           calendar = selected_room.calendar
           availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
           occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
+        
           events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
+
+          occupancy_events_processed = processOccupancyEvents(availability_events,occupancy_events)
   
           context.update({
               'room': selected_room,
               'room_id': selected_room.id,
               'room_image_url': selected_room.image.url if selected_room.image else '',
               'availability_events': availability_events,
-              'occupancy_events': occupancy_events,
+              'occupancy_events': occupancy_events_processed,
               'events_exist': events_exist
                     
           })
@@ -337,17 +343,16 @@ def rooms_master(request, room_id=None, section_id=None):
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
                       child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
                       events_exist = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').exists()
+                      child_occupancy_events_processed= processOccupancyEvents(child_availability_events, child_occupancy_events)
                       children_events[child] = {
                           'availability': child_availability_events,
-                          'occupancy': child_occupancy_events,
+                          'occupancy': child_occupancy_events_processed,
                           'room_image_url': child_room.image.url if child_room.image else '',
                           'room_name': str(child_room),
                           'events_exist':events_exist
                       }
   
               context.update({
-                  'availability_events': availability_events,
-                  'occupancy_events': occupancy_events,
                   'children_events': children_events,
                   'children': children,
 
@@ -368,18 +373,23 @@ def rooms_master(request, room_id=None, section_id=None):
                 availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
                 occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start')
                 events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
+                occupancy_events_processed = processOccupancyEvents(availability_events,occupancy_events)
+
                 room_title = str(room)
+
                 if room.owner:
                     room_title = str(room.owner) + "'s Room"
+
                 section_events[room] = {
                     'availability_events': availability_events,
-                    'occupancy_events': occupancy_events,
+                    'occupancy_events': occupancy_events_processed,
                     'room_image_url': room.image.url if room.image else '',
                     'room_name': str(room),
                     'events_exist':events_exist,
                     'room_id':room.id,
                     'owner_id':room.owner.id if room.owner else None,
-                    'room_title' : room_title
+                    'room_title' : room_title,
+                    
                     
                     
             
@@ -390,15 +400,17 @@ def rooms_master(request, room_id=None, section_id=None):
             'section_title': str(selected_section) + " Section",
             'section_id':section_id,
             'rooms_in_section': rooms_in_section,
-            'test_text': 'HERE IS SOME TEXT'
         })
         context.update({
-              
                   'section_events': section_events,
               })
-
-      print("Room Master Bottom")
-      return render(request, 'catalog/rooms_master.html', context)
+        for room, events in section_events.items():
+            print(f"Room ID: {room.id} - Occupancy Event IDs:")
+            for event in events['occupancy_events']:
+                if 'event' in event:
+                    print(event['event'].id)
+        print("Room Master Bottom")
+    return render(request, 'catalog/rooms_master.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.buildings_offline_toggle'))
@@ -456,3 +468,54 @@ def assign_owner(request, room_id, section_id = None):
         else:
               return redirect('rooms_master_with_room', room_id = room_id)
     return redirect('rooms_master')
+
+
+
+
+###################################3
+
+def processOccupancyEvents(availability_events, occupancy_events):
+    
+    occupancy_events_processed = []
+
+    for avail_event in availability_events:
+              print('AVAIL start is')
+              print(avail_event.start)
+
+              edge_date = avail_event.start
+              for occ_event in occupancy_events:
+                  if occ_event.start >= avail_event.start and occ_event.end <= avail_event.end:
+                    print('occ within avail')
+                    print(occ_event.start)
+                    if occ_event.start > edge_date and edge_date.date() != occ_event.start.date():
+                          print('making vacant beginning')
+                          occupancy_events_processed.append({
+                              'start': edge_date,
+                              'end': occ_event.start,
+                              'type': 'Vacant'
+                          })
+                          print('vacant')
+                          print(edge_date)
+                          print(occ_event.start)
+                    occupancy_events_processed.append({
+                        'event': occ_event,
+                        'start': occ_event.start,
+                        'end': occ_event.end,
+                        'type': 'Booked',
+                        'title': occ_event.title,
+                        'id':occ_event.id
+                        })
+                          # print('booked')
+                          # print(occ_event.id)
+                    edge_date = occ_event.end
+
+              if edge_date < avail_event.end:
+                occupancy_events_processed.append({
+                'start': edge_date,
+                'end': avail_event.end,
+                'type': 'Vacant'
+              })
+                print('end of line vacant')
+                print(edge_date)
+                print(avail_event.end)
+    return occupancy_events_processed
