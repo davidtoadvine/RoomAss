@@ -170,7 +170,7 @@
                     {%if forloop.last and not room.owner%}
                     <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} 
                     {%else%}
-                    <em>Vacant</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}
+                    <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}
                     {%endif%}
                 </span>
               </td>
@@ -285,7 +285,7 @@
 
                 <span class ="booked-text">
                   {%if forloop.last and not room.owner%}
-                  <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} --- {{ o_event.title|slice:"9:" }}
+                  <em>Booked:</em> {{ o_event.start|split_at_second_comma }} - {{ o_event.end|split_at_second_comma }} --- {{ o_event.title|slice:"9:" }}
                   {%else%}
                   <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
                   {%endif%}
@@ -323,9 +323,9 @@
 
                   <span class ="booked-text">
                     {%if forloop.last and not room.owner%}
-                    <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} 
+                    <em>Vacant:</em> {{ o_event.start|split_at_second_comma }} - {{ o_event.end|split_at_second_comma }} 
                     {%else%}
-                    <em>Vacant</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} 
+                    <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} 
         
                     {%endif%}
                 </span>
@@ -443,7 +443,7 @@
                   {%if forloop.last and not room.owner%}
                   <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} 
                   {%else%}
-                  <em>Vacant</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}
+                  <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}
       
                   {%endif%}   
               </span>
@@ -470,8 +470,8 @@
 {% else %}
 <p></p>
 <p>There is currently no room information to display.</p>
-<p>Please select a person to view their room details.</p>
-<p>If you have already selected a person, they appear to not have a room.</p>
+<p>Select rooms above to view details.</p>
+
 {% endif %}
 
 {%include "availability_modals.html"%}

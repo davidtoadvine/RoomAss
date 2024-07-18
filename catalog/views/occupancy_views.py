@@ -1,3 +1,7 @@
+#
+# Views for creating, editing, deleting Occupancy Events (bookings)
+#
+
 
 from datetime import datetime
 

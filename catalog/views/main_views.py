@@ -1,3 +1,7 @@
+#
+# Main Views for visible pages of the application
+#
+
 from datetime import datetime, timedelta
 
 from django.contrib.auth.decorators import login_required, user_passes_test

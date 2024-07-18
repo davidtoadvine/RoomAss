@@ -103,7 +103,7 @@
         <td class = "cell-create-availability" >
 
           {% if room.is_offline%}
-          <p>Room Is Offline</p>
+          <button class = "btn-grey"> Room is Offline</button>
           {%else%}
           <button class = "btn-grey" type = "submit" onclick = "showCreateAvailabilityForm(event, '{{ room.id }}', '{{ room.owner.name }}')">+ Create new availability</button>
         {% endif%}

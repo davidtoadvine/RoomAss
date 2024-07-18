@@ -1,3 +1,7 @@
+#
+# Views for creating, editing, deleting Availability Events
+#
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -6,15 +10,11 @@ from catalog.models import Room, CustomEvent, Person
 from catalog.forms import CreateAvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
 from catalog.utils import date_to_aware_datetime, merge_overlapping_availabilities, handle_reassign
 
-
-
 @login_required
 def create_availability(request, room_id = None, section_id = None):
       if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_room')
         form = CreateAvailabilityForm(request.POST)
-
-        redirect_room_id = room_id
 
         if form.is_valid():
             # Process the form data
