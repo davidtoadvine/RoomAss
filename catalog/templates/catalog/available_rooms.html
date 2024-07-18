@@ -1,8 +1,8 @@
 {% extends "base_generic.html" %} {% block content %}
 <h1>Available Guest Rooms</h1>
 
-<div id = "box-home-forms">
-<form method="post" action="{% url 'home' %}" id="dateRangeForm">
+<div id = "box-available-rooms-forms">
+<form method="post" action="{% url 'available_rooms' %}" id="dateRangeForm">
   {% csrf_token %}
   <div class="form-row">
     <div class="form-group col-md-4">
@@ -42,7 +42,6 @@
   <thead>
     <tr>
       <th scope="col">Building / Section / Room #</th>
-      {% comment %} <th scope="col">View</th> {% endcomment %}
       <th scope="col">Owner</th>
       <th scope="col">Available Until Noon on...</th>
       <th scope="col"></th>
@@ -73,7 +72,6 @@
                     >{{room_name}}</button>
         
       </td>
- 
       <td>
         {% if room.owner %} {{ room.owner.name }} {% else %} Unassigned
         {%endif%}
@@ -131,11 +129,6 @@
   </tbody>
 </table>
 
-{% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
-
-
-
-{% comment %} //////////////////////////////////////////////////////////////////////////// {% endcomment %}
     </div>
   </div>
 </div>

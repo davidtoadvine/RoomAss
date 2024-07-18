@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from catalog.models import Room, CustomEvent, Person
 from catalog.forms import CreateAvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
-from catalog.utils import date_to_aware_datetime, merge_overlapping_events, handle_reassign
+from catalog.utils import date_to_aware_datetime, merge_overlapping_availabilities, handle_reassign
 
 
 
@@ -40,13 +40,13 @@ def create_availability(request, room_id = None, section_id = None):
                     creator = request.user
                 )
             availability_event.save()
-            merge_overlapping_events(room.calendar)  # Call the function to handle overlaps
+            merge_overlapping_availabilities(room.calendar)  # Call the function to handle overlaps
 
             if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
             elif source_page == 'rooms_master' and room_id:
               return redirect('rooms_master_with_room', room_id = room_id)
-         
+        
             
             return redirect('my_room')
         
@@ -91,7 +91,7 @@ def edit_availability(request, room_id = None, section_id = None):
             avail_event.description = "CHANGED"
             avail_event.creator = request.user  # Update creator if needed
             avail_event.save()
-            merge_overlapping_events(avail_event.calendar)  # Call the function to handle overlaps
+            merge_overlapping_availabilities(avail_event.calendar)  # Call the function to handle overlaps
 
           
             ####### Now we deal with any dispruptions to occupation events
@@ -136,8 +136,6 @@ def edit_availability(request, room_id = None, section_id = None):
               if occ_event.start >= occ_event.end:
                   occ_event.delete()
 
-            print('edits source page before redirect is...')
-            print(source_page)
             if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
             elif source_page == 'rooms_master' and room_id:
@@ -154,7 +152,6 @@ def edit_availability(request, room_id = None, section_id = None):
 
         return redirect('my_room')
     
-    print('method not post?')
     return HttpResponse("Invalid request method", status=405)
 
 @login_required

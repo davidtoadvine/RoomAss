@@ -37,7 +37,6 @@
               <p>Section: <span id="bookingSectionName"></span></p>
               <p>Room Number: <span id="bookingRoomNumber"></span></p>
               
-           
             </div>
             <!-- Image Column -->
             <div class="col-md-8">
@@ -61,7 +60,6 @@
       action="{% if section_id %}{% url 'extend_booking_with_section' o_event.id section_id%}
       {% elif o_event.id %}{% url 'extend_booking' o_event.id %}
       {% else %}#{% endif %}">
-       {% csrf_token %}
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
@@ -98,7 +96,6 @@
       action="{% if section_id %}{% url 'shorten_booking_with_section' o_event.id section_id%}
       {% elif o_event.id %}{% url 'shorten_booking' o_event.id %}
       {% else %}#{% endif %}">
-       {% csrf_token %}
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
@@ -132,9 +129,9 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <form id="deleteEventForm-{{ o_event.id }}" method="post"
-       action="{% if section_id %}{% url 'delete_booking_with_section' o_event.id section_id%}
-       {% elif o_event.id %}{% url 'delete_booking' o_event.id %}
-       {% else %}#{% endif %}">
+        action="{% if section_id %}{% url 'delete_booking_with_section' o_event.id section_id%}
+        {% elif o_event.id %}{% url 'delete_booking' o_event.id %}
+        {% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">

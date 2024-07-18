@@ -65,17 +65,9 @@
       </div>
       </td>
       </tr>
-      {% comment %} {% for o_event in occupancy_events %}
-        {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
-          <tr>
-            <td class = "booked-cell" style="padding-left: 50px;" >
-              <span class ="booked-text">
-              <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
-              </span>
-            </td>
-          </tr> {% endcomment %}
+      
           
-          {% for time_block in occupancy_events %}
+          {% for time_block in occupancy_events_and_vacancies %}
           {% if time_block.start >= a_event.start and time_block.end <= a_event.end %}
 
               {% if time_block.type == "Booked"%}
@@ -122,7 +114,7 @@
 </table>
 
   
-    {% for child, events in children_events.items %}
+    {% for child, child_info in children_info.items %}
     <table class="table">
 
     <tbody>
@@ -130,7 +122,7 @@
         <th ><div class="flex-container">
           <button
           class="btn-link"
-          onclick="showFloorplanModal('{{ events.room_image_url }}', '{{events.room_name}}' )"
+          onclick="showFloorplanModal('{{ child_info.room_image_url }}', '{{child_info.room_name}}' )"
         >{{ child.name}}'s Room
       </button>
           <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
@@ -156,8 +148,8 @@
       </th>
       </tr>
 
-      {%if events.child_events_exist == True %}
-      {% for a_event in events.availability %}
+      {%if child_info.events_exist == True %}
+      {% for a_event in child_info.availability_events %}
         <tr >
           <td class = "availability-cell" ><div class="flex-container">
             <span><em>Made Available:</em> {{ a_event.start|split_at_comma }} - {{ a_event.end|split_at_comma }}</span>
@@ -172,7 +164,7 @@
         </tr>
       
 
-        {% for time_block in events.occupancy %}
+        {% for time_block in child_info.occupancy_events_and_vacancies %}
         {% if time_block.start >= a_event.start and time_block.end <= a_event.end %}
 
             {% if time_block.type == "Booked"%}

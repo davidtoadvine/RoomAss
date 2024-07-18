@@ -30,7 +30,7 @@ class BookingForm(forms.Form):
         host_name = bleach.clean(host_name)
         return host_name
     
-    #  dont think this actually does anything , but it is called in home view
+    #  dont think this actually does anything , but it is called in available_rooms view
     def clean_guest_type(self):
         guest_type = self.cleaned_data.get('guest_type')
         if not guest_type:

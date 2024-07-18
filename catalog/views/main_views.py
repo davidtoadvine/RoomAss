@@ -8,10 +8,9 @@ from django.views.decorators.http import require_POST
 
 from catalog.forms import DateRangeForm, PersonSelectForm, RoomSelectForm, SectionSelectForm
 from catalog.models import CustomEvent, Room, Person, Building, Section
-from catalog.utils import date_to_aware_datetime
+from catalog.utils import date_to_aware_datetime, process_occupancy_events
 
-# available rooms page
-def home(request):
+def available_rooms(request):
     
     # get and order rooms for sensible display later
     rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
@@ -88,7 +87,7 @@ def home(request):
         'form': form,
         'guest_type': guest_type
     }
-    return render(request, 'catalog/home.html', context)
+    return render(request, 'catalog/available_rooms.html', context)
 
 
 
@@ -96,10 +95,13 @@ def all_guests(request):
     occupancy_events = CustomEvent.objects.filter(event_type='occupancy')
 
     processed_events = []
+
     for event in occupancy_events:
         room_owner = "Unassigned"
+
         if event.calendar.room.owner:
             room_owner = event.calendar.room.owner
+
         event_info = {
             'guest_name': event.guest_name,
             'creator': event.creator,
@@ -109,9 +111,6 @@ def all_guests(request):
             'room_id': event.calendar.room.id,
             'room_owner': room_owner
             }
-      
-      
-        
         processed_events.append(event_info)
 
     context = {
@@ -125,22 +124,22 @@ def my_room(request):
   request.session['source_page'] = 'my_room'
 
   person = request.user.person
-    # Using hasattr
+
   if hasattr(person, 'room'):
     room = person.room
     calendar = room.calendar
-
+    
+    # Events for room owner
     events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
     availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
     occupancy_events = CustomEvent.objects.filter(calendar = calendar, event_type = 'occupancy').order_by('start')
+    # Processing so we can display booked AND vacant timeblocks within an availability
+    occupancy_events_processed = process_occupancy_events(availability_events,occupancy_events)
 
-
-    occupancy_events_processed = processOccupancyEvents(availability_events,occupancy_events)
-
-    # Get events for each child
+    # Get events for any children
     children = person.children.all()
 
-    children_events = {}
+    children_info = {}
     for child in children:
                   child_room = Room.objects.get(owner=child)
                   if child_room and child_room.calendar:
@@ -148,15 +147,15 @@ def my_room(request):
                       child_events_exist = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').exists()
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
                       child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
+                      # Processing so we can display booked AND vacant timeblocks within an availability
+                      child_occupancy_events_processed = process_occupancy_events(child_availability_events,child_occupancy_events)
 
-                      child_occupancy_events_processed = processOccupancyEvents(child_availability_events,child_occupancy_events)
-
-                      children_events[child] = {
-                          'availability': child_availability_events,
-                          'occupancy': child_occupancy_events_processed,
+                      children_info[child] = {
+                          'availability_events': child_availability_events,
+                          'occupancy_events_and_vacancies': child_occupancy_events_processed,
                           'room_image_url': child_room.image.url if child_room.image else '',
                           'room_name': str(child.room),
-                          'child_events_exist':child_events_exist,
+                          'events_exist':child_events_exist,
                       }
 
 
@@ -169,8 +168,8 @@ def my_room(request):
         'room': room,
         'room_id':room.id,
         'availability_events': availability_events,
-        'occupancy_events': occupancy_events_processed,
-        'children_events': children_events,
+        'occupancy_events_and_vacancies': occupancy_events_processed,
+        'children_info': children_info,
         'children': children,
         'start_date': tomorrow.strftime('%Y-%m-%d'),
         'end_date': dayafter.strftime('%Y-%m-%d'),
@@ -178,10 +177,9 @@ def my_room(request):
         'room_image_url': room.image.url if room.image else '',
         'room_name': room,
         'events_exist': events_exist,
-        # 'gaps':gaps
-
     }
     return render(request, 'catalog/my_room.html', context)
+  
   else:
       return redirect('no_room')
 
@@ -210,7 +208,6 @@ def my_guests(request):
             'image_url': event.calendar.room.image.url if event.calendar.room.image else '',  # Store the image URL for each event
             'room_owner': room_owner
         }
-        print(event_info)
     
         processed_events.append(event_info)
 
@@ -225,7 +222,7 @@ def my_guests(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.view_all_rooms'))
 def rooms_master(request, room_id=None, section_id=None):
-    print("ROOMS MASTER")
+    
     request.session['source_page'] = 'rooms_master'
     roomless_members = Person.objects.filter(room__isnull=True)
 
@@ -236,6 +233,7 @@ def rooms_master(request, room_id=None, section_id=None):
     selected_person = None
     selected_room = None
 
+    # Dealing with form submissions on the page
     if request.method == 'POST':
 
         if 'person_form_submit' in request.POST:
@@ -247,7 +245,6 @@ def rooms_master(request, room_id=None, section_id=None):
                     selected_room = selected_person.room
                 except Room.DoesNotExist:
                     return redirect('no_room')
-                
                 return redirect('rooms_master_with_room', room_id=selected_room.id )
                 
           
@@ -258,7 +255,6 @@ def rooms_master(request, room_id=None, section_id=None):
                 return redirect('rooms_master_with_room', room_id=selected_room.id)
             
         elif 'section_form_submit' in request.POST:
-            print("SECTION FORM")
             section_form = SectionSelectForm(request.POST)
             if section_form.is_valid():
                 selected_room = section_form.cleaned_data['section']
@@ -270,7 +266,7 @@ def rooms_master(request, room_id=None, section_id=None):
 
 
 
-
+    # Displaying what's called for
     else:  
 
       room_name = None
@@ -292,8 +288,8 @@ def rooms_master(request, room_id=None, section_id=None):
             'end_date': dayafter.strftime('%Y-%m-%d'),
       })
 
+      # if a single room is selected
       if room_id:
-        print("ROOM ID")
         selected_room = get_object_or_404(Room, id=room_id)
         room_name = str(selected_room)
         if selected_room.owner:
@@ -315,26 +311,27 @@ def rooms_master(request, room_id=None, section_id=None):
     
         if selected_room:
           calendar = selected_room.calendar
+
+          events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
           availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start') if calendar else None
           occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start') if calendar else None
         
-          events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
-
-          occupancy_events_processed = processOccupancyEvents(availability_events,occupancy_events)
+          # Processing so we can display booked AND vacant timeblocks within an availability
+          occupancy_events_processed = process_occupancy_events(availability_events,occupancy_events)
   
           context.update({
               'room': selected_room,
               'room_id': selected_room.id,
               'room_image_url': selected_room.image.url if selected_room.image else '',
               'availability_events': availability_events,
-              'occupancy_events': occupancy_events_processed,
+              'occupancy_events_and_vacancies': occupancy_events_processed,
               'events_exist': events_exist
                     
           })
   
           if selected_person:
               children = selected_person.children.all()
-              children_events = {}
+              children_info = {}
   
               for child in children:
                   child_room = Room.objects.get(owner=child)
@@ -343,56 +340,54 @@ def rooms_master(request, room_id=None, section_id=None):
                       child_availability_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').order_by('start')
                       child_occupancy_events = CustomEvent.objects.filter(calendar=child_calendar, event_type='occupancy').order_by('start')
                       events_exist = CustomEvent.objects.filter(calendar=child_calendar, event_type='availability').exists()
-                      child_occupancy_events_processed= processOccupancyEvents(child_availability_events, child_occupancy_events)
-                      children_events[child] = {
-                          'availability': child_availability_events,
-                          'occupancy': child_occupancy_events_processed,
+                      child_occupancy_events_processed= process_occupancy_events(child_availability_events, child_occupancy_events)
+                      children_info[child] = {
+                          'availability_events': child_availability_events,
+                          'occupancy_events_and_vacancies': child_occupancy_events_processed,
                           'room_image_url': child_room.image.url if child_room.image else '',
                           'room_name': str(child_room),
                           'events_exist':events_exist
                       }
   
               context.update({
-                  'children_events': children_events,
+                  'children_info': children_info,
                   'children': children,
 
               })
       
+      # if an entire section is selected
       elif section_id:
-        print("SECTION ID")
+
         selected_section = get_object_or_404(Section, id=section_id)
         rooms_in_section = Room.objects.filter(section=selected_section)
 
         section_events = {}
   
         for room in rooms_in_section:
-            print(room.id)
-            print(room.owner)
+          
             if room and room.calendar:
+              
                 calendar = room.calendar
-                availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
-                occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start')
-                events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
-                occupancy_events_processed = processOccupancyEvents(availability_events,occupancy_events)
-
                 room_title = str(room)
-
                 if room.owner:
                     room_title = str(room.owner) + "'s Room"
 
+                events_exist = CustomEvent.objects.filter(calendar=calendar, event_type='availability').exists()
+                availability_events = CustomEvent.objects.filter(calendar=calendar, event_type='availability').order_by('start')
+                occupancy_events = CustomEvent.objects.filter(calendar=calendar, event_type='occupancy').order_by('start')
+              
+                # Processing so we can display booked AND vacant timeblocks within an availability
+                occupancy_events_processed = process_occupancy_events(availability_events,occupancy_events)
+
                 section_events[room] = {
                     'availability_events': availability_events,
-                    'occupancy_events': occupancy_events_processed,
+                    'occupancy_events_and_vacancies': occupancy_events_processed,
                     'room_image_url': room.image.url if room.image else '',
                     'room_name': str(room),
                     'events_exist':events_exist,
                     'room_id':room.id,
                     'owner_id':room.owner.id if room.owner else None,
                     'room_title' : room_title,
-                    
-                    
-                    
-            
                 }
 
         context.update({
@@ -404,118 +399,30 @@ def rooms_master(request, room_id=None, section_id=None):
         context.update({
                   'section_events': section_events,
               })
-        for room, events in section_events.items():
-            print(f"Room ID: {room.id} - Occupancy Event IDs:")
-            for event in events['occupancy_events']:
-                if 'event' in event:
-                    print(event['event'].id)
-        print("Room Master Bottom")
+        # for room, events in section_events.items():
+        #     print(f"Room ID: {room.id} - Occupancy Event IDs:")
+        #     for event in events['occupancy_events']:
+        #         if 'event' in event:
+        #             print(event['event'].id)
+        # print("Room Master Bottom")
     return render(request, 'catalog/rooms_master.html', context)
 
-@login_required
-@user_passes_test(lambda u: u.is_superuser or u.has_perm('app.buildings_offline_toggle'))
-def buildings_offline_toggle(request):
-    buildings = Building.objects.all().order_by('name')
+# @login_required
+# @user_passes_test(lambda u: u.is_superuser or u.has_perm('app.buildings_offline_toggle'))
+# def buildings_offline_toggle(request):
+#     buildings = Building.objects.all().order_by('name')
 
-    return render(request, 'catalog/buildings_offline_toggle.html', {'buildings': buildings})
-
-
-@require_POST
-def toggle_offline_section(request):
-    section_id = request.POST.get('section_id')
-    section = get_object_or_404(Section, id=section_id)
-
-    # Toggle the offline status
-    section.is_offline = not section.is_offline
-    section.save()
-
-    return redirect('buildings_offline_toggle')
-
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
-
-def remove_owner(request,section_id = None):
-    if request.method == 'POST':
-        room_id = request.POST.get('room_id')
-        room = get_object_or_404(Room, id=room_id)
-
-        if request.user.is_superuser or request.user.has_perm('app.change_room'):
-            room.owner = None
-            room.save()
-            if section_id:
-              return redirect('rooms_master_with_section', section_id = section_id)
-            else:
-              return redirect('rooms_master_with_room', room_id = room_id)
-        else:
-            return HttpResponseForbidden("You do not have permission to remove the owner.")
-    return redirect('rooms_master')
-
-def assign_owner(request, room_id, section_id = None):
-    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    if request.method == 'POST':
-        member_id = request.POST.get('member_id')
-
-        room = get_object_or_404(Room, id=room_id)
-        print(str(room))
-        member = get_object_or_404(Person, id=member_id)
-        print(str(member))
-
-        room.owner = member
-        room.save()
-
-        if section_id:
-              return redirect('rooms_master_with_section', section_id = section_id)
-        else:
-              return redirect('rooms_master_with_room', room_id = room_id)
-    return redirect('rooms_master')
+#     return render(request, 'catalog/buildings_offline_toggle.html', {'buildings': buildings})
 
 
+# @require_POST
+# def toggle_offline_section(request):
+#     section_id = request.POST.get('section_id')
+#     section = get_object_or_404(Section, id=section_id)
 
+#     # Toggle the offline status
+#     section.is_offline = not section.is_offline
+#     section.save()
 
-###################################3
+#     return redirect('buildings_offline_toggle')
 
-def processOccupancyEvents(availability_events, occupancy_events):
-    
-    occupancy_events_processed = []
-
-    for avail_event in availability_events:
-              print('AVAIL start is')
-              print(avail_event.start)
-
-              edge_date = avail_event.start
-              for occ_event in occupancy_events:
-                  if occ_event.start >= avail_event.start and occ_event.end <= avail_event.end:
-                    print('occ within avail')
-                    print(occ_event.start)
-                    if occ_event.start > edge_date and edge_date.date() != occ_event.start.date():
-                          print('making vacant beginning')
-                          occupancy_events_processed.append({
-                              'start': edge_date,
-                              'end': occ_event.start,
-                              'type': 'Vacant'
-                          })
-                          print('vacant')
-                          print(edge_date)
-                          print(occ_event.start)
-                    occupancy_events_processed.append({
-                        'event': occ_event,
-                        'start': occ_event.start,
-                        'end': occ_event.end,
-                        'type': 'Booked',
-                        'title': occ_event.title,
-                        'id':occ_event.id
-                        })
-                          # print('booked')
-                          # print(occ_event.id)
-                    edge_date = occ_event.end
-
-              if edge_date < avail_event.end:
-                occupancy_events_processed.append({
-                'start': edge_date,
-                'end': avail_event.end,
-                'type': 'Vacant'
-              })
-                print('end of line vacant')
-                print(edge_date)
-                print(avail_event.end)
-    return occupancy_events_processed

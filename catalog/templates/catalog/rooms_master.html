@@ -44,7 +44,7 @@
 {% if selected_section%}
 <h2 id = "user-title">{{section_title}}</h2>
 
-{% for room, events in section_events.items %}
+{% for room, room_info in section_events.items %}
 
     <table class="table">
       <tbody>
@@ -57,15 +57,14 @@
 
               <button
               class="btn-link"
-              onclick="showFloorplanModal('{{ events.room_image_url }}', '{{events.room_name}}')"
-            >{{events.room_title}}
+              onclick="showFloorplanModal('{{ room_info.room_image_url }}', '{{room_info.room_name}}')"
+            >{{room_info.room_title}}           {%if room.is_offline%}<strong style= "color:red;"> *OFFLINE*</strong>{%endif%}
+
           </button>
-
           <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
-
         </div>
 
-              <form id="preferenceForm-{{ room.id }}" method="post" action="{% url 'edit_guest_preferences_with_section' events.room_id events.owner_id section_id%}">
+              <form id="preferenceForm-{{ room.id }}" method="post" action="{% url 'edit_guest_preferences_with_section' room_info.room_id room_info.owner_id section_id%}">
                 {% csrf_token %}
                 <div class="dropdown preference-dropdown">
                   <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -84,42 +83,32 @@
                 <input type="hidden" name="preference" id="preferenceInput-{{ room.id }}">
               </form>
 
-
-
               {%else%}
               <div class="button-group">
-                  <button class="btn-link" onclick="showFloorplanModal('{{ events.room_image_url }}', '{{ events.room_name }}')">{{events.room_title }}</button>
-                  <form id="assignOwnerForm-{{ events.room_id }}" method="post" action="{% if section_id %}{% url 'assign_owner_with_section' events.room_id section_id %}{% else %}{% url 'assign_owner' events.room_id %}{% endif %}" style="display: inline;">
+                  <button class="btn-link" onclick="showFloorplanModal('{{ room_info.room_image_url }}', '{{ room_info.room_name }}')">{{room_info.room_title }} {%if room.is_offline%}<strong style= "color:red;"> *OFFLINE*</strong>{%endif%}</button>
+                  <form id="assignOwnerForm-{{ room_info.room_id }}" method="post" action="{% if section_id %}{% url 'assign_owner_with_section' room_info.room_id section_id %}{% else %}{% url 'assign_owner' room_info.room_id %}{% endif %}" style="display: inline;">
                     {% csrf_token %}
                     <div class="dropdown" style="display: inline;">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown-{{ events.room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown-{{ room_info.room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Assign Roomless Member
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown-{{ events.room_id }}">
+                        <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown-{{ room_info.room_id }}">
                             {% for member in roomless_members %}
-                                <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}', 'assignOwnerForm-{{ events.room_id }}', 'memberIdInput-{{ events.room_id }}')">{{ member.name }}</a>
+                                <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}', 'assignOwnerForm-{{ room_info.room_id }}', 'memberIdInput-{{ room_info.room_id }}')">{{ member.name }}</a>
                             {% endfor %}
                         </div>
                     </div>
-                    <input type="hidden" name="member_id" id="memberIdInput-{{ events.room_id }}">
+                    <input type="hidden" name="member_id" id="memberIdInput-{{ room_info.room_id }}">
                 </form>
                 </div>
 
                   <button id = "btn-preference-grey" class="btn btn-secondary">Anyone can stay here</button>
               {% endif %}
-
-
-
             </div>
-
-
-
-
-
           </th>
         </tr>
-        {%if events.events_exist%}
-        {% for a_event in events.availability_events %}
+        {%if room_info.events_exist%}
+        {% for a_event in room_info.availability_events %}
           <tr>
             <td class="availability-cell">
               <div class="flex-container">
@@ -131,7 +120,7 @@
               </div>
             </td>
           </tr>
-          {% for o_event in events.occupancy_events %}
+          {% for o_event in room_info.occupancy_events_and_vacancies %}
           {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
 
               {% if o_event.type == "Booked"%}
@@ -140,7 +129,11 @@
                 <div class = "flex-container">
 
                 <span class ="booked-text">
-                <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}  --- {{ o_event.title|slice:"9:" }}
+                {%if forloop.last and not room.owner%}
+                    <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} --- {{ o_event.title|slice:"9:" }}
+                    {%else%}
+                    <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
+                    {%endif%}
               </span>
               <div>
                 <button class="btn-grey"
@@ -174,7 +167,11 @@
                 <td class = "not-booked-cell" style="padding-left: 50px;" >
 
                   <span class ="booked-text">
-                  <em> Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}   
+                    {%if forloop.last and not room.owner%}
+                    <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} 
+                    {%else%}
+                    <em>Vacant</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}
+                    {%endif%}
                 </span>
               </td>
             </tr>
@@ -195,15 +192,6 @@
       </tbody>
     </table>
 {% endfor %}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -270,8 +258,6 @@
               {% endif %}
           </div>
 
-
-
           </th>
         </tr>
         {%if events_exist%}
@@ -289,10 +275,7 @@
           </tr>
           
 
-
-
-
-          {% for o_event in occupancy_events %}
+          {% for o_event in occupancy_events_and_vacancies %}
           {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
 
               {% if o_event.type == "Booked"%}
@@ -301,7 +284,11 @@
                 <div class = "flex-container">
 
                 <span class ="booked-text">
-                <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}  --- {{ o_event.title|slice:"9:" }}
+                  {%if forloop.last and not room.owner%}
+                  <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} --- {{ o_event.title|slice:"9:" }}
+                  {%else%}
+                  <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
+                  {%endif%}
               </span>
               <div>
                 <button class="btn-grey"
@@ -335,7 +322,12 @@
                 <td class = "not-booked-cell" style="padding-left: 50px;" >
 
                   <span class ="booked-text">
-                  <em> Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}   
+                    {%if forloop.last and not room.owner%}
+                    <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} 
+                    {%else%}
+                    <em>Vacant</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} 
+        
+                    {%endif%}
                 </span>
               </td>
             </tr>
@@ -350,13 +342,13 @@
 
         <tr>
           <td class= "cell-create-availability">
-                        <button class = "btn-grey" type="button" onclick="showCreateAvailabilityForm(event, '{{ room_id }}', '{{ events.room_name }}')">+ Create new availability</button>
+          <button class = "btn-grey" type="button" onclick="showCreateAvailabilityForm(event, '{{ room_id }}', '{{ .room_name }}')">+ Create new availability</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    {% for child, events in children_events.items %}
+    {% for child, room_info  in children_info.items %}
     <table class="table">
       <tbody>
         <tr>
@@ -364,7 +356,7 @@
             <div class="flex-container">
               <button
               class="btn-link"
-              onclick="showFloorplanModal('{{ events.room_image_url }}', '{{events.room_name}}')"
+              onclick="showFloorplanModal('{{ .room_image_url }}', '{{.room_name}}')"
             >{{ child.name}}'s Room
           </button>
               <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
@@ -388,8 +380,8 @@
             </div>
           </th>
         </tr>
-        {%if events.events_exist%}
-        {% for a_event in events.availability %}
+        {%if room_info.events_exist%}
+        {% for a_event in room_info.availability_events %}
           <tr>
             <td class="availability-cell">
               <div class="flex-container">
@@ -401,7 +393,7 @@
               </div>
             </td>
           </tr>
-          {% for o_event in events.occupancy %}
+          {% for o_event in room_info.occupancy_events_and_vacancies %}
             {% if o_event.start >= a_event.start and o_event.end <= a_event.end %}
             {% if o_event.type == "Booked"%}
             <tr>
@@ -409,8 +401,12 @@
               <div class = "flex-container">
 
               <span class ="booked-text">
-              <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}  --- {{ o_event.title|slice:"9:" }}
-            </span>
+                
+                {%if forloop.last and not room.owner%}
+                <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} --- {{ o_event.title|slice:"9:" }}
+                {%else%}
+                <em>Booked:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }} --- {{ o_event.title|slice:"9:" }}
+                {%endif%}            </span>
             <div>
               <button class="btn-grey"
                 data-toggle="modal" 
@@ -439,11 +435,17 @@
         {% include "occupancy_modals.html" %}
 
             {%else%}
+
             <tr>
               <td class = "not-booked-cell" style="padding-left: 50px;" >
 
                 <span class ="booked-text">
-                <em> Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}   
+                  {%if forloop.last and not room.owner%}
+                  <em>Vacant:</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_second_comma }} 
+                  {%else%}
+                  <em>Vacant</em> {{ o_event.start|split_at_comma }} - {{ o_event.end|split_at_comma }}
+      
+                  {%endif%}   
               </span>
             </td>
           </tr>
@@ -465,22 +467,15 @@
     </table>
 {% endfor %}
 
-
-
 {% else %}
 <p></p>
 <p>There is currently no room information to display.</p>
 <p>Please select a person to view their room details.</p>
 <p>If you have already selected a person, they appear to not have a room.</p>
-
-
 {% endif %}
-
-
 
 {%include "availability_modals.html"%}
 {%include "floorplan_img_modal.html"%}
-
 
 
 <!-- Modal HTML -->
@@ -503,7 +498,7 @@
         {%else%}{%url 'remove_owner'%} {%endif%}"
         
          
-         id="removeOwnerForm">
+          id="removeOwnerForm">
           {% csrf_token %}
           <input type="hidden" name="room_id" id="room_id">
           <button type="submit" class="btn btn-danger">Remove Owner</button>
@@ -808,35 +803,6 @@ $(document).ready(function() {
 });
 
 
-
-  // Function to populate the extend modal
-
-  // $('.modal').on('show.bs.modal', function(event) {
- //  console.log("Modal is being shown!");
- //  var button = $(event.relatedTarget);
- //  var eventId = button.data('id');
- //  var startDate = button.data('start-date');
- //  var endDate = button.data('end-date');
- //  
- //  console.log(`Opening modal for event ${eventId} with start date ${startDate} and end date ${endDate}`);
-
- //  var modal = $(this);
- //  modal.find(`#extendEventId-${eventId}`).val(eventId);
- //  modal.find(`#extendStartDate-${eventId}`).val(startDate);
- //  modal.find(`#extendEndDate-${eventId}`).val(endDate);
-
- //  // Set the original start and end date data attributes
- //  modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
- //  modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
-
- //  // Similar setup for shorten modal
- //  modal.find(`#shortenEventId-${eventId}`).val(eventId);
- //  modal.find(`#shortenStartDate-${eventId}`).val(startDate);
- //  modal.find(`#shortenEndDate-${eventId}`).val(endDate);
- //  
- //  modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start', startDate);
- //  modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end', endDate);
- //});
 
   // Populate modals with data attributes
   $('.modal').on('show.bs.modal', function(event) {

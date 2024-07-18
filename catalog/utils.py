@@ -6,10 +6,12 @@ import pytz
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.shortcuts import render, get_object_or_404, redirect
 
-from catalog.models import CustomEvent, Room, Building
+from catalog.models import CustomEvent, Room, Building, Person
 
-def merge_overlapping_events(calendar):
+
+def merge_overlapping_availabilities(calendar):
     
     events = CustomEvent.objects.filter(calendar = calendar, event_type='availability').order_by('start')
     merged_events = []
@@ -38,33 +40,32 @@ def merge_overlapping_events(calendar):
 
 
 def normalize_time(dt):
-    return dt.replace(hour=12, minute=0, second=0, microsecond=0)
+  return dt.replace(hour=12, minute=0, second=0, microsecond=0)
 
 
 def event_id_to_redirect_room_id(event_id):
-            occ_event = get_object_or_404(CustomEvent, id = event_id)
-            
-            #for no owner
-            room_id = occ_event.calendar.room.id
-
-            #for owned room, check if kid
-            if occ_event.calendar.room.owner:
-              person = occ_event.calendar.room.owner
-              if person.parent:
-                person = person.parent
-              room_id = person.room.id
-            
-            return room_id
+  occ_event = get_object_or_404(CustomEvent, id = event_id)
+  
+  #for no owner
+  room_id = occ_event.calendar.roo
+  #for owned room, check if child
+  if occ_event.calendar.room.owner:
+    person = occ_event.calendar.room.owner
+    if person.parent:
+      person = person.parent
+    room_id = person.room.id
+  
+  return room_id
 
 
 
 def date_to_aware_datetime(date, hour, minute ):
-    # Convert dates to datetime objects with specific time (around noon)
-            if isinstance(date, datetime):
-                date = date.replace(hour=hour, minute=minute)
-            else:
-                date = datetime.combine(date, time(hour, minute))
-            return ensure_timezone_aware(date)
+  # Convert dates to datetime objects with specific time (around noon)
+    if isinstance(date, datetime):
+      date = date.replace(hour=hour, minute=minute)
+    else:
+      date = datetime.combine(date, time(hour, minute))
+    return ensure_timezone_aware(date)
 
 def ensure_timezone_aware(date, tz_name='America/New_York'):
     if timezone.is_naive(date):
@@ -87,68 +88,106 @@ def ensure_timezone_aware(date, tz_name='America/New_York'):
 # calls create_stopgap_booking if possible, sends emails regardless
 def handle_reassign(occ_event, start_date, end_date, owner, room):
                   
-                  guest_type = occ_event.guest_type
-                  guest_name = occ_event.guest_name
-                  host_email = occ_event.creator.email
+    guest_type = occ_event.guest_type
+    guest_name = occ_event.guest_name
+    host_email = occ_event.creator.email
 
-                  original_room = room
+    original_room = room
 
-                  # getting available rooms in order of geographic preference
-                  original_building = original_room.section.building
-                  buildings_in_same_area = Building.objects.filter(area=original_building.area).exclude(id=original_building.id)
-                  buildings_in_other_area = Building.objects.exclude(area = original_building.area)
+    # getting available rooms in order of geographic preference
+    original_building = original_room.section.building
+    buildings_in_same_area = Building.objects.filter(area=original_building.area).exclude(id=original_building.id)
+    buildings_in_other_area = Building.objects.exclude(area = original_building.area)
 
-                  rooms_in_original_building = Room.objects.filter(section__building = original_building).order_by('?')
-                  rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area).order_by('?')
-                  rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area).order_by('?')
+    rooms_in_original_building = Room.objects.filter(section__building = original_building).order_by('?')
+    rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area).order_by('?')
+    rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area).order_by('?')
 
-                  rooms = list(rooms_in_original_building) + list(rooms_in_same_area) + list(rooms_outside_original_area)
+    rooms = list(rooms_in_original_building) + list(rooms_in_same_area) + list(rooms_outside_original_area)
 
-                  event_assigned = False
+    event_assigned = False
 
-                  for room in rooms:
-                      email_start_date = start_date.strftime('%Y-%m-%d')
-                      email_end_date = end_date.strftime('%Y-%m-%d')
+    for room in rooms:
+        email_start_date = start_date.strftime('%Y-%m-%d')
+        email_end_date = end_date.strftime('%Y-%m-%d')
 
-                      if room.is_available(start_date, end_date) and (
-                        (room.owner and int(guest_type) >= int(room.owner.preference)) or not room.owner):
+        if room.is_available(start_date, end_date) and (
+          (room.owner and int(guest_type) >= int(room.owner.preference)) or not room.owner):
 
-                              create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
-                              event_assigned = True
+                create_stopgap_booking(room, occ_event, start_date, end_date, occ_event.guest_type, occ_event.guest_name)
+                event_assigned = True
 
-                              send_mail(
-                                        "Your room booking has changed",
-                                        f"{owner} has had an availability change. Your guest {guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
-                                        "autoRoomAss@email.com",
-                                        [f"{host_email}"],
-                                        fail_silently=False
-                                        )
+                send_mail(
+                          "Your room booking has changed",
+                          f"{owner} has had an availability change. Your guest {guest_name} has been reassigned to a different room from {email_start_date} to {email_end_date}. Visit 'My Guests' in the room system to see the details. ",
+                          "autoRoomAss@email.com",
+                          [f"{host_email}"],
+                          fail_silently=False
+                          )
 
-                              return
+                return
                           
                               
-                  if not event_assigned:
-                        print('event not reassigned')
-                        send_mail(
-                                        "Your room booking has changed",
-                                        f"{owner} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
-                                        "autoRoomAss@email.com",
-                                        [f"{host_email}"],
-                                        fail_silently=False
-                                        )
+    if not event_assigned:
+          print('event not reassigned')
+          send_mail(
+                          "Your room booking has changed",
+                          f"{owner} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",
+                          "autoRoomAss@email.com",
+                          [f"{host_email}"],
+                          fail_silently=False
+                          )
 # for automatic reassign
 def create_stopgap_booking(room, event, start_date, end_date, guest_type, guest_name):
                               
-                            #book it
-                              booking_event = CustomEvent(
-                              calendar=room.calendar,
-                              event_type='occupancy',
-                              start=start_date,
-                              end=end_date,
-                              title= f"Booking: {guest_name} hosted by {str(event.creator)}",
-                              description = "Meaningful Description",
-                              creator = event.creator,
-                              guest_type = guest_type,
-                              guest_name = guest_name
-                              )
-                              booking_event.save()
+  #book it
+    booking_event = CustomEvent(
+    calendar=room.calendar,
+    event_type='occupancy',
+    start=start_date,
+    end=end_date,
+    title= f"Booking: {guest_name} hosted by {str(event.creator)}",
+    description = "Meaningful Description",
+    creator = event.creator,
+    guest_type = guest_type,
+    guest_name = guest_name
+    )
+    booking_event.save()
+
+
+def process_occupancy_events(availability_events, occupancy_events):
+    
+    occupancy_events_processed = []
+
+    for avail_event in availability_events:
+            
+
+              edge_date = avail_event.start
+              for occ_event in occupancy_events:
+                  if occ_event.start >= avail_event.start and occ_event.end <= avail_event.end:
+
+                    if occ_event.start > edge_date and edge_date.date() != occ_event.start.date():
+                          occupancy_events_processed.append({
+                              'start': edge_date,
+                              'end': occ_event.start,
+                              'type': 'Vacant'
+                          })
+                    
+                    occupancy_events_processed.append({
+                        'event': occ_event,
+                        'start': occ_event.start,
+                        'end': occ_event.end,
+                        'type': 'Booked',
+                        'title': occ_event.title,
+                        'id':occ_event.id
+                        })
+                    
+                    edge_date = occ_event.end
+
+              if edge_date < avail_event.end and edge_date.date() != avail_event.end.date():
+                occupancy_events_processed.append({
+                'start': edge_date,
+                'end': avail_event.end,
+                'type': 'Vacant'
+              })
+    return occupancy_events_processed
