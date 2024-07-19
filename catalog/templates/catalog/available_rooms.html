@@ -9,7 +9,7 @@
       <label class = "available-rooms-input-label" for="start_date">Start Date (@ Noon)</label>
       <input
         type="date"
-        class="form-control"
+        class="form-control no-cursor"
         id="start_date"
         name="start_date"
         value="{{ start_date }}"
@@ -24,7 +24,7 @@
       <label for="end_date">End Date (@ Noon)</label>
       <input
         type="date"
-        class="form-control"
+        class="form-control no-cursor"
         id="end_date"
         name="end_date"
         value="{{ end_date }}"
@@ -210,9 +210,16 @@ console.log("Limit Date Object: ", limitDateObj);
     if (startDate && endDate) {
       var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
       var endDateObj = new Date(endDate + "T11:59:59"); // Set time to just before noon
-
+// Validation for start date
+if (isNaN(startDateObj.getTime())) {
+  alert("Invalid start date.");
+  event.preventDefault();
+  return false;
+}
       if (startDateObj < yesterday) {
         alert("Start date cannot be that far in the past.");
+        console.log(startDateObj)
+        console.log(yesterday)
         return false;
       } else if (startDateObj > endDateObj) {
         alert("Invalid date range.");
@@ -288,7 +295,14 @@ console.log("Limit Date Object: ", limitDateObj);
   $('#floorplanModal').modal('show');
 }
 
+  // Prevent manual typing in the input fields
+  startDateInput.addEventListener('keydown', function(event) {
+    event.preventDefault();
+  });
 
+  endDateInput.addEventListener('keydown', function(event) {
+    event.preventDefault();
+  });
 </script>
 
 {% endblock %}
