@@ -28,9 +28,8 @@ def available_rooms(request):
             guest_type = form.cleaned_data.get('guest_type')
             
         else:
-            start_date = None
-            end_date = None
-            guest_type = None
+            # If the form is not valid, render the form with error message
+            return render(request, 'catalog/available_rooms.html', {'form': form})
 
     # retrieve prior session values if not a form submisison
     else:

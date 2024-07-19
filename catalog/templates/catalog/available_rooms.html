@@ -14,6 +14,11 @@
         name="start_date"
         value="{{ start_date }}"
       />
+      {% if form.start_date.errors or form.end_date.errors or form.guest_type.errors %}
+          <div class="text-danger">
+              <p>Valid inputs for these fields are required.</p>
+          </div>
+        {% endif %}
     </div>
     <div class="form-group col-md-4">
       <label for="end_date">End Date (@ Noon)</label>
