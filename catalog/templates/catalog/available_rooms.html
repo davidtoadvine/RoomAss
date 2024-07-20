@@ -2,6 +2,7 @@
 <h1>Available Guest Rooms</h1>
 
 <div id = "box-available-rooms-forms">
+  
 <form method="post" action="{% url 'available_rooms' %}" id="dateRangeForm">
   {% csrf_token %}
   <div class="form-row">
@@ -14,11 +15,14 @@
         name="start_date"
         value="{{ start_date }}"
       />
-      {% if form.start_date.errors or form.end_date.errors or form.guest_type.errors %}
+      {% if form.start_date.errors or form.end_date.errors or form.guest_type.errors or form.non_field_errors %}
           <div class="text-danger">
-              <p>Valid inputs for these fields are required.</p>
+              <p>Valid inputs are required for these fields.</p>
+
+
           </div>
         {% endif %}
+
     </div>
     <div class="form-group col-md-4">
       <label for="end_date">End Date (@ Noon)</label>
@@ -153,8 +157,7 @@
   var guestTypeInput = document.getElementById("guestType")
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
-  console.log("previous End date set at...")
-  console.log(previousEndDate)
+
   guestTypeInput.addEventListener("change", function(){
     validateAndSubmitDate();
   });
@@ -181,8 +184,7 @@
       endDateInput.value = previousEndDate;
     } else {
       previousEndDate = endDateInput.value;
-      print("end date change, not valid, previous end date is")
-      print(previousEndDate)
+
     }
   });
 
@@ -203,13 +205,14 @@ if (limitDateObj.getDate() < now.getDate()) {
 }
 
 // Print the limitDateObj to verify
-console.log("Limit Date Object: ", limitDateObj);
+//console.log("Limit Date Object: ", limitDateObj);
 
     var yesterday = now.setDate(now.getDate() - 1);
 
     if (startDate && endDate) {
       var startDateObj = new Date(startDate + "T23:59:59"); // Set time to end of the day
       var endDateObj = new Date(endDate + "T11:59:59"); // Set time to just before noon
+
 // Validation for start date
 if (isNaN(startDateObj.getTime())) {
   alert("Invalid start date.");
@@ -218,8 +221,7 @@ if (isNaN(startDateObj.getTime())) {
 }
       if (startDateObj < yesterday) {
         alert("Start date cannot be that far in the past.");
-        console.log(startDateObj)
-        console.log(yesterday)
+
         return false;
       } else if (startDateObj > endDateObj) {
         alert("Invalid date range.");

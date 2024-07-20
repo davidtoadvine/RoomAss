@@ -17,7 +17,6 @@ from catalog.utils import ensure_timezone_aware, event_id_to_redirect_room_id
 def create_booking(request):
 
     if request.method == 'POST':
-        print('post')
         
         form = BookingForm(request.POST)
 
@@ -40,7 +39,7 @@ def create_booking(request):
             end_date = ensure_timezone_aware(end_date)
 
             if room.is_available(start_date, end_date):
-                print('room available')
+
                 booking_event = CustomEvent(
                     calendar=room.calendar,
                     event_type='occupancy',
@@ -88,9 +87,11 @@ def delete_booking(request, event_id, section_id = None):
 def extend_booking(request, event_id, section_id = None):
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_guests')
+        redirect_room_id = event_id_to_redirect_room_id(event_id)
 
         form = EditAvailabilityForm(request.POST)
         if form.is_valid():
+            print('valid form')
             event_id = form.cleaned_data['event_id']
             new_start_date = form.cleaned_data['start_date']
             new_end_date = form.cleaned_data['end_date']
@@ -129,14 +130,18 @@ def extend_booking(request, event_id, section_id = None):
           
             else:
               if source_page == 'rooms_master' and section_id:
+                print('rooms master and section')
                 return redirect('rooms_master_with_section', section_id = section_id)
               elif source_page == 'rooms_master':
+                print('rooms master no section')
                 return redirect('rooms_master_with_room', room_id = redirect_room_id)
-              
-
+              print('my guests')
               return redirect('my_guests')  # Redirect to the appropriate page after saving
-    if request.user.is_superuser:
-                  return redirect('rooms_master_with_room', room_id = redirect_room_id)
+            
+    if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+    elif source_page == 'rooms_master':
+              return redirect('rooms_master_with_room', room_id = redirect_room_id)
     return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
 

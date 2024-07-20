@@ -14,6 +14,8 @@ from catalog.forms import DateRangeForm, PersonSelectForm, RoomSelectForm, Secti
 from catalog.models import CustomEvent, Room, Person, Building, Section
 from catalog.utils import date_to_aware_datetime, process_occupancy_events
 
+from django.http import HttpResponseRedirect
+
 def available_rooms(request):
     
     # get and order rooms for sensible display later
@@ -26,8 +28,16 @@ def available_rooms(request):
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
             guest_type = form.cleaned_data.get('guest_type')
+            print(f"Valid data: {form.cleaned_data}")
+            # Save the session variables
+            request.session['start_date'] = str(start_date)
+            request.session['end_date'] = str(end_date)
+            request.session['guest_type'] = guest_type
+
+            return HttpResponseRedirect('')
             
         else:
+            print(f"Form errors: {form.errors}")
             # If the form is not valid, render the form with error message
             return render(request, 'catalog/available_rooms.html', {'form': form})
 
@@ -197,6 +207,7 @@ def my_guests(request):
     processed_events = []
 
     for event in occupancy_events:
+        print(event.id)
         room_owner = "Unassigned"
         if event.calendar.room.owner:
             room_owner = event.calendar.room.owner

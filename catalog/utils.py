@@ -47,7 +47,7 @@ def event_id_to_redirect_room_id(event_id):
   occ_event = get_object_or_404(CustomEvent, id = event_id)
   
   #for no owner
-  room_id = occ_event.calendar.roo
+  room_id = occ_event.calendar.room.id
   #for owned room, check if child
   if occ_event.calendar.room.owner:
     person = occ_event.calendar.room.owner

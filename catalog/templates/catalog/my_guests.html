@@ -23,6 +23,7 @@
                 </tr>
             {% else %}
                 {% for o_event in occupancy_events %}
+
                 <tr>
                     <td>{{ o_event.guest_name }}</td>
                     <td>{{ o_event.start_date|date:"F d" }}</td>
@@ -70,8 +71,8 @@
                     </button>
                     </td>
                 </tr>
+                {%include "occupancy_modals.html"%}
 
-{%include "occupancy_modals.html"%}
 {%include "floorplan_img_modal.html"%}
 
 {% endfor %}
@@ -82,140 +83,158 @@
 
 <script>
   $(document).ready(function() {
-    // Function to populate the extend modal
+    // Function to populate the extend and shorten modals
     $('.modal').on('show.bs.modal', function(event) {
       var button = $(event.relatedTarget);
-      var eventId = button.data('id');
       var startDate = button.data('start-date');
       var endDate = button.data('end-date');
-      var imageUrl = button.data('image-url'); // Get the image URL from the button
-
+      var eventId = button.data('id');
       var modal = $(this);
+  
+      console.log("Modal event ID: " + eventId);
+  
+      // For Extend Modal
+      modal.find(`#extendStartDate-${eventId}`).val(startDate).attr('data-original-start', startDate);
+      modal.find(`#extendEndDate-${eventId}`).val(endDate).attr('data-original-end', endDate);
+      console.log("Extend Start Date:", modal.find(`#extendStartDate-${eventId}`).attr('data-original-start'));
+      console.log("Extend End Date:", modal.find(`#extendEndDate-${eventId}`).attr('data-original-end'));
+  
+      // For Shorten Modal
+      modal.find(`#shortenStartDate-${eventId}`).val(startDate).attr('data-original-start', startDate);
+      modal.find(`#shortenEndDate-${eventId}`).val(endDate).attr('data-original-end', endDate);
+      console.log("Shorten Start Date:", modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start'));
+      console.log("Shorten End Date:", modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end'));
+  
+      // Explicitly set the event_id field value
       modal.find(`#extendEventId-${eventId}`).val(eventId);
-      modal.find(`#extendStartDate-${eventId}`).val(startDate);
-      modal.find(`#extendEndDate-${eventId}`).val(endDate);
-
-      // Set the original start and end date data attributes
-      modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
-      modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
-      
-      // Similar setup for shorten modal
       modal.find(`#shortenEventId-${eventId}`).val(eventId);
-      modal.find(`#shortenStartDate-${eventId}`).val(startDate);
-      modal.find(`#shortenEndDate-${eventId}`).val(endDate);
-      
-      modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start', startDate);
-      modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end', endDate);
-
-      // Set the image URL for the floorplan modal
-      if(modal.attr('id') === 'floorplanModal') {
-        modal.find('#floorplanImage').attr('src', imageUrl);
-      }
     });
-  });
-
-  // Function to validate date selection
-  function validateExtendDate(eventId) {
-    let startDateInput = document.getElementById(`extendStartDate-${eventId}`);
-    let endDateInput = document.getElementById(`extendEndDate-${eventId}`);
-    let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
-    let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
-    let newStartDate = new Date(startDateInput.value);
-    let newEndDate = new Date(endDateInput.value);
-
-    var now = new Date();
-    // Create a new date object for the limit date, starting with today
-    var limitDateObj = new Date(now);
-
-// Add 3 months to the limit date
-limitDateObj.setMonth(limitDateObj.getMonth() + 3);
-
-// Adjust for potential month overflow (if adding 3 months to a date exceeds the month's days, it will correct itself)
-if (limitDateObj.getDate() < now.getDate()) {
-  limitDateObj.setDate(0); // Set to last day of the previous month
-}
-
-
-    if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
-      alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
-      startDateInput.value = startDateInput.getAttribute('data-original-start');
-      endDateInput.value = endDateInput.getAttribute('data-original-end');
-      return false;
+  
+    // Function to validate date selection for extending
+    function validateExtendDate(eventId) {
+      let startDateInput = document.getElementById(`extendStartDate-${eventId}`);
+      let endDateInput = document.getElementById(`extendEndDate-${eventId}`);
+      
+      if (!startDateInput || !endDateInput) {
+        console.error('Start date or end date input not found for event ID:', eventId);
+        return false;
+      }
+  
+      let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+      let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+      let newStartDate = new Date(startDateInput.value);
+      let newEndDate = new Date(endDateInput.value);
+  
+      var now = new Date();
+      var limitDateObj = new Date(now);
+      limitDateObj.setMonth(limitDateObj.getMonth() + 3);
+      if (limitDateObj.getDate() < now.getDate()) {
+        limitDateObj.setDate(0); // Set to last day of the previous month
+      }
+  
+      if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
+        alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
+        startDateInput.value = startDateInput.getAttribute('data-original-start');
+        endDateInput.value = endDateInput.getAttribute('data-original-end');
+        return false;
+      }
+      if (newEndDate > limitDateObj) {
+        alert("You cannot schedule more than 3 months out.");
+        startDateInput.value = startDateInput.getAttribute('data-original-start');
+        endDateInput.value = endDateInput.getAttribute('data-original-end');
+        return false;
+      }
+      return true;
     }
-    else if (newEndDate > limitDateObj){
-      alert("You cannot schedule more than 3 months out.")
-      startDateInput.value = startDateInput.getAttribute('data-original-start');
-      endDateInput.value = endDateInput.getAttribute('data-original-end');
-      return false;
-
+  
+    // Function to validate date selection for shortening
+    function validateShortenDate(eventId) {
+      let startDateInput = document.getElementById(`shortenStartDate-${eventId}`);
+      let endDateInput = document.getElementById(`shortenEndDate-${eventId}`);
+  
+      if (!startDateInput || !endDateInput) {
+        console.error('Start date or end date input not found for event ID:', eventId);
+        return false;
+      }
+  
+      let originalStartDateStr = startDateInput.getAttribute('data-original-start');
+      let originalEndDateStr = endDateInput.getAttribute('data-original-end');
+      let originalStartDate = new Date(originalStartDateStr);
+      let originalEndDate = new Date(originalEndDateStr);
+      let newStartDate = new Date(startDateInput.value);
+      let newEndDate = new Date(endDateInput.value);
+  
+      if (newStartDate < originalStartDate || newEndDate > originalEndDate) {
+        alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
+        startDateInput.value = originalStartDateStr;
+        endDateInput.value = originalEndDateStr;
+        return false;
+      }
+      return true;
     }
-    return true;
-  }
-  // Attach change event listeners to the date inputs
+  
+    // Attach change event listeners to the date inputs for extending and shortening
+    $(document).on('change', '.extend-start-date, .extend-end-date', function() {
+      const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+      console.log(eventId)
+      validateExtendDate(eventId);
+    });
+  
+    $(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
+
+      const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+      console.log(eventId)
+
+      validateShortenDate(eventId);
+    });
+  
+    // Attach change event listeners to the date inputs for extending and shortening
   $(document).on('change', '.extend-start-date, .extend-end-date', function() {
     const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+    console.log("EVENT ID (on change for extend):", eventId);
     validateExtendDate(eventId);
   });
 
-
-  ////////////////////////////////////////////////////////////////////////////
-  // Function to validate date selection
-  function validateShortenDate(eventId) {
-    let startDateInput = document.getElementById(`shortenStartDate-${eventId}`);
-    let endDateInput = document.getElementById(`shortenEndDate-${eventId}`);
-    let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
-    let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
-    let newStartDate = new Date(startDateInput.value);
-    let newEndDate = new Date(endDateInput.value);
-
-    if (newStartDate < originalStartDate || newEndDate > originalEndDate) {
-      alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
-      startDateInput.value = startDateInput.getAttribute('data-original-start');
-      endDateInput.value = endDateInput.getAttribute('data-original-end');
-      return false;
-    }
-    else if (newStartDate >= originalEndDate || newEndDate<= originalStartDate){
-      alert("The start date cannot occur on or after the end date. If you wish to delete this event, please use the 'Delete' button.");
-      startDateInput.value = startDateInput.getAttribute('data-original-start');
-      endDateInput.value = endDateInput.getAttribute('data-original-end');
-      return false;
-    }
-    return true;
-  } 
-  /////////////////////////////////////////////////////////////////////////////////
-
-  // Attach change event listeners to the date inputs
   $(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
     const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+    console.log("EVENT ID (on change for shorten):", eventId);
     validateShortenDate(eventId);
   });
 
-  $(document).ready(function() {
-    $('#floorplanModal').on('shown.bs.modal', function () {
-        console.log('Image src:', $('#floorplanModal img').attr('src'));
+  // Prevent form submission if validation fails
+  $(document).on('submit', 'form[data-form-type]', function(e) {
+    console.log('Form submission triggered');
+    console.log('Form element:', this);
+
+    // Log all inputs within the form to check for event_id
+    $(this).find('input').each(function() {
+      console.log('Input:', this, 'Name:', this.name, 'Value:', this.value);
     });
-  });
 
+    // Retrieve the event ID using jQuery closest method
+    const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+    console.log('Event ID (on submit):', eventId);
 
+    if (!eventId) {
+      console.error('Event ID not found');
+      e.preventDefault();
+      return;
+    }
 
-   // Prevent form submission if validation fails
-   $(document).on('submit', 'form', function(e) {
-    const eventId = $(this).find('input[name="event_id"]').val();
-    const formType = $(this).attr('data-form-type'); // Assuming you have a way to distinguish form types
+    // Find and log the form type
+    const formType = this.getAttribute('data-form-type');
+    console.log('Form type:', formType);
 
+    // Validation checks
     if (formType === 'extend' && !validateExtendDate(eventId)) {
+      console.log('Validation failed on extend');
       e.preventDefault(); // Prevent form submission for extend form
     } else if (formType === 'shorten' && !validateShortenDate(eventId)) {
+      console.log('Validation failed on shorten');
       e.preventDefault(); // Prevent form submission for shorten form
     }
   });
-
- // Function to show the floorplan modal with the correct image
- function showFloorplanModal(imageUrl, roomName) {
-  document.getElementById('floorplanImage').src = imageUrl;
-  document.getElementById('floorplanModalLabel').innerText = roomName;
-  console.log("roomname" + roomName)
-  $('#floorplanModal').modal('show');
-}
+});
+  
 </script>
 {% endblock %}
