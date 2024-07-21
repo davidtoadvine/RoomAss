@@ -53,7 +53,10 @@
       <th scope="col">Building / Section / Room #</th>
       <th scope="col">Owner</th>
       <th scope="col">Available Until Noon on...</th>
+      {% if user.is_authenticated%}
+
       <th scope="col"></th>
+      {%endif%}
     </tr>
   </thead>
   <tbody>
@@ -66,8 +69,12 @@
       </td>
       <td>
       </td>
+      {% if user.is_authenticated%}
+
       <td>
       </td>
+      {%endif%}
+
     </tr>
     {%endif%}
     {% for room, availability_date, room_image_url,room_name in available_rooms_info %}
@@ -91,8 +98,9 @@
         {%else%}
         No Further Availability {% endif %}
       </td>
-      <td>
       {% if user.is_authenticated%}
+
+      <td>
 
 
 
@@ -106,11 +114,12 @@
           Book Room
         </button>
       
-      {%endif%}
         
   
         
       </td>
+      {%endif%}
+
         <!-- </form> -->
         {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
@@ -251,27 +260,27 @@ if (isNaN(startDateObj.getTime())) {
     event.preventDefault();
   
     // Set the form values
-    $("#bookingStartDateHidden").val(startDate);
-    $("#bookingEndDateHidden").val(endDate);
-    $("#bookingRoomId").val(roomId);
-    $("#bookingRoomNumber").text(roomNumber);
-    $("#bookingBuildingName").text(buildingName);
-    $("#bookingSectionName").text(sectionName);
-    $("#bookingStartDate").text(startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
-    $("#bookingEndDate").text(endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
-    $("bookingGuestType").val(guestType);
+    $("#booking-start-date-hidden").val(startDate);
+    $("#booking-end-date-hidden").val(endDate);
+    $("#booking-room-id").val(roomId);
+    $("#booking-room-number").text(roomNumber);
+    $("#booking-building-name").text(buildingName);
+    $("#booking-section-name").text(sectionName);
+    $("#booking-start-date").text(startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+    $("#booking-end-date").text(endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+    $("booking-guest-type").val(guestType);
     // Set the room image
     if (roomImageUrl) {
-      $("#bookingRoomImage").attr("src", roomImageUrl).show();
+      $("#booking-room-image").attr("src", roomImageUrl).show();
     } else {
-      $("#bookingRoomImage").hide();
+      $("#booking-room-image").hide();
     }
     // Show the modal
-    $("#bookingModal").modal("show");
+    $("#booking-modal").modal("show");
   }
 
   function submitBookingForm() {
-    let guestName = document.getElementById("guestName").value.trim()
+    let guestName = document.getElementById("guest-name").value.trim()
    
       // Simulate form submission and failure
       // Check if the value is empty or whitespace
@@ -282,7 +291,7 @@ if (isNaN(startDateObj.getTime())) {
      else {
       alert("Submitted booking.")
      }
-    $("#bookingForm").submit();
+    $("#booking-form").submit();
     }
   
 

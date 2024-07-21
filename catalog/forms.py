@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+
+###Occupancy Forms###
 class BookingForm(forms.Form):
     
     GUEST_TYPE_CHOICES = [
@@ -58,7 +60,6 @@ class BookingForm(forms.Form):
 
   
 
-        return cleaned_data
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -88,6 +89,30 @@ class DateRangeForm(forms.Form):
 
         return cleaned_data
 
+
+
+
+class ShortenBookingForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    room_id = forms.IntegerField(widget=forms.HiddenInput())
+
+class ExtendBookingForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    event_id = forms.IntegerField(widget=forms.HiddenInput())
+
+class DeleteBookingForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    event_id = forms.IntegerField(widget=forms.HiddenInput())
+
+
+
+
+
+
+### Availability Forms ###
 class CreateAvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -98,37 +123,26 @@ class EditAvailabilityForm(forms.Form):
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
 
-    def clean(self):
-        cleaned_data = super().clean()
-        event_id = cleaned_data.get('event_id')
-        new_start_date = cleaned_data.get('start_date')
-        new_end_date = cleaned_data.get('end_date')
-
-        # Fetch the existing event
-        event = CustomEvent.objects.get(id=event_id)
-
-        # if new_start_date and new_end_date:
-        #     # Ensure the new dates are within the old limits
-        #     if new_start_date < event.start.date() or new_end_date > event.end.date():
-        #         raise ValidationError("The new dates must be within the original booking dates.")
-
-        return cleaned_data
-
-    def ensure_timezone_aware(date):
-        if timezone.is_naive(date):
-            return timezone.make_aware(date, timezone.get_current_timezone())
-        return date
-
 class DeleteAvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
-# honestly not sure why this is a model form, guessing it doesn't need to be
+
+
+
+
+
+
 class GuestPreferencesForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = ['preference']
 
+
+
+
+
+### Form for Admin Page ###
 class CustomEventForm(forms.ModelForm):
     class Meta:
         model = CustomEvent
@@ -147,7 +161,12 @@ class CustomEventForm(forms.ModelForm):
             self.add_error('guest_name', 'Guest name is required for occupancy events.')
 
         return cleaned_data
-    
+
+
+
+
+
+### Rooms Master Selection Forms####
 class PersonSelectForm(forms.Form):
     person = forms.ModelChoiceField(
         queryset=Person.objects.filter(room__is_offline=False),
