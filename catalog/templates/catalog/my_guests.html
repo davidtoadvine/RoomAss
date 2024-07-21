@@ -42,7 +42,7 @@
                     <td>
                       <button class="btn btn-primary"
                               data-toggle="modal" 
-                              data-target="#extendModal-{{ o_event.id }}" 
+                              data-target="#extend-modal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
                               data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
                               data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
@@ -52,7 +52,7 @@
 
                       <button class="btn btn-primary" 
                               data-toggle="modal" 
-                              data-target="#shortenModal-{{ o_event.id }}" 
+                              data-target="#shorten-modal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
                               data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
                               data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
@@ -62,7 +62,7 @@
 
                     <button class="btn btn-danger" 
                             data-toggle="modal" 
-                            data-target="#deleteModal-{{ o_event.id }}" 
+                            data-target="#delete-modal-{{ o_event.id }}" 
                             data-id="{{ o_event.id }}" 
                             data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
                             data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
@@ -94,26 +94,26 @@
       console.log("Modal event ID: " + eventId);
   
       // For Extend Modal
-      modal.find(`#extendStartDate-${eventId}`).val(startDate).attr('data-original-start', startDate);
-      modal.find(`#extendEndDate-${eventId}`).val(endDate).attr('data-original-end', endDate);
-      console.log("Extend Start Date:", modal.find(`#extendStartDate-${eventId}`).attr('data-original-start'));
-      console.log("Extend End Date:", modal.find(`#extendEndDate-${eventId}`).attr('data-original-end'));
+      modal.find(`#extend-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
+      modal.find(`#extend-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
+      console.log("Extend Start Date:", modal.find(`#extend-start-date-${eventId}`).attr('data-original-start'));
+      console.log("Extend End Date:", modal.find(`#extend-end-date-${eventId}`).attr('data-original-end'));
   
       // For Shorten Modal
-      modal.find(`#shortenStartDate-${eventId}`).val(startDate).attr('data-original-start', startDate);
-      modal.find(`#shortenEndDate-${eventId}`).val(endDate).attr('data-original-end', endDate);
-      console.log("Shorten Start Date:", modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start'));
-      console.log("Shorten End Date:", modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end'));
+      modal.find(`#shorten-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
+      modal.find(`#shorten-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
+      console.log("Shorten Start Date:", modal.find(`#shorten-start-date-${eventId}`).attr('data-original-start'));
+      console.log("Shorten End Date:", modal.find(`#shorten-end-date-${eventId}`).attr('data-original-end'));
   
       // Explicitly set the event_id field value
-      modal.find(`#extendEventId-${eventId}`).val(eventId);
-      modal.find(`#shortenEventId-${eventId}`).val(eventId);
+      modal.find(`#extend-event-id-${eventId}`).val(eventId);
+      modal.find(`#shorten-event-id-${eventId}`).val(eventId);
     });
   
     // Function to validate date selection for extending
     function validateExtendDate(eventId) {
-      let startDateInput = document.getElementById(`extendStartDate-${eventId}`);
-      let endDateInput = document.getElementById(`extendEndDate-${eventId}`);
+      let startDateInput = document.getElementById(`extend-start-date-${eventId}`);
+      let endDateInput = document.getElementById(`extend-end-date-${eventId}`);
       
       if (!startDateInput || !endDateInput) {
         console.error('Start date or end date input not found for event ID:', eventId);
@@ -149,8 +149,8 @@
   
     // Function to validate date selection for shortening
     function validateShortenDate(eventId) {
-      let startDateInput = document.getElementById(`shortenStartDate-${eventId}`);
-      let endDateInput = document.getElementById(`shortenEndDate-${eventId}`);
+      let startDateInput = document.getElementById(`shorten-start-date-${eventId}`);
+      let endDateInput = document.getElementById(`shorten-end-date-${eventId}`);
   
       if (!startDateInput || !endDateInput) {
         console.error('Start date or end date input not found for event ID:', eventId);

@@ -78,27 +78,27 @@
   </div>
 </div>
 <!-- Extend Booking Modal -->
-<div class="modal fade" id="extendModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="extendModalLabel-{{ o_event.id }}" aria-hidden="true">
+<div class="modal fade" id="extend-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="extend-modal-label-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="extendForm-{{ o_event.id }}" method="post" data-form-type="extend" action="{% if section_id %}{% url 'extend_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'extend_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="extend-form-{{ o_event.id }}" method="post" data-form-type="extend" action="{% if section_id %}{% url 'extend_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'extend_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
-        <input type="hidden" name="event_id" id="extendEventId-{{ o_event.id }}" value="{{ o_event.id }}">
+        <input type="hidden" name="event_id" id="extend-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
         <div class="modal-header">
-          <h5 class="modal-title" id="extendModalLabel-{{ o_event.id }}">Extend Booking</h5>
+          <h5 class="modal-title" id="extend-modal-label-{{ o_event.id }}">Extend Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="extendStartDate-{{ o_event.id }}">Start Date</label>
-            <input type="date" class="form-control extend-start-date" id="extendStartDate-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
+            <label for="extend-start-date-{{ o_event.id }}">Start Date</label>
+            <input type="date" class="form-control extend-start-date" id="extend-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
           </div>
           <div class="form-group">
-            <label for="extendEndDate-{{ o_event.id }}">End Date</label>
-            <input type="date" class="form-control extend-end-date" id="extendEndDate-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
+            <label for="extend-end-date-{{ o_event.id }}">End Date</label>
+            <input type="date" class="form-control extend-end-date" id="extend-end-date-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
           </div>
         </div>
         <div class="modal-footer">
@@ -111,27 +111,27 @@
 </div>
 
 <!-- Shorten Booking Modal -->
-<div class="modal fade" id="shortenModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="shortenModalLabel-{{ o_event.id }}" aria-hidden="true">
+<div class="modal fade" id="shorten-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="shorten-modal-label-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="shortenForm-{{ o_event.id }}" method="post" data-form-type="shorten" action="{% if section_id %}{% url 'shorten_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'shorten_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="shorten-form-{{ o_event.id }}" method="post" data-form-type="shorten" action="{% if section_id %}{% url 'shorten_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'shorten_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
-        <input type="hidden" name="event_id" id="shortenEventId-{{ o_event.id }}" value="{{ o_event.id }}">
+        <input type="hidden" name="event_id" id="shorten-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
         <div class="modal-header">
-          <h5 class="modal-title" id="shortenModalLabel-{{ o_event.id }}">Shorten Booking</h5>
+          <h5 class="modal-title" id="shorten-modal-label-{{ o_event.id }}">Shorten Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="shortenStartDate-{{ o_event.id }}">Start Date</label>
-            <input type="date" class="form-control shorten-start-date" id="shortenStartDate-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
+            <label for="shorten-start-date-{{ o_event.id }}">Start Date</label>
+            <input type="date" class="form-control shorten-start-date" id="shorten-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
           </div>
           <div class="form-group">
-            <label for="shortenEndDate-{{ o_event.id }}">End Date</label>
-            <input type="date" class="form-control shorten-end-date" id="shortenEndDate-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
+            <label for="shorten-end-date-{{ o_event.id }}">End Date</label>
+            <input type="date" class="form-control shorten-end-date" id="shorten-end-date-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
           </div>
         </div>
         <div class="modal-footer">
@@ -143,17 +143,17 @@
   </div>
 </div>
 <!-- Delete Booking Modal -->
-<div class="modal fade" id="deleteModal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ o_event.id }}" aria-hidden="true">
+<div class="modal fade" id="delete-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteEventForm-{{ o_event.id }}" method="post"
+      <form id="delete-event-form-{{ o_event.id }}" method="post"
         action="{% if section_id %}{% url 'delete_booking_with_section' o_event.id section_id%}
         {% elif o_event.id %}{% url 'delete_booking' o_event.id %}
         {% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
         <div class="modal-header">
-          <h5 class="modal-title" id="deleteModalLabel-{{ o_event.id }}">Delete Event?</h5>
+          <h5 class="modal-title" id="delete-modal-label-{{ o_event.id }}">Delete Event?</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>

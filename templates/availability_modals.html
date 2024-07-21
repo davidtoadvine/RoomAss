@@ -1,8 +1,8 @@
 <!-- Create Availability Modal -->
-<div class="modal fade" id="createAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="createAvailabilityModalLabel" aria-hidden="true">
+<div class="modal fade" id="create-availability-modal" tabindex="-1" role="dialog" aria-labelledby="create-availability-modal-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="createAvailabilityForm" method="post"
+      <form id="create-availability-form" method="post"
        action="{% if room_id %}{% url 'create_availability_with_room_redirect' room_id %}
               {% elif section_id%}{% url 'create_availability_with_section_redirect' section_id %}
 
@@ -11,7 +11,7 @@
         {% comment %} <input type="hidden" name="room_id" id="createRoomId" value="{{ room_id }}"> {% endcomment %}
 
         <div class="modal-header">
-          <h5 class="modal-title" id="createAvailabilityPersonName"></h5>
+          <h5 class="modal-title" id="create-availability-person-name"></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -20,11 +20,11 @@
           <div class="row">
             <!-- Form Column -->
             <div class="col-md-6">
-              <input type="hidden" name="room_id" id="createAvailabilityRoomId" />
+              <input type="hidden" name="room_id" id="create-availability-room-id" />
               <label for="startDate">Start Date:</label>
-              <input type="date" name="start_date" id="startDate" class="form-control" value="{{ start_date }}" />
+              <input type="date" name="start_date" id="create-start-date" class="form-control" value="{{ start_date }}" />
               <label for="endDate">End Date:</label>
-              <input type="date" name="end_date" id="endDate" class="form-control" value="{{ end_date }}" />
+              <input type="date" name="end_date" id="create-end-date" class="form-control" value="{{ end_date }}" />
             </div> 
           </div>
         </div>
@@ -38,10 +38,10 @@
 </div>
 
 <!-- Edit Availability Modal -->
-<div class="modal fade" id="editAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+<div class="modal fade" id="edit-availability-modal" tabindex="-1" role="dialog" aria-labelledby="availability-modal-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="editAvailabilityForm" method="post"
+      <form id="edit-availability-form" method="post"
        action="{% if room_id %}{% url 'edit_availability_with_room_redirect' room_id %}
                {% elif section_id%}{% url 'edit_availability_with_section_redirect' section_id %}
                 {% else %}#{% endif %}">
@@ -58,11 +58,11 @@
           <div class="row">
             <!-- Form Column -->
             <div class="col-md-6">
-              <input type="hidden" name="event_id" id="eventId" />
-              <label for="startDate">Start Date:</label>
-              <input type="date" name="start_date" id="editStartDate" class="form-control" />
-              <label for="endDate">End Date:</label>
-              <input type="date" name="end_date" id="editEndDate" class="form-control" />
+              <input type="hidden" name="event_id" id="edit-event-id" />
+              <label for="start-date">Start Date:</label>
+              <input type="date" name="start_date" id="edit-start-date" class="form-control" />
+              <label for="end-date">End Date:</label>
+              <input type="date" name="end_date" id="edit-end-date" class="form-control" />
             </div> 
           </div>
         </div>
@@ -77,10 +77,10 @@
 
 
 <!-- Delete Availability Modal -->
-<div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+<div class="modal fade" id="delete-availability-modal" tabindex="-1" role="dialog" aria-labelledby="availability-modal-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="deleteAvailabilityForm" method="post"
+      <form id="delete-availability-form" method="post"
        action="{% if room_id %}{% url 'delete_availability_with_room_redirect' room_id %}
        {% elif section_id%}{% url 'delete_availability_with_section_redirect' section_id %}
        {% else %}#{% endif %}">
@@ -97,11 +97,11 @@
           <div class="row">
             <!-- Form Column -->
             <div class="col-md-6">
-              <input type="hidden" name="event_id" id="deleteEventId" />
-              <label for="startDate">Start Date:</label>
-              <input type="date" name="start_date" id="deleteStartDate" class="form-control" readonly />
-              <label for="endDate">End Date:</label>
-              <input type="date" name="end_date" id="deleteEndDate" class="form-control" readonly />
+              <input type="hidden" name="event_id" id="delete-event-id" />
+              <label for="start-date">Start Date:</label>
+              <input type="date" name="start_date" id="delete-start-date" class="form-control" readonly />
+              <label for="end-date">End Date:</label>
+              <input type="date" name="end_date" id="delete-end-date" class="form-control" readonly />
             </div> 
           </div>
         </div>

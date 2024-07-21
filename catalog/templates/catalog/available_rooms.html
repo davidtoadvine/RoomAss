@@ -36,7 +36,7 @@
     </div>
     <div class="form-group col-md-4">
       <label for="guest_type">Guest Type</label>
-      <select class="form-control" id="guestType" name="guest_type">
+      <select class="form-control" id="guest-type" name="guest_type">
         {% for value, display in form.fields.guest_type.choices %}
             <option value="{{ value }}" {% if form.guest_type.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ display }}</option>
         {% endfor %}
@@ -83,7 +83,7 @@
       <td>
         <button class="btn-link"
                       data-toggle="modal" 
-                      data-target="#floorplanModal" 
+                      data-target="#floorplan-modal" 
                       onclick="showFloorplanModal('{{ room_image_url }}' , '{{room_name}}')"
                     >{{room_name}}</button>
         
@@ -153,8 +153,8 @@
 
 <script>
   $(document).ready(function() {
-    $('#floorplanModal').on('shown.bs.modal', function () {
-        console.log('Image src:', $('#floorplanModal img').attr('src'));
+    $('#floorplan-modal').on('shown.bs.modal', function () {
+        console.log('Image src:', $('#floorplan-modal img').attr('src'));
     });
 });
   // gathering date information
@@ -163,7 +163,7 @@
 
   var startDateObj = new Date(startDateInput.value);
   var endDateObj = new Date(endDateInput.value);
-  var guestTypeInput = document.getElementById("guestType")
+  var guestTypeInput = document.getElementById("guest-type")
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
 
@@ -300,10 +300,9 @@ if (isNaN(startDateObj.getTime())) {
 
  // Function to show the floorplan modal with the correct image
  function showFloorplanModal(imageUrl, roomName) {
-  document.getElementById('floorplanImage').src = imageUrl;
-  document.getElementById('floorplanModalLabel').innerText = roomName;
-  console.log("roomname" + roomName)
-  $('#floorplanModal').modal('show');
+  document.getElementById('floorplan-image').src = imageUrl;
+  document.getElementById('floorplan-modal-label').innerText = roomName;
+  $('#floorplan-modal').modal('show');
 }
 
   // Prevent manual typing in the input fields

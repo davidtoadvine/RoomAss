@@ -24,23 +24,23 @@
       >{{ room.owner}}'s Room
     </button>
 
-        <form id="preferenceForm-{{room_id}}" method="post" action="{% url 'edit_guest_preferences' room_id room.owner.id %}">
+        <form id="preference-form-{{room_id}}" method="post" action="{% url 'edit_guest_preferences' room_id room.owner.id %}">
           {% csrf_token %}
           <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{room_id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="preferences-dropdown-button-{{room_id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   {% if room.owner.preference %}
                       {{ room.owner.get_preference_display }}
                   {% else %}
                       Select Preference
                   {% endif %}
               </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{room_id}}">
+              <div class="dropdown-menu" aria-labelledby="dropdown-menu-button-{{room_id}}">
                   {% for value, display in room.owner.Preference.choices %}
-                      <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ room_id }}" data-value="{{ value }}">{{ display }}</a>
+                      <a class="dropdown-item" href="#" data-target="#preference-form-{{ room_id }}" data-value="{{ value }}">{{ display }}</a>
                   {% endfor %}
               </div>
           </div>
-          <input type="hidden" name="preference" id="preferenceInput-{{room_id}}">
+          <input type="hidden" name="preference" id="preference-input-{{room_id}}">
       </form>
       </div>
       </th>
@@ -125,23 +125,23 @@
           onclick="showFloorplanModal('{{ child_info.room_image_url }}', '{{child_info.room_name}}' )"
         >{{ child.name}}'s Room
       </button>
-          <form id="preferenceForm-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
+          <form id="preference-form-{{child.id}}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
             {% csrf_token %}
             <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{child.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="preferences-dropdown-button-{{child.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if child.preference %}
                         {{ child.get_preference_display }}
                     {% else %}
                         Select Preference
                     {% endif %}
                 </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{child.id}}">
+                <div class="dropdown-menu" aria-labelledby="dropdown-menu-button-{{child.id}}">
                     {% for value, display in child.Preference.choices %}
-                        <a class="dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
+                        <a class="dropdown-item" href="#" data-target="#preference-form-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                 </div>
             </div>
-            <input type="hidden" name="preference" id="preferenceInput-{{child.id}}">
+            <input type="hidden" name="preference" id="preference-input-{{child.id}}">
         </form>
 
         </div>
@@ -220,21 +220,21 @@
   function showCreateAvailabilityForm(event, roomId, owner) {
     event.preventDefault();
     // Set the form values
-    document.getElementById('createAvailabilityRoomId').value = roomId;
-    document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + owner + '\'s Room';
+    document.getElementById('create-availability-room-id').value = roomId;
+    document.getElementById('create-availability-person-name').innerText = 'Create Availability for ' + owner + '\'s Room';
     
     // Show the modal
-    $('#createAvailabilityModal').modal('show');
+    $('#create-availability-modal').modal('show');
   }
 
   function submitAvailabilityForm() {
-    $("#createAvailabilityForm").submit();
+    $("#create-availability-form").submit();
   }
 
 ////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
   // gathering date information
-  var startDateInput = document.getElementById("startDate");
-  var endDateInput = document.getElementById("endDate");
+  var startDateInput = document.getElementById("create-start-date");
+  var endDateInput = document.getElementById("create-end-date");
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
 
@@ -318,22 +318,22 @@ endDateInput.addEventListener("change", function () {
     console.log(end)
     
     // Set the form values
-    $("#editStartDate").val(startDate);
-    $("#editEndDate").val(endDate);
-    $("#eventId").val(eventId);
+    $("#edit-start-date").val(startDate);
+    $("#edit-end-date").val(endDate);
+    $("#edit-event-id").val(eventId);
 
   
     // Show the modal
-    $('#editAvailabilityModal').modal('show');
+    $('#edit-availability-modal').modal('show');
   }
   function submitEditAvailabilityForm(){
-    $("#editAvailabilityForm").submit();
+    $("#edit-availability-form").submit();
   }
 
   ////////////////////////////////////EDIT -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
     // gathering date information
-  var editStartDateInput = document.getElementById("editStartDate");
-  var editEndDateInput = document.getElementById("editEndDate");
+  var editStartDateInput = document.getElementById("edit-start-date");
+  var editEndDateInput = document.getElementById("edit-end-date");
   var previousEditStartDate = editStartDateInput.value;
   var previousEditEndDate = editEndDateInput.value;
 
@@ -415,15 +415,15 @@ function showDeleteAvailabilityForm(eventId, start, end) {
    console.log(end)
      
      // Set the form values
-     $("#deleteStartDate").val(startDate);
-     $("#deleteEndDate").val(endDate);
-     $("#deleteEventId").val(eventId);
+     $("#delete-start-date").val(startDate);
+     $("#delete-end-date").val(endDate);
+     $("#delete-event-id").val(eventId);
   // Show the modal
-  $('#deleteAvailabilityModal').modal('show');
+  $('#delete-availability-modal').modal('show');
 }
 
 function submitAvailabilityForm() {
-  $("#deleteAvailabilityForm").submit();
+  $("#delete-availability-form").submit();
 }
 
 
@@ -431,18 +431,18 @@ function submitAvailabilityForm() {
 
 
 $(document).ready(function() {
-  $('#floorplanModal').on('shown.bs.modal', function () {
-      console.log('Image src:', $('#floorplanModal img').attr('src'));
+  $('#floorplan-modal').on('shown.bs.modal', function () {
+      console.log('Image src:', $('#floorplan-modal img').attr('src'));
   });
 });
 
 
  // Function to show the floorplan modal with the correct image
   function showFloorplanModal(imageUrl, roomName) {
-  document.getElementById('floorplanImage').src = imageUrl;
-  document.getElementById('floorplanModalLabel').innerText = roomName;
+  document.getElementById('floorplan-image').src = imageUrl;
+  document.getElementById('floorplan-modal-label').innerText = roomName;
   console.log("roomname" + roomName)
-  $('#floorplanModal').modal('show');
+  $('#floorplan-modal').modal('show');
 }
 
 </script>

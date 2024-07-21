@@ -14,19 +14,19 @@
 
 <div id = "box-rooms-master-forms">
 
-<form id="personSelectForm" method="post">
+<form id="person-select-form" method="post">
   {% csrf_token %}
   {{ person_form.person.label_tag }} {{ person_form.person }}
   <input type="hidden" name="person_form_submit" value="1">
 </form>
 
-<form id="roomSelectForm" method="post">
+<form id="room-select-form" method="post">
   {% csrf_token %}
   {{ room_form.room.label_tag }} {{ room_form.room }}
   <input type="hidden" name="room_form_submit" value="1">
 </form>
 
-<form id="sectionSelectForm" method="post">
+<form id="section-select-form" method="post">
   {% csrf_token %}
   {{ section_form.section.label_tag }} {{ section_form.section }}
   <input type="hidden" name="section_form_submit" value="1">
@@ -61,44 +61,44 @@
             >{{room_info.room_title}}           {%if room.is_offline%}<strong style= "color:red;"> *OFFLINE*</strong>{%endif%}
 
           </button>
-          <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
+          <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#remove-owner-modal" data-room-id="{{ room.id }}">Remove Owner</button>
         </div>
 
-              <form id="preferenceForm-{{ room.id }}" method="post" action="{% url 'edit_guest_preferences_with_section' room_info.room_id room_info.owner_id section_id%}">
+              <form id="preference-form-{{ room.id }}" method="post" action="{% url 'edit_guest_preferences_with_section' room_info.room_id room_info.owner_id section_id%}">
                 {% csrf_token %}
                 <div class="dropdown preference-dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferences-dropdown-button-{{ room.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if room.owner.preference %}
                       {{ room.owner.get_preference_display }}
                     {% else %}
                       Select Preference
                     {% endif %}
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ room.id }}">
+                  <div class="dropdown-menu" aria-labelledby="dropdown-menu-button-{{ room.id }}">
                     {% for value, display in room.owner.Preference.choices %}
-                      <a class="dropdown-item preference-dropdown-item" href="#" data-target="#preferenceForm-{{ room.id }}" data-value="{{ value }}">{{ display }}</a>
+                      <a class="dropdown-item preference-dropdown-item" href="#" data-target="#preference-form-{{ room.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                   </div>
                 </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{ room.id }}">
+                <input type="hidden" name="preference" id="preference-input-{{ room.id }}">
               </form>
 
               {%else%}
               <div class="button-group">
                   <button class="btn-link" onclick="showFloorplanModal('{{ room_info.room_image_url }}', '{{ room_info.room_name }}')">{{room_info.room_title }} {%if room.is_offline%}<strong style= "color:red;"> *OFFLINE*</strong>{%endif%}</button>
-                  <form id="assignOwnerForm-{{ room_info.room_id }}" method="post" action="{% if section_id %}{% url 'assign_owner_with_section' room_info.room_id section_id %}{% else %}{% url 'assign_owner' room_info.room_id %}{% endif %}" style="display: inline;">
+                  <form id="assign-owner-form-{{ room_info.room_id }}" method="post" action="{% if section_id %}{% url 'assign_owner_with_section' room_info.room_id section_id %}{% else %}{% url 'assign_owner' room_info.room_id %}{% endif %}" style="display: inline;">
                     {% csrf_token %}
                     <div class="dropdown" style="display: inline;">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown-{{ room_info.room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="roomless-members-dropdown-{{ room_info.room_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Assign Roomless Member
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown-{{ room_info.room_id }}">
+                        <div class="dropdown-menu" aria-labelledby="roomless-members-dropdown-{{ room_info.room_id }}">
                             {% for member in roomless_members %}
-                                <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}', 'assignOwnerForm-{{ room_info.room_id }}', 'memberIdInput-{{ room_info.room_id }}')">{{ member.name }}</a>
+                                <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}', 'assign-owner-form-{{ room_info.room_id }}', 'member-id-input-{{ room_info.room_id }}')">{{ member.name }}</a>
                             {% endfor %}
                         </div>
                     </div>
-                    <input type="hidden" name="member_id" id="memberIdInput-{{ room_info.room_id }}">
+                    <input type="hidden" name="member_id" id="member-id-input-{{ room_info.room_id }}">
                 </form>
                 </div>
 
@@ -138,21 +138,21 @@
               <div>
                 <button class="btn-grey"
                 data-toggle="modal" 
-                data-target="#extendModal-{{ o_event.event.id }}" 
+                data-target="#extend-modal-{{ o_event.event.id }}" 
                 data-id="{{ o_event.event.id }}" 
                 data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                 data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
 
             <button class="btn-grey" 
                 data-toggle="modal" 
-                data-target="#shortenModal-{{ o_event.event.id }}" 
+                data-target="#shorten-modal-{{ o_event.event.id }}" 
                 data-id="{{ o_event.event.id }}" 
                 data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                 data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
 
             <button class="bt-grey" 
                 data-toggle="modal" 
-                data-target="#deleteModal-{{ o_event.event.id }}" 
+                data-target="#delete-modal-{{ o_event.event.id }}" 
                 data-id="{{ o_event.event.id }}" 
                 data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                 data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
@@ -215,42 +215,42 @@
               {% if room.owner %}
               <div class="button-group">
                   <button class="btn-link" onclick="showFloorplanModal('{{ room_image_url }}', '{{ room_name }}')">{{ room.owner }}'s Room</button>
-                  <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#removeOwnerModal" data-room-id="{{ room.id }}">Remove Owner</button>
+                  <button type="button" class="btn btn-danger owner-button" data-toggle="modal" data-target="#remove-owner-modal" data-room-id="{{ room.id }}">Remove Owner</button>
               </div>
-              <form id="preferenceForm-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.id room.owner.id %}">
+              <form id="preference-form-{{ room.owner.id }}" method="post" action="{% url 'edit_guest_preferences' room.id room.owner.id %}">
                   {% csrf_token %}
                   <div class="dropdown preference-dropdown">
-                      <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <button class="btn btn-secondary dropdown-toggle" type="button" id="preferences-dropdown-button-{{ room.owner.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           {% if room.owner.preference %}
                           {{ room.owner.get_preference_display }}
                           {% else %}
                           Select Preference
                           {% endif %}
                       </button>
-                      <div class="dropdown-menu" aria-labelledby="preferencesDropdownButton-{{ room.owner.id }}">
+                      <div class="dropdown-menu" aria-labelledby="preferences-dropdown-button-{{ room.owner.id }}">
                           {% for value, display in room.owner.Preference.choices %}
                           <a class="dropdown-item preference-dropdown-item" href="#" onclick="selectPreference('{{ value }}', '{{ room.owner.id }}')">{{ display }}</a>
                           {% endfor %}
                       </div>
                   </div>
-                  <input type="hidden" name="preference" id="preferenceInput-{{ room.owner.id }}">
+                  <input type="hidden" name="preference" id="preference-input-{{ room.owner.id }}">
               </form>
               {% else %}
               <div class="button-group">
                   <button class="btn-link" onclick="showFloorplanModal('{{ room_image_url }}', '{{ room_name }}')">{{ room_name }}</button>
-                  <form id="assignOwnerForm-{{ room_id }}" method="post" action="{% if section_id %}{% url 'assign_owner_with_section' room.id section_id %}{% else %}{% url 'assign_owner' room.id %}{% endif %}" style="display: inline;">
+                  <form id="assign-owner-form-{{ room_id }}" method="post" action="{% if section_id %}{% url 'assign_owner_with_section' room.id section_id %}{% else %}{% url 'assign_owner' room.id %}{% endif %}" style="display: inline;">
                     {% csrf_token %}
                     <div class="dropdown" style="display: inline;">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="roomlessMembersDropdown-{{ room.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="roomless-members-dropdown-{{ room.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Assign Roomless Member
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="roomlessMembersDropdown-{{ room.id }}">
+                        <div class="dropdown-menu" aria-labelledby="roomless-members-dropdown-{{ room.id }}">
                             {% for member in roomless_members %}
-                                <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}', 'assignOwnerForm-{{ room.id }}', 'memberIdInput-{{ room.id }}')">{{ member.name }}</a>
+                                <a class="dropdown-item" href="#" onclick="selectMember('{{ member.id }}', 'assign-owner-form-{{ room.id }}', 'member-id-input-{{ room.id }}')">{{ member.name }}</a>
                             {% endfor %}
                         </div>
                     </div>
-                    <input type="hidden" name="member_id" id="memberIdInput-{{ room.id }}">
+                    <input type="hidden" name="member_id" id="member-id-input-{{ room.id }}">
                 </form>
                 </div>
 
@@ -293,21 +293,21 @@
               <div>
                 <button class="btn-grey"
                   data-toggle="modal" 
-                  data-target="#extendModal-{{ o_event.event.id }}" 
+                  data-target="#extend-modal-{{ o_event.event.id }}" 
                   data-id="{{ o_event.event.id }}" 
                   data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                   data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
   
                 <button class="btn-grey" 
                   data-toggle="modal" 
-                  data-target="#shortenModal-{{ o_event.event.id }}" 
+                  data-target="#shorten-modal-{{ o_event.event.id }}" 
                   data-id="{{ o_event.event.id }}" 
                   data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                   data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
   
                 <button class="bt-grey" 
                   data-toggle="modal" 
-                  data-target="#deleteModal-{{ o_event.event.id }}" 
+                  data-target="#delete-modal-{{ o_event.event.id }}" 
                   data-id="{{ o_event.event.id }}" 
                   data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                   data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
@@ -356,26 +356,26 @@
             <div class="flex-container">
               <button
               class="btn-link"
-              onclick="showFloorplanModal('{{ .room_image_url }}', '{{.room_name}}')"
+              onclick="show-floorplan-modal('{{ .room_image_url }}', '{{.room_name}}')"
             >{{ child.name}}'s Room
           </button>
-              <form id="preferenceForm-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
+              <form id="preference-form-{{ child.id }}" method="post" action="{% url 'edit_guest_preferences' room_id child.id %}">
                 {% csrf_token %}
                 <div class="dropdown preference-dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferencesDropdownButton-{{ child.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="preferences-dropdown-button-{{ child.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if child.preference %}
                       {{ child.get_preference_display }}
                     {% else %}
                       Select Preference
                     {% endif %}
                   </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ child.id }}">
+                  <div class="dropdown-menu" aria-labelledby="dropdown-menu-button-{{ child.id }}">
                     {% for value, display in child.Preference.choices %}
-                      <a class="dropdown-item preference-dropdown-item" href="#" data-target="#preferenceForm-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
+                      <a class="dropdown-item preference-dropdown-item" href="#" data-target="#preference-form-{{ child.id }}" data-value="{{ value }}">{{ display }}</a>
                     {% endfor %}
                   </div>
                 </div>
-                <input type="hidden" name="preference" id="preferenceInput-{{ child.id }}">
+                <input type="hidden" name="preference" id="preference-input-{{ child.id }}">
               </form>
             </div>
           </th>
@@ -410,21 +410,21 @@
             <div>
               <button class="btn-grey"
                 data-toggle="modal" 
-                data-target="#extendModal-{{ o_event.event.id }}" 
+                data-target="#extend-modal-{{ o_event.event.id }}" 
                 data-id="{{ o_event.event.id }}" 
                 data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                 data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
 
               <button class="btn-grey" 
                 data-toggle="modal" 
-                data-target="#shortenModal-{{ o_event.event.id }}" 
+                data-target="#shorten-modal-{{ o_event.event.id }}" 
                 data-id="{{ o_event.event.id }}" 
                 data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                 data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
 
               <button class="bt-grey" 
                 data-toggle="modal" 
-                data-target="#deleteModal-{{ o_event.event.id }}" 
+                data-target="#delete-modal-{{ o_event.event.id }}" 
                 data-id="{{ o_event.event.id }}" 
                 data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
                 data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
@@ -479,11 +479,11 @@
 
 
 <!-- Modal HTML -->
-<div class="modal fade" id="removeOwnerModal" tabindex="-1" role="dialog" aria-labelledby="removeOwnerModalLabel" aria-hidden="true">
+<div class="modal fade" id="remove-owner-modal" tabindex="-1" role="dialog" aria-labelledby="remove-owner-modal-label" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="removeOwnerModalLabel">Remove Owner</h5>
+        <h5 class="modal-title" id="remove-owner-modal-label">Remove Owner</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -498,7 +498,7 @@
         {%else%}{%url 'remove_owner'%} {%endif%}"
         
          
-          id="removeOwnerForm">
+          id="remove-owner-form">
           {% csrf_token %}
           <input type="hidden" name="room_id" id="room_id">
           <button type="submit" class="btn btn-danger">Remove Owner</button>
@@ -520,7 +520,7 @@
     if (personSelectElement) {
       personSelectElement.onchange = function() {
         const selectedPersonId = this.value;
-        const form = document.getElementById('personSelectForm');
+        const form = document.getElementById('person-select-form');
         const url = "{% url 'rooms_master_with_room' 1 %}".replace('1', selectedPersonId);
         form.action = url;
         form.submit();
@@ -530,7 +530,7 @@
     if (roomSelectElement) {
       roomSelectElement.onchange = function() {
         const selectedRoomId = this.value;
-        const form = document.getElementById('roomSelectForm');
+        const form = document.getElementById('room-select-form');
         const url = "{% url 'rooms_master_with_room' 1 %}".replace('1', selectedRoomId);
         form.action = url;
         form.submit();
@@ -540,7 +540,7 @@
    if (sectionSelectElement) {
      sectionSelectElement.onchange = function() {
        const selectedSectionId = this.value;
-       const form = document.getElementById('sectionSelectForm');
+       const form = document.getElementById('section-select-form');
        const url = "{% url 'rooms_master_with_section' 1 %}".replace('1', selectedSectionId);
        form.action = url;
        form.submit();
@@ -553,23 +553,23 @@
   function showCreateAvailabilityForm(event, roomId, roomName) {
     event.preventDefault();
     // Set the form values
-    document.getElementById('createAvailabilityRoomId').value = roomId;
-    document.getElementById('createAvailabilityPersonName').innerText = 'Create Availability for ' + roomName;
-    $("#createAvailabilityRoomId").val(roomId);  
+    document.getElementById('create-availability-room-id').value = roomId;
+    document.getElementById('create-availability-person-name').innerText = 'Create Availability for ' + roomName;
+    $("#create-availability-room-id").val(roomId);  
 
     
     // Show the modal
-    $('#createAvailabilityModal').modal('show');
+    $('#create-availability-modal').modal('show');
   }
 
   function submitCreateAvailabilityForm() {
-    $("#createAvailabilityForm").submit();
+    $("#create-availability-form").submit();
   }
 
 ////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
   // gathering date information
-  var startDateInput = document.getElementById("startDate");
-  var endDateInput = document.getElementById("endDate");
+  var startDateInput = document.getElementById("create-start-date");
+  var endDateInput = document.getElementById("create-end-date");
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
 
@@ -643,7 +643,7 @@ endDateInput.addEventListener("change", function () {
   function showEditAvailabilityForm(eventId, start, end, redirectId) {
     // Prevent default action if needed (e.g., if inside a form submission handler)
     // event.preventDefault();
-    console.log("showEditAvail")
+
     // Use moment.js to parse the custom date format
   const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
   const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
@@ -651,9 +651,9 @@ endDateInput.addEventListener("change", function () {
 
     
     // Set the form values
-    $("#editStartDate").val(startDate);
-    $("#editEndDate").val(endDate);
-    $("#eventId").val(eventId);
+    $("#edit-start-date").val(startDate);
+    $("#edit-end-date").val(endDate);
+    $("#edit-event-id").val(eventId);
     //$("#editRedirectId").val(redirectId);  
 // Log values to debug
 console.log("Event ID:", eventId);
@@ -663,17 +663,16 @@ console.log("Room ID:", redirectId);
 
   
     // Show the modal
-    $('#editAvailabilityModal').modal('show');
+    $('#edit-availability-modal').modal('show');
   }
   function submitEditAvailabilityForm(){
-    console.log("submit Edit Avail")
-    $("#editAvailabilityForm").submit();
+    $("#edit-availability-form").submit();
   }
 
   ////////////////////////////////////EDIT -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
     // gathering date information
-  var editStartDateInput = document.getElementById("editStartDate");
-  var editEndDateInput = document.getElementById("editEndDate");
+  var editStartDateInput = document.getElementById("edit-start-date");
+  var editEndDateInput = document.getElementById("edit-end-date");
   var previousEditStartDate = editStartDateInput.value;
   var previousEditEndDate = editEndDateInput.value;
 
@@ -749,32 +748,32 @@ function showDeleteAvailabilityForm(eventId, start, end) {
      
      
      // Set the form values
-     $("#deleteStartDate").val(startDate);
-     $("#deleteEndDate").val(endDate);
-     $("#deleteEventId").val(eventId);
+     $("#delete-start-date").val(startDate);
+     $("#delete-end-date").val(endDate);
+     $("#delete-event-id").val(eventId);
      //$("#editRoomId").val(roomId);  
 
   // Show the modal
-  $('#deleteAvailabilityModal').modal('show');
+  $('#delete-availability-modal').modal('show');
 }
 
 function submitDeleteAvailabilityForm() {
-  $("#deleteAvailabilityForm").submit();
+  $("#delete-availability-form").submit();
 }
 
 $(document).ready(function() {
-  $('#floorplanModal').on('shown.bs.modal', function () {
-      console.log('Image src:', $('#floorplanModal img').attr('src'));
+  $('#floorplan-modal').on('shown.bs.modal', function () {
+      console.log('Image src:', $('#floorplan-modal img').attr('src'));
   });
 });
 
 
  // Function to show the floorplan modal with the correct image
  function showFloorplanModal(imageUrl, roomName) {
-  document.getElementById('floorplanImage').src = imageUrl;
-  document.getElementById('floorplanModalLabel').innerText = roomName;
+  document.getElementById('floorplan-image').src = imageUrl;
+  document.getElementById('floorplan-modal-label').innerText = roomName;
 
-  $('#floorplanModal').modal('show');
+  $('#floorplan-modal').modal('show');
 }
 
 
@@ -812,25 +811,25 @@ $(document).ready(function() {
     var endDate = button.data('end-date');
 
     var modal = $(this);
-    modal.find(`#extendEventId-${eventId}`).val(eventId);
-    modal.find(`#extendStartDate-${eventId}`).val(startDate);
-    modal.find(`#extendEndDate-${eventId}`).val(endDate);
+    modal.find(`#extend-event-id-${eventId}`).val(eventId);
+    modal.find(`#extend-start-date-${eventId}`).val(startDate);
+    modal.find(`#extend-end-date-${eventId}`).val(endDate);
 
     // Set the original start and end date data attributes
-    modal.find(`#extendStartDate-${eventId}`).attr('data-original-start', startDate);
-    modal.find(`#extendEndDate-${eventId}`).attr('data-original-end', endDate);
+    modal.find(`#extend-start-date-${eventId}`).attr('data-original-start', startDate);
+    modal.find(`#extend-endDate-${eventId}`).attr('data-original-end', endDate);
     // Similar setup for shorten modal
-    modal.find(`#shortenEventId-${eventId}`).val(eventId);
-    modal.find(`#shortenStartDate-${eventId}`).val(startDate);
-    modal.find(`#shortenEndDate-${eventId}`).val(endDate);
+    modal.find(`#shorten-event-id-${eventId}`).val(eventId);
+    modal.find(`#shorten-start-date-${eventId}`).val(startDate);
+    modal.find(`#shorten-endDate-${eventId}`).val(endDate);
     
-    modal.find(`#shortenStartDate-${eventId}`).attr('data-original-start', startDate);
-    modal.find(`#shortenEndDate-${eventId}`).attr('data-original-end', endDate);
+    modal.find(`#shorten-start-date-${eventId}`).attr('data-original-start', startDate);
+    modal.find(`#shorten-endDate-${eventId}`).attr('data-original-end', endDate);
   });
 
 function submitExtendForm() {
             console.log("Extend form submitted!");
-            document.getElementById('extendForm').submit();
+            document.getElementById('extend-form').submit();
         }
 
   });
@@ -839,8 +838,8 @@ function submitExtendForm() {
 // Function to validate date selection
 function validateExtendDate(eventId) {
   console.log(`Validating extend date for event ${eventId}`);
-  let startDateInput = document.getElementById(`extendStartDate-${eventId}`);
-  let endDateInput = document.getElementById(`extendEndDate-${eventId}`);
+  let startDateInput = document.getElementById(`extend-start-date-${eventId}`);
+  let endDateInput = document.getElementById(`extend-end-date-${eventId}`);
   let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
   let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
   let newStartDate = new Date(startDateInput.value);
@@ -861,8 +860,8 @@ $(document).on('change', '.extend-start-date, .extend-end-date', function() {
 
 function validateShortenDate(eventId) {
   console.log(`Validating shorten date for event ${eventId}`);
-  let startDateInput = document.getElementById(`shortenStartDate-${eventId}`);
-  let endDateInput = document.getElementById(`shortenEndDate-${eventId}`);
+  let startDateInput = document.getElementById(`shorten-start-date-${eventId}`);
+  let endDateInput = document.getElementById(`shorten-end-date-${eventId}`);
   let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
   let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
   let newStartDate = new Date(startDateInput.value);
@@ -887,18 +886,18 @@ $(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
 });
 
 function submitExtendForm(eventId) {
-  document.getElementById(`extendForm-${eventId}`).submit();
+  document.getElementById(`extend-form-${eventId}`).submit();
 }
 
 function submitShortenForm(eventId) {
-  document.getElementById(`shortenForm-${eventId}`).submit();
+  document.getElementById(`shorten-form-${eventId}`).submit();
 }
 
 
 
 
 
-$('#removeOwnerModal').on('show.bs.modal', function (event) {
+$('#remove-owner-modal').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget); // Button that triggered the modal
   var roomId = button.data('room-id'); // Extract info from data-* attributes
   var modal = $(this);
@@ -907,15 +906,10 @@ $('#removeOwnerModal').on('show.bs.modal', function (event) {
 
 
 
-function selectMember(memberId) {
-  document.getElementById('memberIdInput').value = memberId;
-  document.getElementById('assignOwnerForm').submit();
-}
-
 function selectPreference(value, ownerId) {
-  var input = document.getElementById('preferenceInput-' + ownerId);
+  var input = document.getElementById('preference-input-' + ownerId);
   input.value = value;
-  document.getElementById('preferenceForm-' + ownerId).submit();
+  document.getElementById('preference-form-' + ownerId).submit();
 }
 
 

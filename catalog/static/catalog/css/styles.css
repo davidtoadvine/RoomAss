@@ -146,12 +146,12 @@ background-color: #ac3b61!important;
 
 
 
-label, #bookingModalLabel {
+label, #booking-modal-label {
   font-size: 1.1rem;
   font-weight: 600;
 }
 
-#bookingModalLabel {
+#booking-modal-label {
   font-size: x-large;
 }
 
