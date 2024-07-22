@@ -85,18 +85,19 @@ def delete_booking(request, event_id, section_id = None):
 
 @login_required
 def extend_booking(request, event_id, section_id = None):
+    
+    event = get_object_or_404(CustomEvent, id=event_id)
+    redirect_room_id = event_id_to_redirect_room_id(event_id)
+
+
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_guests')
-        redirect_room_id = event_id_to_redirect_room_id(event_id)
-
         form = ExtendBookingForm(request.POST)
         if form.is_valid():
             print('valid form')
-            event_id = form.cleaned_data['event_id']
             new_start_date = form.cleaned_data['start_date']
             new_end_date = form.cleaned_data['end_date']
 
-            redirect_room_id = event_id_to_redirect_room_id(event_id)
 
             # Convert dates to datetime objects with specific time (around noon)
             new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
@@ -104,8 +105,7 @@ def extend_booking(request, event_id, section_id = None):
             new_start_date= ensure_timezone_aware(new_start_date)
             new_end_date=ensure_timezone_aware(new_end_date)
 
-            # Fetch the existing event
-            event = get_object_or_404(CustomEvent, id=event_id)
+          
             room = event.calendar.room
           
             old_start_date = ensure_timezone_aware(event.start)
@@ -180,8 +180,10 @@ def shorten_booking(request, event_id, section_id = None):
                     
             return redirect('my_guests')  # Redirect to the appropriate page after saving
         
-  if request.user.is_superuser:
-      return redirect('rooms_master_with_room', room_id = redirect_room_id)
+  if source_page == 'rooms_master' and section_id:
+              return redirect('rooms_master_with_section', section_id = section_id)
+  elif source_page == 'rooms_master':
+              return redirect('rooms_master_with_room', room_id = redirect_room_id)
   return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
 
 
