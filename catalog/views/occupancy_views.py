@@ -84,66 +84,79 @@ def delete_booking(request, event_id, section_id = None):
         # Render a confirmation page for GET request, if needed
     return render(request, 'catalog/delete_booking.html', {'event': event})
 
+from django.http import JsonResponse
+
 @login_required
-def extend_booking(request, event_id, section_id = None):
-    
+def extend_booking(request, event_id, section_id=None):
     event = get_object_or_404(CustomEvent, id=event_id)
     redirect_room_id = event_id_to_redirect_room_id(event_id)
 
-
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_guests')
-        form = ExtendBookingForm(request.POST)
+        form = ExtendBookingForm(request.POST, event=event)
         if form.is_valid():
-            print('valid form')
             new_start_date = form.cleaned_data['start_date']
             new_end_date = form.cleaned_data['end_date']
-
 
             # Convert dates to datetime objects with specific time (around noon)
             new_start_date = datetime.combine(new_start_date, datetime.min.time()).replace(hour=12, minute=1)
             new_end_date = datetime.combine(new_end_date, datetime.min.time()).replace(hour=11, minute=59)
-            new_start_date= ensure_timezone_aware(new_start_date)
-            new_end_date=ensure_timezone_aware(new_end_date)
+            new_start_date = ensure_timezone_aware(new_start_date)
+            new_end_date = ensure_timezone_aware(new_end_date)
 
-          
             room = event.calendar.room
-          
+
             old_start_date = ensure_timezone_aware(event.start)
             old_end_date = ensure_timezone_aware(event.end)
 
             conflict = False
             # Update the event dates
             if new_start_date < old_start_date and room.is_available(new_start_date, old_start_date):
-              event.start = new_start_date
-              event.save()
+                event.start = new_start_date
+                event.save()
             elif new_start_date != old_start_date:
-              conflict = True
-                
+                conflict = True
+
             if new_end_date > old_end_date and room.is_available(old_end_date, new_end_date):
-              event.end = new_end_date
-              event.save()
-            elif new_end_date!= old_end_date:
-              conflict = True
+                event.end = new_end_date
+                event.save()
+            elif new_end_date != old_end_date:
+                conflict = True
 
             if conflict:
-                return render(request, 'catalog/extend_conflict.html', {'start': event.start, 'end': event.end, 'redirect_room_id':redirect_room_id, 'source_page':source_page})
-          
+                return JsonResponse({
+                    'status': 'conflict',
+                    'start': event.start,
+                    'end': event.end,
+                    'redirect_room_id': redirect_room_id,
+                    'source_page': source_page
+                })
+
+            response_data = {
+                'status': 'success',
+                'redirect_url': None
+            }
+
+            if source_page == 'rooms_master' and section_id:
+                response_data['redirect_url'] = reverse('rooms_master_with_section', args=[section_id])
+            elif source_page == 'rooms_master':
+                response_data['redirect_url'] = reverse('rooms_master_with_room', args=[redirect_room_id])
             else:
-              if source_page == 'rooms_master' and section_id:
-                print('rooms master and section')
-                return redirect('rooms_master_with_section', section_id = section_id)
-              elif source_page == 'rooms_master':
-                print('rooms master no section')
-                return redirect('rooms_master_with_room', room_id = redirect_room_id)
-              print('my guests')
-              return redirect('my_guests')  # Redirect to the appropriate page after saving
-            
-    if source_page == 'rooms_master' and section_id:
-              return redirect('rooms_master_with_section', section_id = section_id)
-    elif source_page == 'rooms_master':
-              return redirect('rooms_master_with_room', room_id = redirect_room_id)
-    return redirect('my_guests')  # Redirect to the appropriate page if form is not valid
+                response_data['redirect_url'] = reverse('my_guests')
+
+            return JsonResponse(response_data)
+
+        # If form is invalid, return errors as JSON
+        return JsonResponse({
+            'status': 'error',
+            'errors': form.errors,
+        })
+
+    if request.user.is_superuser:
+        return redirect('rooms_master_with_room', room_id=redirect_room_id)
+
+    return redirect('my_guests')
+
 
 
 @login_required

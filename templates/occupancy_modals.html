@@ -92,6 +92,8 @@
           </button>
         </div>
         <div class="modal-body">
+          <div id="extend-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
+
           <div class="form-group">
             <label for="extend-start-date-{{ o_event.id }}">Start Date</label>
             <input type="date" class="form-control extend-start-date" id="extend-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
