@@ -827,10 +827,7 @@ $(document).ready(function() {
     modal.find(`#shorten-end-date-${eventId}`).attr('data-original-end', endDate);
   });
 
-function submitExtendForm() {
-            console.log("Extend form submitted!");
-            document.getElementById('extend-form').submit();
-        }
+
 
   });
 
@@ -849,7 +846,9 @@ function validateExtendDate(eventId) {
     alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
     startDateInput.value = startDateInput.getAttribute('data-original-start');
     endDateInput.value = endDateInput.getAttribute('data-original-end');
+    return false;
   }
+  return true;
 }
 
 // Attach change event listeners to the date inputs
@@ -871,12 +870,15 @@ function validateShortenDate(eventId) {
     alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
     startDateInput.value = startDateInput.getAttribute('data-original-start');
     endDateInput.value = endDateInput.getAttribute('data-original-end');
+    return false;
   }
   else if (newStartDate >= originalEndDate || newEndDate <= originalStartDate){
     alert("The start date cannot occur on or after the end date. If you wish to delete this event, please use the 'Delete' button.");
     startDateInput.value = startDateInput.getAttribute('data-original-start');
     endDateInput.value = endDateInput.getAttribute('data-original-end');
+    return false;
   }
+  return true;
 } 
 
 // Attach change event listeners to the date inputs
@@ -886,11 +888,15 @@ $(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
 });
 
 function submitExtendForm(eventId) {
-  document.getElementById(`extend-form-${eventId}`).submit();
+  if (validateExtendDate(eventId)) {
+    document.getElementById(`extend-form-${eventId}`).submit();
+  }
 }
 
 function submitShortenForm(eventId) {
-  document.getElementById(`shorten-form-${eventId}`).submit();
+  if (validateShortenDate(eventId)) {
+    document.getElementById(`shorten-form-${eventId}`).submit();
+  }
 }
 
 
