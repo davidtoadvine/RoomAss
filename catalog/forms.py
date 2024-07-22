@@ -10,18 +10,30 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 ###Occupancy Forms###
 class CreateBookingForm(forms.Form):
-    
     GUEST_TYPE_CHOICES = [
         (1, 'Relatively new to Twin Oaks'),
         (2, 'Well known to Twin Oaks'),
         (3, 'Twin Oaks member'),
     ]
+    
     room_id = forms.IntegerField(widget=forms.HiddenInput())
-    start_date = forms.DateField(widget=forms.HiddenInput())
-    end_date = forms.DateField(widget=forms.HiddenInput())
-    guest_name = forms.CharField(max_length=100, validators = [MinLengthValidator(1), MaxLengthValidator(100)])
-    host_name = forms.CharField(max_length=100, validators = [MinLengthValidator(1), MaxLengthValidator(100)])
-    guest_type = forms.ChoiceField(choices=GUEST_TYPE_CHOICES, required=False)
+    start_date = forms.DateField(widget=forms.HiddenInput(), error_messages={'invalid': 'Enter a valid date.'})
+    end_date = forms.DateField(widget=forms.HiddenInput(), error_messages={'invalid': 'Enter a valid date.'})
+    guest_name = forms.CharField(
+        max_length=100, 
+        validators=[MinLengthValidator(1), MaxLengthValidator(100)],
+        error_messages={'required': 'Guest name is required.'}
+    )
+    host_name = forms.CharField(
+        max_length=100, 
+        validators=[MinLengthValidator(1), MaxLengthValidator(100)],
+        error_messages={'required': 'Host name is required.'}
+    )
+    guest_type = forms.ChoiceField(
+        choices=GUEST_TYPE_CHOICES,
+        required=False,
+        error_messages={'required': 'Guest type is required.'}
+    )
 
     def clean_room_id(self):
         room_id = self.cleaned_data.get('room_id')
@@ -37,28 +49,23 @@ class CreateBookingForm(forms.Form):
         if start_date and end_date:
             if start_date > end_date:
                 raise forms.ValidationError('Start date must be before end date.')
-
         return cleaned_data
 
     def clean_guest_name(self):
         guest_name = self.cleaned_data['guest_name']
-        # Sanitize input using bleach
         guest_name = bleach.clean(guest_name)
         return guest_name
 
     def clean_host_name(self):
         host_name = self.cleaned_data['host_name']
-        # Sanitize input using bleach
         host_name = bleach.clean(host_name)
         return host_name
-    
-    #  dont think this actually does anything , but it is called in available_rooms view
+
     def clean_guest_type(self):
         guest_type = self.cleaned_data.get('guest_type')
         if not guest_type:
             raise forms.ValidationError("Guest type is required.")
         return guest_type
-
   
 
 class DateRangeForm(forms.Form):
@@ -74,19 +81,21 @@ class DateRangeForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        start_date = cleaned_data.get('start_date')
-        end_date = cleaned_data.get('end_date')
+        new_start_date = cleaned_data.get('start_date')
+        new_end_date = cleaned_data.get('end_date')
 
-        if start_date and end_date:
+        if new_start_date and new_end_date:
             now = datetime.now().date()
             three_months_later = now + timedelta(days=90)
 
-            if start_date < now - timedelta(days=1):
+            if new_start_date < now - timedelta(days=1):
                 raise ValidationError("Start date cannot be that far in the past.")
-            if start_date > end_date:
+            if new_start_date > new_end_date:
                 raise ValidationError("Invalid date range.")
-            if end_date > three_months_later:
+            if new_end_date > three_months_later:
                 raise ValidationError("You cannot schedule more than 3 months out.")
+            if new_start_date > new_end_date:
+                raise ValidationError("Start date cannot be after the end date.")
 
         return cleaned_data
 
@@ -120,6 +129,8 @@ class ShortenBookingForm(forms.Form):
 
             if new_end_date > old_end_date:
                 raise ValidationError("New end date cannot be after the original end date.")
+            if new_start_date > new_end_date:
+                raise ValidationError("Start date cannot be after the end date.")
 
         return cleaned_data
 
@@ -130,7 +141,7 @@ class ExtendBookingForm(forms.Form):
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
 
-    
+
     def __init__(self, *args, **kwargs):
         self.event = kwargs.pop('event', None)
         super().__init__(*args, **kwargs)

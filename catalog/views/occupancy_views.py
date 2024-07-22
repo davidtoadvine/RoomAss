@@ -16,55 +16,45 @@ from django.http import JsonResponse
 
 @login_required
 def create_booking(request):
-
     if request.method == 'POST':
-        
         form = CreateBookingForm(request.POST)
-
         if form.is_valid():
             room_id = form.cleaned_data['room_id']
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             host_name = form.cleaned_data['host_name']
-            room = Room.objects.get(id=room_id)
-            host_object = request.user
             guest_type = form.cleaned_data['guest_type']
             guest_name = form.cleaned_data['guest_name']
+
+            room = Room.objects.get(id=room_id)
 
             # Convert dates to datetime objects with specific time (around noon)
             start_date = datetime.combine(start_date, datetime.min.time()).replace(hour=12, minute=1)
             end_date = datetime.combine(end_date, datetime.min.time()).replace(hour=11, minute=59)
-
-            # Ensure dates are timezone-aware
             start_date = ensure_timezone_aware(start_date)
             end_date = ensure_timezone_aware(end_date)
 
             if room.is_available(start_date, end_date):
-
                 booking_event = CustomEvent(
                     calendar=room.calendar,
                     event_type='occupancy',
                     start=start_date,
                     end=end_date,
-                    title= f"Booking: {guest_name} hosted by {host_name}",
-                    description = "Meaningful Description",
-                    creator = host_object,
-                    guest_type = guest_type,
-                    guest_name = guest_name
+                    title=f"Booking: {guest_name} hosted by {host_name}",
+                    description="Meaningful Description",
+                    creator=request.user,
+                    guest_type=guest_type,
+                    guest_name=guest_name
                 )
                 booking_event.save()
-                
-                # Store form data in session
-                request.session['start_date'] = str(start_date.date())
-                request.session['end_date'] = str(end_date.date())
-                request.session['guest_type'] = guest_type
-            
-                return redirect('available_rooms')
+
+                return JsonResponse({'status': 'success', 'redirect_url': reverse('available_rooms')})
             else:
-                return render(request, 'catalog/available_rooms.html', {'error': 'Room is not available'})
+                return JsonResponse({'status': 'error', 'errors': {'__all__': ['Room is not available']}})
         else:
-            return render(request, 'catalog/available_rooms.html', {'error': 'Form is invalid', 'form_errors': form.errors})
-    return redirect('available_rooms')
+            return JsonResponse({'status': 'error', 'errors': form.errors})
+
+    return JsonResponse({'status': 'error', 'errors': {'__all__': ['Invalid request method']}})
 
 @login_required
 def delete_booking(request, event_id, section_id = None):

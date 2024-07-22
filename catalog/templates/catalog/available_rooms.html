@@ -279,7 +279,7 @@ if (isNaN(startDateObj.getTime())) {
     $("#booking-modal").modal("show");
   }
 
-  function submitBookingForm() {
+  {% comment %} function submitBookingForm() {
     let guestName = document.getElementById("guest-name").value.trim()
    
       // Simulate form submission and failure
@@ -293,7 +293,48 @@ if (isNaN(startDateObj.getTime())) {
      }
     $("#booking-form").submit();
     }
-  
+   {% endcomment %}
+   function submitBookingForm() {
+    let guestName = document.getElementById("guest-name").value.trim()
+   
+      // Simulate form submission and failure
+      // Check if the value is empty or whitespace
+      if (guestName === "") {
+        alert("Guest Name cannot be empty or just whitespace.");
+        return;
+    }
+    var form = $('#booking-form');
+    $.ajax({
+        type: form.attr('method'),
+        url: form.attr('action'),
+        data: form.serialize(),
+        success: function(response) {
+            if (response.status === 'success') {
+                window.location.href = response.redirect_url;
+            } else {
+                displayFormErrors(form, response.form_errors);
+            }
+        }
+    });
+}
+
+function displayFormErrors(form, errors) {
+    form.find('.form-group').each(function() {
+        var group = $(this);
+        var field = group.find('input, select, textarea').attr('name');
+        if (errors[field]) {
+            group.addClass('has-error');
+            group.find('.help-block').html(errors[field].join('<br>'));
+        } else {
+            group.removeClass('has-error');
+            group.find('.help-block').html('');
+        }
+    });
+
+    if (errors.__all__) {
+        alert(errors.__all__.join('\n'));
+    }
+}
 
 
 
