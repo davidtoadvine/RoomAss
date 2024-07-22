@@ -807,6 +807,7 @@ $(document).ready(function() {
   $('.modal').on('show.bs.modal', function(event) {
     var button = $(event.relatedTarget);
     var eventId = button.data('id');
+    console.log("Event id is " + eventId)
     var startDate = button.data('start-date');
     var endDate = button.data('end-date');
 
@@ -893,12 +894,59 @@ function submitExtendForm(eventId) {
   }
 }
 
-function submitShortenForm(eventId) {
+{% comment %} function submitShortenForm(eventId) {
   if (validateShortenDate(eventId)) {
     document.getElementById(`shorten-form-${eventId}`).submit();
   }
+} {% endcomment %}
+function submitShortenForm(eventId) {
+  // Collect form data
+  var form = $(`#shorten-form-${eventId}`);
+  var formData = form.serialize();
+
+  $.ajax({
+      type: "POST",
+      url: form.attr('action'),
+      data: formData,
+      success: function(response) {
+          if (response.status === 'success') {
+              // Redirect to the appropriate URL
+              window.location.href = response.redirect_url;
+          } else if (response.status === 'error') {
+              // Display errors in the modal
+              displayFormErrors(form, response.errors);
+          }
+      },
+      error: function(xhr, status, error) {
+          // Handle the error
+          console.error("An error occurred:", status, error);
+          alert("An error occurred while submitting the form. Please try again.");
+      }
+  });
 }
 
+function displayFormErrors(form, errors) {
+  // Clear previous errors
+  form.find('.form-error').remove();
+  // Display new errors
+  $.each(errors, function(field, messages) {
+    var fieldElement = form.find(`[name="${field}"]`);
+    if (fieldElement.length > 0) {
+      var errorList = $('<ul class="form-error text-danger"></ul>');
+      $.each(messages, function(_, message) {
+        errorList.append($('<li></li>').text(message));
+      });
+      fieldElement.after(errorList);
+    } else if (field === '__all__') {
+      // General errors
+      var generalErrorList = $('<ul class="form-error text-danger"></ul>');
+      $.each(messages, function(_, message) {
+        generalErrorList.append($('<li></li>').text(message));
+      });
+      form.prepend(generalErrorList);
+    }
+  });
+}
 
 
 

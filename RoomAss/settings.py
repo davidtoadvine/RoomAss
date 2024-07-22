@@ -40,6 +40,7 @@ INSTALLED_APPS = [
         'django_celery_beat',
     'schedule',
         'catalog.apps.CatalogConfig', # This object was created for us in /catalog/apps.py
+            'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    
+
 ]
 
 ROOT_URLCONF = 'RoomAss.urls'
@@ -137,3 +143,32 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # Add your front-end URL here
+    'http://yourdomain.com',
+]
+
+# Optional: Allow credentials
+CORS_ALLOW_CREDENTIALS = True
+
+# Optional: Allow specific headers
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-csrftoken',
+    'accept',
+    'origin',
+    'x-requested-with',
+]
+
+# Optional: Allow specific methods
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]

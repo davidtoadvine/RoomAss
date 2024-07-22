@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.shortcuts import render, get_object_or_404, redirect
 
 ###Occupancy Forms###
 class CreateBookingForm(forms.Form):
@@ -95,7 +96,34 @@ class DateRangeForm(forms.Form):
 class ShortenBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    # room_id = forms.IntegerField(widget=forms.HiddenInput())
+    event_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        self.event = kwargs.pop('event', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not self.event:
+            raise ValidationError("Event is required for validation.")
+
+        new_start_date = cleaned_data.get('start_date')
+        new_end_date = cleaned_data.get('end_date')
+
+        if new_start_date and new_end_date:
+            old_start_date = self.event.start.date()
+            old_end_date = self.event.end.date()
+
+            if new_start_date < old_start_date:
+                raise ValidationError("New start date cannot be before the original start date.")
+
+            if new_end_date > old_end_date:
+                raise ValidationError("New end date cannot be after the original end date.")
+
+        return cleaned_data
+
+
 
 class ExtendBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

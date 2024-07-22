@@ -125,6 +125,7 @@
           </button>
         </div>
         <div class="modal-body">
+          <div id="shorten-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
           <div class="form-group">
             <label for="shorten-start-date-{{ o_event.id }}">Start Date</label>
             <input type="date" class="form-control shorten-start-date" id="shorten-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
