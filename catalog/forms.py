@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 ###Occupancy Forms###
-class BookingForm(forms.Form):
+class CreateBookingForm(forms.Form):
     
     GUEST_TYPE_CHOICES = [
         (1, 'Relatively new to Twin Oaks'),
@@ -95,7 +95,7 @@ class DateRangeForm(forms.Form):
 class ShortenBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    room_id = forms.IntegerField(widget=forms.HiddenInput())
+    # room_id = forms.IntegerField(widget=forms.HiddenInput())
 
 class ExtendBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -106,9 +106,6 @@ class DeleteBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
-
-
-
 
 
 

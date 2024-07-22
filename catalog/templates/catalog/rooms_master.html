@@ -817,14 +817,14 @@ $(document).ready(function() {
 
     // Set the original start and end date data attributes
     modal.find(`#extend-start-date-${eventId}`).attr('data-original-start', startDate);
-    modal.find(`#extend-endDate-${eventId}`).attr('data-original-end', endDate);
+    modal.find(`#extend-end-date-${eventId}`).attr('data-original-end', endDate);
     // Similar setup for shorten modal
     modal.find(`#shorten-event-id-${eventId}`).val(eventId);
     modal.find(`#shorten-start-date-${eventId}`).val(startDate);
-    modal.find(`#shorten-endDate-${eventId}`).val(endDate);
+    modal.find(`#shorten-end-date-${eventId}`).val(endDate);
     
     modal.find(`#shorten-start-date-${eventId}`).attr('data-original-start', startDate);
-    modal.find(`#shorten-endDate-${eventId}`).attr('data-original-end', endDate);
+    modal.find(`#shorten-end-date-${eventId}`).attr('data-original-end', endDate);
   });
 
 function submitExtendForm() {
