@@ -140,22 +140,22 @@
                 data-toggle="modal" 
                 data-target="#extend-booking-modal" 
                 data-id="{{ o_event.event.id }}" 
-                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
+                data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
 
             <button class="btn-grey" 
                 data-toggle="modal" 
                 data-target="#shorten-booking-modal" 
                 data-id="{{ o_event.event.id }}" 
-                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
+                data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
 
             <button class="bt-grey" 
                 data-toggle="modal" 
                 data-target="#delete-booking-modal" 
                 data-id="{{ o_event.event.id }}" 
-                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
+                data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
               </div>
             </div>
             </td>
@@ -295,22 +295,22 @@
                   data-toggle="modal" 
                   data-target="#extend-booking-modal" 
                   data-id="{{ o_event.event.id }}" 
-                  data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                  data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
+                  data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                  data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
   
                 <button class="btn-grey" 
                   data-toggle="modal" 
                   data-target="#shorten-booking-modal" 
                   data-id="{{ o_event.event.id }}" 
-                  data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                  data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
+                  data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                  data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
   
                 <button class="bt-grey" 
                   data-toggle="modal" 
                   data-target="#delete-booking-modal" 
                   data-id="{{ o_event.event.id }}" 
-                  data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                  data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
+                  data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                  data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
               </div>
             </div>
             </td>
@@ -412,22 +412,22 @@
                 data-toggle="modal" 
                 data-target="#extend-booking-modal" 
                 data-id="{{ o_event.event.id }}" 
-                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
+                data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Extend</button>
 
               <button class="btn-grey" 
                 data-toggle="modal" 
                 data-target="#shorten-booking-modal" 
                 data-id="{{ o_event.event.id }}" 
-                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
+                data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Shorten</button>
 
               <button class="bt-grey" 
                 data-toggle="modal" 
                 data-target="#delete-booking-modal" 
                 data-id="{{ o_event.event.id }}" 
-                data-start-date="{{ o_event.event.start|date:'Y-m-d' }}" 
-                data-end-date="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
+                data-original-start="{{ o_event.event.start|date:'Y-m-d' }}" 
+                data-original-end="{{ o_event.event.end|date:'Y-m-d' }}">Delete</button>
             </div>
           </div>
           </td>
@@ -777,22 +777,13 @@ $(document).ready(function() {
   $('#floorplan-modal').modal('show');
 }
 
+</script>
 
 
 
 
-
-//////////////////////////////////////////////////////////////////////////////////
-$(document).ready(function() {
-  // Log message to confirm buttons are clicked
-  document.querySelectorAll('.btn-occ').forEach(function(button) {
-    button.addEventListener('click', function() {
-        console.log("Button clicked!!!");
-        console.log('Data ID:', button.getAttribute('data-id'));
-        console.log('Data Start Date:', button.getAttribute('data-start-date'));
-        console.log('Data End Date:', button.getAttribute('data-end-date'));
-    });
-  });
+{% comment %} $(document).ready(function() {
+  
 
   // Populate modals with data attributes
   $('.modal').on('show.bs.modal', function(event) {
@@ -1040,7 +1031,8 @@ function displayFormErrors(form, errors) {
       form.prepend(generalErrorList);
     }
   });
-}
+} </script>{% endcomment %}
+<script>    var sectionId = "{{ section_id|default:'' }}";</script>
+<script src="{% static 'catalog/js/my_guests.js' %}"></script>
 
-</script>
 {% endblock %}
