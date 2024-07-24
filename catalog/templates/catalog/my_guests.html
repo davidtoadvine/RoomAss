@@ -42,17 +42,18 @@
                     <td>
                       <button class="btn btn-primary"
                               data-toggle="modal" 
-                              data-target="#extend-modal-{{ o_event.id }}" 
+                              data-target="#extend-booking-modal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
                               data-original-start="{{ o_event.start_date|date:'Y-m-d' }}" 
                               data-original-end="{{ o_event.end_date|date:'Y-m-d' }}"
                               data-image-url="{{ o_event.image_url }}">
                           Extend
                       </button>
+                      
 
                       <button class="btn btn-primary" 
                               data-toggle="modal" 
-                              data-target="#shorten-modal-{{ o_event.id }}" 
+                              data-target="#shorten-booking-modal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
                               data-original-start="{{ o_event.start_date|date:'Y-m-d' }}" 
                               data-original-end="{{ o_event.end_date|date:'Y-m-d' }}"
@@ -62,7 +63,7 @@
 
                     <button class="btn btn-danger" 
                             data-toggle="modal" 
-                            data-target="#delete-modal-{{ o_event.id }}" 
+                            data-target="#delete-booking-modal-{{ o_event.id }}" 
                             data-id="{{ o_event.id }}" 
                             data-original-start="{{ o_event.start_date|date:'Y-m-d' }}" 
                             data-original-end="{{ o_event.end_date|date:'Y-m-d' }}"
@@ -74,9 +75,10 @@
                     </td>
                 </tr>
 
-{%include "floorplan_img_modal.html"%}
 
 {% endfor %}
+{%include "floorplan_img_modal.html"%}
+
 {% endif %}
 </tbody>
 </table>
@@ -98,25 +100,25 @@
     modal.data('event-id', eventId);
 
     // For Extend Modal
-    modal.find(`#extend-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
-    modal.find(`#extend-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
+    modal.find(`#extend-booking-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
+    modal.find(`#extend-booking-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
 
     // For Shorten Modal
-    modal.find(`#shorten-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
-    modal.find(`#shorten-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
+    modal.find(`#shorten-booking-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
+    modal.find(`#shorten-booking-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
 
     // Set the event_id field value explicitly
-    modal.find(`#extend-event-id-${eventId}`).val(eventId);
-    modal.find(`#shorten-event-id-${eventId}`).val(eventId);
+    modal.find(`#extend-booking-event-id-${eventId}`).val(eventId);
+    modal.find(`#shorten-booking-event-id-${eventId}`).val(eventId);
 
-    modal.find(`#delete-event-id-${eventId}`).val(eventId);
+    modal.find(`#delete-booking-event-id-${eventId}`).val(eventId);
   });
  // Add the validation functions here (validateExtendDate and validateShortenDate)...
   // Function to validate date selection
   function validateExtendDate(eventId) {
     console.log(`Validating extend date for event ${eventId}`);
-    let startDateInput = document.getElementById(`extend-start-date-${eventId}`);
-    let endDateInput = document.getElementById(`extend-end-date-${eventId}`);
+    let startDateInput = document.getElementById(`extend-booking-start-date-${eventId}`);
+    let endDateInput = document.getElementById(`extend-booking-end-date-${eventId}`);
     let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
     let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
     let newStartDate = new Date(startDateInput.value);
@@ -136,8 +138,8 @@
   function validateShortenDate(eventId) {
     console.log(eventId)
     console.log(`Validating shorten date for event ${eventId}`);
-    let startDateInput = document.getElementById(`shorten-start-date-${eventId}`);
-    let endDateInput = document.getElementById(`shorten-end-date-${eventId}`);
+    let startDateInput = document.getElementById(`shorten-booking-start-date-${eventId}`);
+    let endDateInput = document.getElementById(`shorten-booking-end-date-${eventId}`);
     let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
     let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
     let newStartDate = new Date(startDateInput.value);
@@ -158,13 +160,13 @@
     return true;
   } 
   // Attach change event listeners to the date inputs
-$(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
+$(document).on('change', '.shorten-booking-start-date, .shorten-booking-end-date', function() {
   const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
   console.log(eventId)
   validateShortenDate(eventId);
 });
 // Attach change event listeners to the date inputs
-$(document).on('change', '.extend-start-date, .extend-end-date', function() {
+$(document).on('change', '.extend-booking-start-date, .extend-booking-end-date', function() {
   const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
   console.log(eventId)
   validateExtendDate(eventId);
@@ -217,8 +219,8 @@ $(document).on('change', '.extend-start-date, .extend-end-date', function() {
 });
 
 // Function to submit extend form
-function submitExtendForm(eventId) {
-  var form = $(`#extend-form-${eventId}`);
+function submitExtendBookingForm(eventId) {
+  var form = $(`#extend-booking-form-${eventId}`);
   var formData = form.serialize();
 
   $.ajax({
@@ -246,8 +248,8 @@ function submitExtendForm(eventId) {
 }
 
 // Function to submit shorten form
-function submitShortenForm(eventId) {
-  var form = $(`#shorten-form-${eventId}`);
+function submitShortenBookingForm(eventId) {
+  var form = $(`#shorten-booking-form-${eventId}`);
   var formData = form.serialize();
   var csrfToken = form.find('[name="csrfmiddlewaretoken"]').val();
   console.log("CSRF Token:", csrfToken);
@@ -277,7 +279,7 @@ function submitShortenForm(eventId) {
 }
 
 // Function to submit delete form
-function submitDeleteForm(eventId) {
+function submitDeleteBookingForm(eventId) {
   console.log("SUBMITTING DELETE FORM")
   var form = $(`#delete-event-form-${eventId}`);
   console.log(form)
@@ -335,5 +337,32 @@ function displayFormErrors(form, errors) {
     }
   });
 }
+
+
+
+{% comment %} function showExtendBookingForm(eventId, start, end) {
+  // Prevent default action if needed (e.g., if inside a form submission handler)
+  // event.preventDefault();
+  
+  // Use moment.js to parse the custom date format
+const startDate = moment(start, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+const endDate = moment(end, 'MMMM D, YYYY, h:mm a').format('YYYY-MM-DD');
+  
+  console.log(eventId)
+  console.log(start)
+  console.log(end)
+  
+  // Set the form values
+  $("#extend-booking-start-date").val(startDate);
+  $("#extend-booking-end-date").val(endDate);
+  $("#extend-booking-event-id").val(eventId);
+
+
+  // Show the modal
+  $('#extend-booking-modal').modal('show');
+}
+function submitEditAvailabilityForm(){
+  $("#extend-booking-form").submit();
+} {% endcomment %}
 </script>
 {% endblock %}

@@ -142,7 +142,7 @@
 
     {% endfor %}
     {%include "floorplan_img_modal.html"%}
-    {%include "occupancy_modals.html"%}
+    {%include "booking_modals.html"%}
 
   </tbody>
 </table>
@@ -294,8 +294,8 @@ if (isNaN(startDateObj.getTime())) {
     $("#booking-form").submit();
     }
    {% endcomment %}
-   function submitBookingForm() {
-    let guestName = document.getElementById("guest-name").value.trim()
+   function submitCreateBookingForm() {
+    let guestName = document.getElementById("create-booking-guest-name").value.trim()
    
       // Simulate form submission and failure
       // Check if the value is empty or whitespace
@@ -303,7 +303,7 @@ if (isNaN(startDateObj.getTime())) {
         alert("Guest Name cannot be empty or just whitespace.");
         return;
     }
-    var form = $('#booking-form');
+    var form = $('#create-booking-form');
     $.ajax({
         type: form.attr('method'),
         url: form.attr('action'),

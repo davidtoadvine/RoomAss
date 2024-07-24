@@ -1,5 +1,4 @@
 
-
 <!--Create Booking Modal -->
 <div class="modal fade" id="create-booking-modal" tabindex="-1" role="dialog" aria-labelledby="booking-modal-label" aria-hidden="true">
   {% if error %}
@@ -73,41 +72,41 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="submitBookingForm()">Confirm Booking</button>
+          <button type="button" class="btn btn-primary" onclick="submitCreateBookingForm()">Confirm Booking</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 <!-- Extend Booking Modal -->
-<div class="modal fade" id="extend-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="extend-modal-label-{{ o_event.id }}" aria-hidden="true">
+<div class="modal fade" id="extend-booking-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="extend-booking-modal-label-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="extend-form-{{ o_event.id }}" method="post" data-form-type="extend" action="{% if section_id %}{% url 'extend_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'extend_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="extend-booking-form-{{ o_event.id }}" method="post" data-form-type="extend" action="{% if section_id %}{% url 'extend_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'extend_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
-        <input type="hidden" name="event_id" id="extend-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
+        <input type="hidden" name="event_id" id="extend-booking-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
         <div class="modal-header">
-          <h5 class="modal-title" id="extend-modal-label-{{ o_event.id }}">Extend Booking</h5>
+          <h5 class="modal-title" id="extend-booking-modal-label-{{ o_event.id }}">Extend Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <div id="extend-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
+          <div id="extend-booking-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
 
           <div class="form-group">
-            <label for="extend-start-date-{{ o_event.id }}">Start Date</label>
-            <input type="date" class="form-control extend-start-date" id="extend-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
+            <label for="extend-booking-start-date-{{ o_event.id }}">Start Date</label>
+            <input type="date" class="form-control extend-booking-start-date" id="extend-booking-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
           </div>
           <div class="form-group">
-            <label for="extend-end-date-{{ o_event.id }}">End Date</label>
-            <input type="date" class="form-control extend-end-date" id="extend-end-date-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
+            <label for="extend-booking-end-date-{{ o_event.id }}">End Date</label>
+            <input type="date" class="form-control extend-booking-end-date" id="extend-booking-end-date-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="submitExtendForm('{{ o_event.id }}')">Save changes</button>
+          <button type="button" class="btn btn-primary" onclick="submitExtendBookingForm('{{ o_event.id }}')">Save changes</button>
         </div>
       </form>
     </div>
@@ -115,60 +114,60 @@
 </div>
 
 <!-- Shorten Booking Modal -->
-<div class="modal fade" id="shorten-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="shorten-modal-label-{{ o_event.id }}" aria-hidden="true">
+<div class="modal fade" id="shorten-booking-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="shorten-booking-modal-label-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="shorten-form-{{ o_event.id }}" method="post" data-form-type="shorten" action="{% if section_id %}{% url 'shorten_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'shorten_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="shorten-booking-form-{{ o_event.id }}" method="post" data-form-type="shorten" action="{% if section_id %}{% url 'shorten_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'shorten_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="source_page" value="{{source_page}}">
-        <input type="hidden" name="event_id" id="shorten-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
+        <input type="hidden" name="event_id" id="shorten-booking-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
         <div class="modal-header">
-          <h5 class="modal-title" id="shorten-modal-label-{{ o_event.id }}">Shorten Booking</h5>
+          <h5 class="modal-title" id="shorten-booking-modal-label-{{ o_event.id }}">Shorten Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <div id="shorten-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
+          <div id="shorten-booking-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
           <div class="form-group">
-            <label for="shorten-start-date-{{ o_event.id }}">Start Date</label>
-            <input type="date" class="form-control shorten-start-date" id="shorten-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
+            <label for="shorten-booking-start-date-{{ o_event.id }}">Start Date</label>
+            <input type="date" class="form-control shorten-booking-start-date" id="shorten-booking-start-date-{{ o_event.id }}" name="start_date" data-original-start="{{ o_event.start_date }}">
           </div>
           <div class="form-group">
-            <label for="shorten-end-date-{{ o_event.id }}">End Date</label>
-            <input type="date" class="form-control shorten-end-date" id="shorten-end-date-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
+            <label for="shorten-booking-end-date-{{ o_event.id }}">End Date</label>
+            <input type="date" class="form-control shorten-booking-end-date" id="shorten-booking-end-date-{{ o_event.id }}" name="end_date" data-original-end="{{ o_event.end_date }}">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="submitShortenForm('{{ o_event.id }}')">Save changes</button>
+          <button type="button" class="btn btn-primary" onclick="submitShortenBookingForm('{{ o_event.id }}')">Save changes</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="delete-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-modal-label-{{ o_event.id }}" aria-hidden="true">
+<div class="modal fade" id="delete-booking-modal-{{ o_event.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-booking-modal-label-{{ o_event.id }}" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <!-- Ensure the form tag properly encloses the inputs and content -->
-      <form id="delete-event-form-{{ o_event.id }}" method="post" action="{% if section_id %}{% url 'delete_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'delete_booking' o_event.id %}{% else %}#{% endif %}">
+      <form id="delete-booking-form-{{ o_event.id }}" method="post" action="{% if section_id %}{% url 'delete_booking_with_section' o_event.id section_id %}{% elif o_event.id %}{% url 'delete_booking' o_event.id %}{% else %}#{% endif %}">
         {% csrf_token %} 
-        <input type="hidden" name="event_id" id="delete-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
+        <input type="hidden" name="event_id" id="delete-booking-event-id-{{ o_event.id }}" value="{{ o_event.id }}">
         {% comment %} <input type="hidden" name="source_page" value="{{source_page}}"> {% endcomment %}
         <div class="modal-header">
-          <h5 class="modal-title" id="delete-modal-label-{{ o_event.id }}">Delete Event?</h5>
+          <h5 class="modal-title" id="delete-booking-modal-label-{{ o_event.id }}">Delete Event?</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <div id="delete-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
+          <div id="delete-booking-form-errors-{{ o_event.id }}"></div> <!-- Error container -->
           <p>Are you sure you want to delete this booking?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-danger" onclick="submitDeleteForm({{ o_event.id }})">Delete</button>
+          <button type="button" class="btn btn-danger" onclick="submitDeleteBookingForm({{ o_event.id }})">Delete</button>
         </div>
       </form> <!-- Ensure this closing tag is in the right place -->
     </div>
