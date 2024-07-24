@@ -57,7 +57,10 @@ def create_booking(request):
     return JsonResponse({'status': 'error', 'errors': {'__all__': ['Invalid request method']}})
 
 def delete_booking(request, event_id, section_id=None):
+    print('delete booking')
+
     event = get_object_or_404(CustomEvent, id=event_id)
+    print(event)
 
     if request.method == 'POST':
         form = DeleteBookingForm(request.POST)
@@ -68,12 +71,15 @@ def delete_booking(request, event_id, section_id=None):
                 'redirect_url': None
             }
             source_page = request.session.get('source_page', 'my_guests')
+            print("view says source page is " + source_page)
             if source_page == 'rooms_master' and section_id:
                 response_data['redirect_url'] = reverse('rooms_master_with_section', args=[section_id])
             elif source_page == 'rooms_master':
                 response_data['redirect_url'] = reverse('rooms_master_with_room', args=[event_id_to_redirect_room_id(event_id)])
             else:
+                print("response data is directing to My Guests ")
                 response_data['redirect_url'] = reverse('my_guests')
+                print(response_data)
 
             return JsonResponse(response_data)
 
@@ -146,9 +152,10 @@ def extend_booking(request, event_id, section_id=None):
                 print('extend from rooms master via Room')
                 response_data['redirect_url'] = reverse('rooms_master_with_room', args=[redirect_room_id])
             else:
+                print("going to My guests")
                 response_data['redirect_url'] = reverse('my_guests')
 
-            print('returning')
+            print(response_data)
             return JsonResponse(response_data)
 
         # If form is invalid, return errors as JSON

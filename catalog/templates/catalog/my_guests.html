@@ -278,7 +278,7 @@ function submitShortenForm(eventId) {
 
 // Function to submit delete form
 function submitDeleteForm(eventId) {
-  console.log(eventId)
+  console.log("SUBMITTING DELETE FORM")
   var form = $(`#delete-event-form-${eventId}`);
   console.log(form)
   var csrfTokenInput = form.find('input[name="csrfmiddlewaretoken"]');
@@ -289,8 +289,8 @@ function submitDeleteForm(eventId) {
   console.log('CSRF Token Input:', csrfTokenInput);
   console.log('CSRF Token:', csrfToken);
 
-  var sourcePage= form.find('input[name="source_page"]').val();
-  console.log(sourcePage);
+  //var sourcePage= form.find('input[name="source_page"]').val();
+  //console.log(sourcePage);
 
   if (!csrfToken) {
     alert("CSRF token not found!");
@@ -299,13 +299,11 @@ function submitDeleteForm(eventId) {
 
   var formData = form.serialize();
 
+  
   $.ajax({
     type: "POST",
     url: form.attr('action'),
     data: formData,
-    headers: {
-      'X-CSRFToken': csrfToken
-    },
     success: function(response) {
       if (response.status === 'success') {
         // Redirect to the appropriate URL
@@ -313,7 +311,7 @@ function submitDeleteForm(eventId) {
       } else if (response.status === 'error') {
         // Display errors in the modal
         displayFormErrors(form, response.errors);
-      }
+      } 
     },
     error: function(xhr, status, error) {
       // Handle the error
