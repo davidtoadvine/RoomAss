@@ -146,12 +146,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # Add your front-end URL here
-    'http://yourdomain.com',
+      'http://localhost:8000',
+    'http://127.0.0.1:8000',
 ]
 
 # Optional: Allow credentials
 CORS_ALLOW_CREDENTIALS = True
+
+# FIXME DELETE THIS
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Optional: Allow specific headers
 CORS_ALLOW_HEADERS = [

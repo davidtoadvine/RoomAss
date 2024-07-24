@@ -171,10 +171,13 @@ class ExtendBookingForm(forms.Form):
     
 
 class DeleteBookingForm(forms.Form):
-    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    event_id = forms.IntegerField(widget=forms.HiddenInput())
 
+    event_id = forms.IntegerField(widget=forms.HiddenInput())
+    def clean_event_id(self):
+        event_id = self.cleaned_data.get('event_id')
+        if not CustomEvent.objects.filter(id=event_id).exists():
+            raise ValidationError('Invalid event ID.')
+        return event_id
 
 
 ### Availability Forms ###

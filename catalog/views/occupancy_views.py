@@ -8,7 +8,7 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 
-from catalog.forms import CreateBookingForm, ExtendBookingForm, ShortenBookingForm
+from catalog.forms import CreateBookingForm, ExtendBookingForm, ShortenBookingForm, DeleteBookingForm
 from catalog.models import CustomEvent, Room
 from catalog.utils import ensure_timezone_aware, event_id_to_redirect_room_id
 
@@ -56,35 +56,48 @@ def create_booking(request):
 
     return JsonResponse({'status': 'error', 'errors': {'__all__': ['Invalid request method']}})
 
-@login_required
-def delete_booking(request, event_id, section_id = None):
+def delete_booking(request, event_id, section_id=None):
     event = get_object_or_404(CustomEvent, id=event_id)
 
-    room_id = event_id_to_redirect_room_id(event_id)
-    
     if request.method == 'POST':
-        source_page = request.session.get('source_page', 'my_guests')
-        event.delete()
-        if source_page == 'rooms_master' and section_id:
-              return redirect('rooms_master_with_section', section_id = section_id)
-        elif source_page == 'rooms_master':
-              return redirect('rooms_master_with_room', room_id = room_id)
-        
-        return redirect('my_guests')
-        # Render a confirmation page for GET request, if needed
+        form = DeleteBookingForm(request.POST)
+        if form.is_valid():
+            event.delete()
+            response_data = {
+                'status': 'success',
+                'redirect_url': None
+            }
+            source_page = request.session.get('source_page', 'my_guests')
+            if source_page == 'rooms_master' and section_id:
+                response_data['redirect_url'] = reverse('rooms_master_with_section', args=[section_id])
+            elif source_page == 'rooms_master':
+                response_data['redirect_url'] = reverse('rooms_master_with_room', args=[event_id_to_redirect_room_id(event_id)])
+            else:
+                response_data['redirect_url'] = reverse('my_guests')
+
+            return JsonResponse(response_data)
+
+        # If form is invalid, return errors as JSON
+        return JsonResponse({
+            'status': 'error',
+            'errors': form.errors,
+        })
+
     return render(request, 'catalog/delete_booking.html', {'event': event})
 
-from django.http import JsonResponse
-
-@login_required
 def extend_booking(request, event_id, section_id=None):
+    print("EXTEND BOOKING")
     event = get_object_or_404(CustomEvent, id=event_id)
     redirect_room_id = event_id_to_redirect_room_id(event_id)
 
     if request.method == 'POST':
+        print('EXTEND POST')
         source_page = request.session.get('source_page', 'my_guests')
+        print('source page is...')
+        print(source_page)
         form = ExtendBookingForm(request.POST, event=event)
         if form.is_valid():
+            print("extend form valid")
             new_start_date = form.cleaned_data['start_date']
             new_end_date = form.cleaned_data['end_date']
 
@@ -130,10 +143,12 @@ def extend_booking(request, event_id, section_id=None):
             if source_page == 'rooms_master' and section_id:
                 response_data['redirect_url'] = reverse('rooms_master_with_section', args=[section_id])
             elif source_page == 'rooms_master':
+                print('extend from rooms master via Room')
                 response_data['redirect_url'] = reverse('rooms_master_with_room', args=[redirect_room_id])
             else:
                 response_data['redirect_url'] = reverse('my_guests')
 
+            print('returning')
             return JsonResponse(response_data)
 
         # If form is invalid, return errors as JSON
@@ -147,8 +162,6 @@ def extend_booking(request, event_id, section_id=None):
 
     return redirect('my_guests')
 
-
-
 @login_required
 def shorten_booking(request, event_id, section_id = None):
   print('in Shorten Booking')
@@ -157,8 +170,12 @@ def shorten_booking(request, event_id, section_id = None):
 
   if request.method == 'POST':
         print("shorten Booking POST")
+        print(event_id)
+        print(section_id)
         source_page = request.session.get('source_page', 'my_guests')
         form = ShortenBookingForm(request.POST, event=event)
+        print('source page is...')
+        print(source_page)
 
         if form.is_valid():
             print('form valid')

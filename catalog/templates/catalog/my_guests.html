@@ -44,8 +44,8 @@
                               data-toggle="modal" 
                               data-target="#extend-modal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
-                              data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
-                              data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
+                              data-original-start="{{ o_event.start_date|date:'Y-m-d' }}" 
+                              data-original-end="{{ o_event.end_date|date:'Y-m-d' }}"
                               data-image-url="{{ o_event.image_url }}">
                           Extend
                       </button>
@@ -54,8 +54,8 @@
                               data-toggle="modal" 
                               data-target="#shorten-modal-{{ o_event.id }}" 
                               data-id="{{ o_event.id }}" 
-                              data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
-                              data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
+                              data-original-start="{{ o_event.start_date|date:'Y-m-d' }}" 
+                              data-original-end="{{ o_event.end_date|date:'Y-m-d' }}"
                               data-image-url="{{ o_event.image_url }}">
                           Shorten
                       </button>
@@ -64,14 +64,15 @@
                             data-toggle="modal" 
                             data-target="#delete-modal-{{ o_event.id }}" 
                             data-id="{{ o_event.id }}" 
-                            data-start-date="{{ o_event.start_date|date:'Y-m-d' }}" 
-                            data-end-date="{{ o_event.end_date|date:'Y-m-d' }}"
+                            data-original-start="{{ o_event.start_date|date:'Y-m-d' }}" 
+                            data-original-end="{{ o_event.end_date|date:'Y-m-d' }}"
                             data-image-url="{{ o_event.image_url }}">
                         Delete
                     </button>
+                    {%include "occupancy_modals.html"%}
+
                     </td>
                 </tr>
-                {%include "occupancy_modals.html"%}
 
 {%include "floorplan_img_modal.html"%}
 
@@ -83,158 +84,258 @@
 
 <script>
   $(document).ready(function() {
-    // Function to populate the extend and shorten modals
-    $('.modal').on('show.bs.modal', function(event) {
-      var button = $(event.relatedTarget);
-      var startDate = button.data('start-date');
-      var endDate = button.data('end-date');
-      var eventId = button.data('id');
-      var modal = $(this);
-  
-      console.log("Modal event ID: " + eventId);
-  
-      // For Extend Modal
-      modal.find(`#extend-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
-      modal.find(`#extend-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
-      console.log("Extend Start Date:", modal.find(`#extend-start-date-${eventId}`).attr('data-original-start'));
-      console.log("Extend End Date:", modal.find(`#extend-end-date-${eventId}`).attr('data-original-end'));
-  
-      // For Shorten Modal
-      modal.find(`#shorten-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
-      modal.find(`#shorten-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
-      console.log("Shorten Start Date:", modal.find(`#shorten-start-date-${eventId}`).attr('data-original-start'));
-      console.log("Shorten End Date:", modal.find(`#shorten-end-date-${eventId}`).attr('data-original-end'));
-  
-      // Explicitly set the event_id field value
-      modal.find(`#extend-event-id-${eventId}`).val(eventId);
-      modal.find(`#shorten-event-id-${eventId}`).val(eventId);
-    });
-  
-    // Function to validate date selection for extending
-    function validateExtendDate(eventId) {
-      let startDateInput = document.getElementById(`extend-start-date-${eventId}`);
-      let endDateInput = document.getElementById(`extend-end-date-${eventId}`);
-      
-      if (!startDateInput || !endDateInput) {
-        console.error('Start date or end date input not found for event ID:', eventId);
-        return false;
-      }
-  
-      let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
-      let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
-      let newStartDate = new Date(startDateInput.value);
-      let newEndDate = new Date(endDateInput.value);
-  
-      var now = new Date();
-      var limitDateObj = new Date(now);
-      limitDateObj.setMonth(limitDateObj.getMonth() + 3);
-      if (limitDateObj.getDate() < now.getDate()) {
-        limitDateObj.setDate(0); // Set to last day of the previous month
-      }
-  
-      if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
-        alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
-        startDateInput.value = startDateInput.getAttribute('data-original-start');
-        endDateInput.value = endDateInput.getAttribute('data-original-end');
-        return false;
-      }
-      if (newEndDate > limitDateObj) {
-        alert("You cannot schedule more than 3 months out.");
-        startDateInput.value = startDateInput.getAttribute('data-original-start');
-        endDateInput.value = endDateInput.getAttribute('data-original-end');
-        return false;
-      }
-      return true;
-    }
-  
-    // Function to validate date selection for shortening
-    function validateShortenDate(eventId) {
-      let startDateInput = document.getElementById(`shorten-start-date-${eventId}`);
-      let endDateInput = document.getElementById(`shorten-end-date-${eventId}`);
-  
-      if (!startDateInput || !endDateInput) {
-        console.error('Start date or end date input not found for event ID:', eventId);
-        return false;
-      }
-  
-      let originalStartDateStr = startDateInput.getAttribute('data-original-start');
-      let originalEndDateStr = endDateInput.getAttribute('data-original-end');
-      let originalStartDate = new Date(originalStartDateStr);
-      let originalEndDate = new Date(originalEndDateStr);
-      let newStartDate = new Date(startDateInput.value);
-      let newEndDate = new Date(endDateInput.value);
-  
-      if (newStartDate < originalStartDate || newEndDate > originalEndDate) {
-        alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
-        startDateInput.value = originalStartDateStr;
-        endDateInput.value = originalEndDateStr;
-        return false;
-      }
-      return true;
-    }
-  
-    // Attach change event listeners to the date inputs for extending and shortening
-    $(document).on('change', '.extend-start-date, .extend-end-date', function() {
-      const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
-      console.log(eventId)
-      validateExtendDate(eventId);
-    });
-  
-    $(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
+    
+  // Populate the extend and shorten modals with the event data
+  $('.modal').on('show.bs.modal', function(event) {
+    var button = $(event.relatedTarget);
+    var startDate = button.data('original-start');
+    var endDate = button.data('original-end');
+    var eventId = button.data('id');
+    var modal = $(this);
 
-      const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
-      console.log(eventId)
 
-      validateShortenDate(eventId);
-    });
-  
-    // Attach change event listeners to the date inputs for extending and shortening
-  $(document).on('change', '.extend-start-date, .extend-end-date', function() {
-    const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
-    console.log("EVENT ID (on change for extend):", eventId);
-    validateExtendDate(eventId);
+    // Store the eventId in the modal's data attribute
+    modal.data('event-id', eventId);
+
+    // For Extend Modal
+    modal.find(`#extend-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
+    modal.find(`#extend-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
+
+    // For Shorten Modal
+    modal.find(`#shorten-start-date-${eventId}`).val(startDate).attr('data-original-start', startDate);
+    modal.find(`#shorten-end-date-${eventId}`).val(endDate).attr('data-original-end', endDate);
+
+    // Set the event_id field value explicitly
+    modal.find(`#extend-event-id-${eventId}`).val(eventId);
+    modal.find(`#shorten-event-id-${eventId}`).val(eventId);
+
+    modal.find(`#delete-event-id-${eventId}`).val(eventId);
   });
+ // Add the validation functions here (validateExtendDate and validateShortenDate)...
+  // Function to validate date selection
+  function validateExtendDate(eventId) {
+    console.log(`Validating extend date for event ${eventId}`);
+    let startDateInput = document.getElementById(`extend-start-date-${eventId}`);
+    let endDateInput = document.getElementById(`extend-end-date-${eventId}`);
+    let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+    let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+    let newStartDate = new Date(startDateInput.value);
+    let newEndDate = new Date(endDateInput.value);
+  
+    if (newStartDate > originalStartDate || newEndDate < originalEndDate) {
+      alert("New dates cannot shrink the original reservation window. Please use the 'Shorten' button for that.");
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
+    }
+    return true;
+  }
+  
+  
+  
+  function validateShortenDate(eventId) {
+    console.log(eventId)
+    console.log(`Validating shorten date for event ${eventId}`);
+    let startDateInput = document.getElementById(`shorten-start-date-${eventId}`);
+    let endDateInput = document.getElementById(`shorten-end-date-${eventId}`);
+    let originalStartDate = new Date(startDateInput.getAttribute('data-original-start'));
+    let originalEndDate = new Date(endDateInput.getAttribute('data-original-end'));
+    let newStartDate = new Date(startDateInput.value);
+    let newEndDate = new Date(endDateInput.value);
+  
+    if (newStartDate < originalStartDate || newEndDate > originalEndDate) {
+      alert("New dates cannot extend the original reservation window. Please use the 'Extend' button for that.");
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
+    }
+    else if (newStartDate >= originalEndDate || newEndDate <= originalStartDate){
+      alert("The start date cannot occur on or after the end date. If you wish to delete this event, please use the 'Delete' button.");
+      startDateInput.value = startDateInput.getAttribute('data-original-start');
+      endDateInput.value = endDateInput.getAttribute('data-original-end');
+      return false;
+    }
+    return true;
+  } 
+  // Attach change event listeners to the date inputs
+$(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
+  const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+  console.log(eventId)
+  validateShortenDate(eventId);
+});
+// Attach change event listeners to the date inputs
+$(document).on('change', '.extend-start-date, .extend-end-date', function() {
+  const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
+  console.log(eventId)
+  validateExtendDate(eventId);
+});
 
-  $(document).on('change', '.shorten-start-date, .shorten-end-date', function() {
-    const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
-    console.log("EVENT ID (on change for shorten):", eventId);
-    validateShortenDate(eventId);
-  });
+
+
+
 
   // Prevent form submission if validation fails
   $(document).on('submit', 'form[data-form-type]', function(e) {
-    console.log('Form submission triggered');
-    console.log('Form element:', this);
+    e.preventDefault(); // Prevent the default form submission
+    const form = $(this);
+    const eventId = form.find('input[name="event_id"]').val();
+    const formType = form.attr('data-form-type');
 
-    // Log all inputs within the form to check for event_id
-    $(this).find('input').each(function() {
-      console.log('Input:', this, 'Name:', this.name, 'Value:', this.value);
-    });
-
-    // Retrieve the event ID using jQuery closest method
-    const eventId = $(this).closest('.modal').find('input[name="event_id"]').val();
-    console.log('Event ID (on submit):', eventId);
-
-    if (!eventId) {
-      console.error('Event ID not found');
-      e.preventDefault();
-      return;
-    }
-
-    // Find and log the form type
-    const formType = this.getAttribute('data-form-type');
-    console.log('Form type:', formType);
-
-    // Validation checks
-    if (formType === 'extend' && !validateExtendDate(eventId)) {
-      console.log('Validation failed on extend');
-      e.preventDefault(); // Prevent form submission for extend form
-    } else if (formType === 'shorten' && !validateShortenDate(eventId)) {
-      console.log('Validation failed on shorten');
-      e.preventDefault(); // Prevent form submission for shorten form
+    if ((formType === 'extend' && validateExtendDate(eventId)) || 
+      (formType === 'shorten' && validateShortenDate(eventId)) || 
+      formType === 'delete') { // No validation for delete, just submit
+    $.ajax({
+        type: form.attr('method'),
+        url: form.attr('action'),
+        data: form.serialize(),
+        success: function(response) {
+          if (response.status === 'success') {
+            if (response.redirect_url) {
+              window.location.href = response.redirect_url; // Redirect to the URL provided in the response
+            } else {
+              // Handle the case where no redirect URL is provided (update the modal or page content as needed)
+              alert('Booking updated successfully');
+            }
+          } else if (response.status === 'error') {
+            displayFormErrors(form, response.errors);
+          } else if (response.status === 'conflict') {
+            // Handle conflict response if necessary
+            alert('There is a conflict with the new dates.');
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error:', error);
+          alert('An error occurred while processing your request. Please try again.');
+        }
+      });
     }
   });
-});
+
   
+
+
+});
+
+// Function to submit extend form
+function submitExtendForm(eventId) {
+  var form = $(`#extend-form-${eventId}`);
+  var formData = form.serialize();
+
+  $.ajax({
+    type: "POST",
+    url: form.attr('action'),
+    data: formData,
+    success: function(response) {
+      if (response.status === 'success') {
+        // Redirect to the appropriate URL
+        window.location.href = response.redirect_url;
+      } else if (response.status === 'error') {
+        // Display errors in the modal
+        displayFormErrors(form, response.errors);
+      } else if (response.status === 'conflict') {
+        // Handle conflict
+        alert(`Conflict detected: Start - ${response.start}, End - ${response.end}`);
+      }
+    },
+    error: function(xhr, status, error) {
+      // Handle the error
+      console.error("An error occurred:", status, error);
+      alert("An error occurred while submitting the form. Please try again.");
+    }
+  });
+}
+
+// Function to submit shorten form
+function submitShortenForm(eventId) {
+  var form = $(`#shorten-form-${eventId}`);
+  var formData = form.serialize();
+  var csrfToken = form.find('[name="csrfmiddlewaretoken"]').val();
+  console.log("CSRF Token:", csrfToken);
+
+  $.ajax({
+    type: "POST",
+    url: form.attr('action'),
+    data: formData,
+    success: function(response) {
+      if (response.status === 'success') {
+        // Redirect to the appropriate URL
+        window.location.href = response.redirect_url;
+      } else if (response.status === 'error') {
+        // Display errors in the modal
+        displayFormErrors(form, response.errors);
+      } else if (response.status === 'conflict') {
+        // Handle conflict
+        alert(`Conflict detected: Start - ${response.start}, End - ${response.end}`);
+      }
+    },
+    error: function(xhr, status, error) {
+      // Handle the error
+      console.error("An error occurred:", status, error);
+      alert("An error occurred while submitting the form. Please try again.");
+    }
+  });
+}
+
+// Function to submit delete form
+function submitDeleteForm(eventId) {
+  console.log(eventId)
+  var form = $(`#delete-event-form-${eventId}`);
+  console.log(form)
+  var csrfTokenInput = form.find('input[name="csrfmiddlewaretoken"]');
+  var csrfToken = csrfTokenInput.val();
+
+  // Debugging logs
+  console.log('Form:', form);
+  console.log('CSRF Token Input:', csrfTokenInput);
+  console.log('CSRF Token:', csrfToken);
+
+  var sourcePage= form.find('input[name="source_page"]').val();
+  console.log(sourcePage);
+
+  if (!csrfToken) {
+    alert("CSRF token not found!");
+    return;
+  }
+
+  var formData = form.serialize();
+
+  $.ajax({
+    type: "POST",
+    url: form.attr('action'),
+    data: formData,
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    success: function(response) {
+      if (response.status === 'success') {
+        // Redirect to the appropriate URL
+        window.location.href = response.redirect_url;
+      } else if (response.status === 'error') {
+        // Display errors in the modal
+        displayFormErrors(form, response.errors);
+      }
+    },
+    error: function(xhr, status, error) {
+      // Handle the error
+      console.error("An error occurred:", status, error);
+      alert("An error occurred while submitting the form. Please try again.");
+    }
+  });
+}
+
+// Display form errors in the modal
+function displayFormErrors(form, errors) {
+  // Clear previous errors
+  form.find('.form-error').remove();
+
+  // Display new errors
+  $.each(errors, function(field, messages) {
+    const input = form.find(`[name="${field}"]`);
+    if (input.length) {
+      const errorHtml = `<div class="form-error text-danger">${messages.join('<br>')}</div>`;
+      input.after(errorHtml);
+    }
+  });
+}
 </script>
 {% endblock %}
