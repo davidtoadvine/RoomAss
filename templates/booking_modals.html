@@ -1,7 +1,7 @@
 
 
 <!--Create Booking Modal -->
-<div class="modal fade" id="booking-modal" tabindex="-1" role="dialog" aria-labelledby="booking-modal-label" aria-hidden="true">
+<div class="modal fade" id="create-booking-modal" tabindex="-1" role="dialog" aria-labelledby="booking-modal-label" aria-hidden="true">
   {% if error %}
     <div class="alert alert-danger">{{ error }}</div>
 {% endif %}
@@ -18,10 +18,10 @@
 {% endif %}
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <form id="booking-form" method="post" action="{% url 'create_booking' %}">
+      <form id="create-booking-form" method="post" action="{% url 'create_booking' %}">
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title label" id="booking-modal-label">Confirm Booking</h5>
+          <h5 class="modal-title label" id="create-booking-modal-label">Confirm Booking</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -30,15 +30,15 @@
           <div class="row">
             <!-- Form Column -->
             <div class="col-md-4">
-              <input type="hidden" name="room_id" id="booking-room-id" />
-              <input type="hidden" name="guest_type" id="booking-guest-type" value="{{guest_type}}" />
+              <input type="hidden" name="room_id" id="create-booking-room-id" />
+              <input type="hidden" name="guest_type" id="create-booking-guest-type" value="{{guest_type}}" />
 
-              <input type="hidden" name="start_date" id="booking-start-date-hidden" />
-              <input type="hidden" name="end_date" id="booking-end-date-hidden" />
+              <input type="hidden" name="start_date" id="create-booking-start-date-hidden" />
+              <input type="hidden" name="end_date" id="create-booking-end-date-hidden" />
 
               <div class="form-group">
                 <label for="guest-name">Guest Name</label>
-                <input type="text" class="form-control" id="guest-name" name="guest_name" required />
+                <input type="text" class="form-control" id="create-booking-guest-name" name="guest_name" required />
                 {% if form.guest_name.errors %}
           <div class="text-danger">
             {{ form.guest_name.errors }}
@@ -50,24 +50,24 @@
 
               <div class="form-group">
                 <label for="host-name">Host Name</label>
-                <input type="text" class="form-control" id="host-name" name="host_name" value="{{user}}" readonly required />
+                <input type="text" class="form-control" id="create-booking-host-name" name="host_name" value="{{user}}" readonly required />
                 {% if form.host_name.errors %}
           <div class="text-danger">
             {{ form.host_name.errors }}
           </div>
         {% endif %}
               </div>
-              <p id = 'test'>Start Date: <span id="booking-start-date"></span></p>
-              <p>End Date: <span id="booking-end-date"></span></p>
+              <p id = 'test'>Start Date: <span id="create-booking-start-date"></span></p>
+              <p>End Date: <span id="create-booking-end-date"></span></p>
               <p>--------------------------</p>
-              <p>Building: <span id="booking-building-name"></span></p>
-              <p>Section: <span id="booking-section-name"></span></p>
-              <p>Room Number: <span id="booking-room-number"></span></p>
+              <p>Building: <span id="create-booking-building-name"></span></p>
+              <p>Section: <span id="create-booking-section-name"></span></p>
+              <p>Room Number: <span id="create-booking-room-number"></span></p>
               
             </div>
             <!-- Image Column -->
             <div class="col-md-8">
-              <img id="booking-room-image" src="" alt="Room Image" class="img-fluid booking-room-image" />
+              <img id="create-booking-room-image" src="" alt="Room Image" class="img-fluid booking-room-image" />
             </div>
           </div>
         </div>

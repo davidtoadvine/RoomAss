@@ -260,23 +260,23 @@ if (isNaN(startDateObj.getTime())) {
     event.preventDefault();
   
     // Set the form values
-    $("#booking-start-date-hidden").val(startDate);
-    $("#booking-end-date-hidden").val(endDate);
-    $("#booking-room-id").val(roomId);
-    $("#booking-room-number").text(roomNumber);
-    $("#booking-building-name").text(buildingName);
-    $("#booking-section-name").text(sectionName);
-    $("#booking-start-date").text(startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
-    $("#booking-end-date").text(endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
-    $("booking-guest-type").val(guestType);
+    $("#create-booking-start-date-hidden").val(startDate);
+    $("#create-booking-end-date-hidden").val(endDate);
+    $("#create-booking-room-id").val(roomId);
+    $("#create-booking-room-number").text(roomNumber);
+    $("#create-booking-building-name").text(buildingName);
+    $("#create-booking-section-name").text(sectionName);
+    $("#create-booking-start-date").text(startDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+    $("#create-booking-end-date").text(endDateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+    $("create-booking-guest-type").val(guestType);
     // Set the room image
     if (roomImageUrl) {
-      $("#booking-room-image").attr("src", roomImageUrl).show();
+      $("#create-booking-room-image").attr("src", roomImageUrl).show();
     } else {
-      $("#booking-room-image").hide();
+      $("#create-booking-room-image").hide();
     }
     // Show the modal
-    $("#booking-modal").modal("show");
+    $("#create-booking-modal").modal("show");
   }
 
   {% comment %} function submitBookingForm() {

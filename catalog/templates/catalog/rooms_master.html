@@ -160,7 +160,7 @@
             </div>
             </td>
           </tr>
-          {% include "occupancy_modals.html" %}
+          {% include "booking_modals.html" %}
 
               {%else%}
               <tr>
@@ -315,7 +315,7 @@
             </div>
             </td>
           </tr>
-          {% include "occupancy_modals.html" %}
+          {% include "booking_modals.html" %}
 
               {%else%}
               <tr>
@@ -432,7 +432,7 @@
           </div>
           </td>
         </tr>
-        {% include "occupancy_modals.html" %}
+        {% include "booking_modals.html" %}
 
             {%else%}
 
@@ -451,7 +451,7 @@
           </tr>
           {%endif%}
             {% endif %}
-            {% include "occupancy_modals.html" %}
+            {% include "booking_modals.html" %}
           {% endfor %}
         {% endfor %}
         
@@ -568,8 +568,8 @@
 
 ////////////////////////////////////CREATE -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
   // gathering date information
-  var startDateInput = document.getElementById("create-start-date");
-  var endDateInput = document.getElementById("create-end-date");
+  var startDateInput = document.getElementById("create-availability-start-date");
+  var endDateInput = document.getElementById("create-availability-end-date");
   var previousStartDate = startDateInput.value;
   var previousEndDate = endDateInput.value;
 
@@ -651,9 +651,9 @@ endDateInput.addEventListener("change", function () {
 
     
     // Set the form values
-    $("#edit-start-date").val(startDate);
-    $("#edit-end-date").val(endDate);
-    $("#edit-event-id").val(eventId);
+    $("#edit-availability-start-date").val(startDate);
+    $("#edit-availability-end-date").val(endDate);
+    $("#edit-availability-event-id").val(eventId);
     //$("#editRedirectId").val(redirectId);  
 // Log values to debug
 console.log("Event ID:", eventId);
@@ -671,8 +671,8 @@ console.log("Room ID:", redirectId);
 
   ////////////////////////////////////EDIT -- LISTENERS AND VALIDATION//////////////////////////////////////////////////////////////////////
     // gathering date information
-  var editStartDateInput = document.getElementById("edit-start-date");
-  var editEndDateInput = document.getElementById("edit-end-date");
+  var editStartDateInput = document.getElementById("edit-availability-start-date");
+  var editEndDateInput = document.getElementById("edit-availability-end-date");
   var previousEditStartDate = editStartDateInput.value;
   var previousEditEndDate = editEndDateInput.value;
 
@@ -748,9 +748,9 @@ function showDeleteAvailabilityForm(eventId, start, end) {
      
      
      // Set the form values
-     $("#delete-start-date").val(startDate);
-     $("#delete-end-date").val(endDate);
-     $("#delete-event-id").val(eventId);
+     $("#delete-availability-start-date").val(startDate);
+     $("#delete-availability-end-date").val(endDate);
+     $("#delete-availability-event-id").val(eventId);
      //$("#editRoomId").val(roomId);  
 
   // Show the modal
