@@ -60,11 +60,13 @@ def delete_booking(request, event_id, section_id=None):
     print('delete booking')
 
     event = get_object_or_404(CustomEvent, id=event_id)
+    redirect_room_id = event_id_to_redirect_room_id(event_id)
     print(event)
 
     if request.method == 'POST':
         form = DeleteBookingForm(request.POST)
         if form.is_valid():
+            print('valid form')
             event.delete()
             response_data = {
                 'status': 'success',
@@ -75,15 +77,18 @@ def delete_booking(request, event_id, section_id=None):
             if source_page == 'rooms_master' and section_id:
                 response_data['redirect_url'] = reverse('rooms_master_with_section', args=[section_id])
             elif source_page == 'rooms_master':
-                response_data['redirect_url'] = reverse('rooms_master_with_room', args=[event_id_to_redirect_room_id(event_id)])
+                print("so going to rooms master with room")
+                response_data['redirect_url'] = reverse('rooms_master_with_room', args=[redirect_room_id])
             else:
                 print("response data is directing to My Guests ")
                 response_data['redirect_url'] = reverse('my_guests')
                 print(response_data)
 
+            print(response_data)
             return JsonResponse(response_data)
 
         # If form is invalid, return errors as JSON
+        print('invalid form')
         return JsonResponse({
             'status': 'error',
             'errors': form.errors,
