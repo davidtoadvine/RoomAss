@@ -12,19 +12,27 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+from decouple import Config, Csv
+config = Config()
+
+
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.'
+# (So BASE_DIR is the path to the overarching project folder)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@0w=bjtj+bv7-qtfpcl1kj5u(jp)2hjq8iwr7&2d824+)6m&tg'
+# Key as variable in .env directory
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# allowing local host and hburg pc
 ALLOWED_HOSTS = ['10.0.0.68', '127.0.0.1']
 
 
@@ -37,12 +45,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-        'django_celery_beat',
-    'schedule',
-        'catalog.apps.CatalogConfig', # This object was created for us in /catalog/apps.py
-            'corsheaders',
+    'django_celery_beat', # for scheduling background tasks
+    'schedule', # used with celery
+    'catalog.apps.CatalogConfig', # This object was created for use in /catalog/apps.py
+    'corsheaders', # security headers, more important when app open to internet 
 ]
-
+ 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
