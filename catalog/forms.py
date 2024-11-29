@@ -1,4 +1,3 @@
-#test comment for new laptop connection
 from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 import bleach
@@ -10,6 +9,8 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 
 ###Occupancy Forms###
+
+# book a room
 class CreateBookingForm(forms.Form):
     GUEST_TYPE_CHOICES = [
         (1, 'Relatively new to Twin Oaks'),
@@ -36,11 +37,12 @@ class CreateBookingForm(forms.Form):
         error_messages={'required': 'Guest type is required.'}
     )
 
-    def clean_room_id(self):
-        room_id = self.cleaned_data.get('room_id')
-        if not Room.objects.filter(id=room_id).exists():
-            raise forms.ValidationError('Invalid room ID.')
-        return room_id
+
+
+    # sanitizing form inputs to prevent HTML or JS injections
+    # cleaned_data starts as just validated, not cleaned
+    # is_valid() method in views validates the form input types and then calls clean
+    # clean calls all the sub cleans first then does its own stuff
 
     def clean(self):
         cleaned_data = super().clean()
@@ -51,6 +53,12 @@ class CreateBookingForm(forms.Form):
             if start_date > end_date:
                 raise forms.ValidationError('Start date must be before end date.')
         return cleaned_data
+
+    def clean_room_id(self):
+           room_id = self.cleaned_data.get('room_id')
+           if not Room.objects.filter(id=room_id).exists():
+               raise forms.ValidationError('Invalid room ID.')
+           return room_id
 
     def clean_guest_name(self):
         guest_name = self.cleaned_data['guest_name']
@@ -68,7 +76,7 @@ class CreateBookingForm(forms.Form):
             raise forms.ValidationError("Guest type is required.")
         return guest_type
   
-
+# for front page input when searching for available guest rooms
 class DateRangeForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -102,7 +110,7 @@ class DateRangeForm(forms.Form):
 
 
 
-
+# for shortening a guest's stay
 class ShortenBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -136,7 +144,7 @@ class ShortenBookingForm(forms.Form):
         return cleaned_data
 
 
-
+# for extending a guest's stay
 class ExtendBookingForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -170,7 +178,7 @@ class ExtendBookingForm(forms.Form):
 
 
     
-
+# for deleting a booking entirely
 class DeleteBookingForm(forms.Form):
 
     event_id = forms.IntegerField(widget=forms.HiddenInput())
@@ -182,6 +190,8 @@ class DeleteBookingForm(forms.Form):
 
 
 ### Availability Forms ###
+
+# forms for members managing their own room
 class CreateAvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -196,11 +206,6 @@ class DeleteAvailabilityForm(forms.Form):
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     event_id = forms.IntegerField(widget=forms.HiddenInput())
-
-
-
-
-
 
 class GuestPreferencesForm(forms.ModelForm):
     class Meta:

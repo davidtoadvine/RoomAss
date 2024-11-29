@@ -11,46 +11,57 @@ from django.shortcuts import render, get_object_or_404, redirect
 from catalog.models import CustomEvent, Room, Building, Person
 
 
+# Merge overlapping availability events on a single calendar
 def merge_overlapping_availabilities(calendar):
     
+    # get availability events from calendar ordered by start date
     events = CustomEvent.objects.filter(calendar = calendar, event_type='availability').order_by('start')
     merged_events = []
     
+    # go through them
     for event in events:
+        # add first event to list
         if not merged_events:
             merged_events.append(event)
+        # then...
         else:
+            # get the last merged event in list
             last_event = merged_events[-1]
             
-            # Normalize times to 12:00 PM for comparison
+            # Normalize times of events to 12:00 PM for sake of comparison
             normalized_last_end = normalize_time(last_event.end)
             normalized_current_start = normalize_time(event.start)
             
+            # adjust and cull as the merge operation
             if normalized_current_start <= normalized_last_end:
-                # Overlapping or contiguous events
                 if event.end > last_event.end:
                     last_event.end = event.end
                 last_event.save()
                 event.delete()
+
             else:
+                # there's no overlap so don't merge anything
                 merged_events.append(event)
 
+    # save your work
     for event in merged_events:
         event.save()
 
+# Set time of day equal for comparing days
+def normalize_time(datetime):
+  return datetime.replace(hour=12, minute=0, second=0, microsecond=0)
 
-def normalize_time(dt):
-  return dt.replace(hour=12, minute=0, second=0, microsecond=0)
 
-
+# For navigation back to correct room pages
 def event_id_to_redirect_room_id(event_id):
   occ_event = get_object_or_404(CustomEvent, id = event_id)
   
-  #for no owner
+  # ownerless rooms
   room_id = occ_event.calendar.room.id
-  #for owned room, check if child
+  # owned rooms
   if occ_event.calendar.room.owner:
     person = occ_event.calendar.room.owner
+    # if room owner is a child, redirect to parent's page
     if person.parent:
       person = person.parent
     room_id = person.room.id
@@ -83,8 +94,8 @@ def ensure_timezone_aware(date, tz_name='America/New_York'):
     return converted_date
 
 
-# this if for after editing or deleting availability events
-# attempts to find another room that is available for the missing chunk of time
+# occupation events will sometimes be disrupted by the alteration of availabiliity events
+# this attempts to find another room that is available for the missing chunk of time
 # calls create_stopgap_booking if possible, sends emails regardless
 def handle_reassign(occ_event, start_date, end_date, owner, room):
                   
@@ -94,15 +105,17 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
 
     original_room = room
 
-    # getting available rooms in order of geographic preference
+    # getting available rooms in order of assumed geographic preference
     original_building = original_room.section.building
     buildings_in_same_area = Building.objects.filter(area=original_building.area).exclude(id=original_building.id)
     buildings_in_other_area = Building.objects.exclude(area = original_building.area)
 
+    # randomly order the rooms in each area
     rooms_in_original_building = Room.objects.filter(section__building = original_building).order_by('?')
     rooms_in_same_area = Room.objects.filter(section__building__in = buildings_in_same_area).order_by('?')
     rooms_outside_original_area = Room.objects.filter(section__building__in = buildings_in_other_area).order_by('?')
 
+    # ooh boy now we've got a list
     rooms = list(rooms_in_original_building) + list(rooms_in_same_area) + list(rooms_outside_original_area)
 
     event_assigned = False
@@ -154,7 +167,8 @@ def create_stopgap_booking(room, event, start_date, end_date, guest_type, guest_
     )
     booking_event.save()
 
-
+# i think this is assessing events on a room's calender in order to create a sensible display
+# but it's been while since I've looked at it
 def process_occupancy_events(availability_events, occupancy_events):
     
     occupancy_events_processed = []

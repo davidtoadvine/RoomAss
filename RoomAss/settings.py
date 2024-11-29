@@ -12,9 +12,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from celery.schedules import crontab
 
+# allows environment variables from .env file
+# storing secret key there and using .gitignore
 from decouple import Config, Csv
-config = Config()
+config = Config(repository= "C:\\Users\\David\\TO_Django_Rooms\\.env")
 
 
 
@@ -26,8 +29,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# Key as variable in .env directory
-SECRET_KEY = config('SECRET_KEY')
+# Key as variable in .env file
+SECRET_KEY = config('SECRET_KEY', default = "test")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -183,3 +186,20 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
+
+CELERY_BROKER_URL = 'amqp://localhost'  # RabbitMQ URL (localhost means it's on the same machine)
+CELERY_ACCEPT_CONTENT = ['json']  # Celery will accept only JSON-encoded messages
+CELERY_TASK_SERIALIZER = 'json'  # Task data will be serialized to JSON
+CELERY_RESULT_BACKEND = 'rpc://'  # You can use RabbitMQ's RPC feature for result storage
+
+# Optionally configure the timezone and task serializer
+CELERY_TIMEZONE ='UTC'
+
+
+# Celery Beat Configuration (if using Django Celery Beat)
+#CELERY_BEAT_SCHEDULE = {
+ #   'delete-ended-events-every-midnight': {
+  #      'task': 'catalog.tasks.delete_ended_events',
+   #     'schedule': crontab(hour=13, minute=45),
+    #},
+#}

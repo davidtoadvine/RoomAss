@@ -17,12 +17,13 @@ from catalog.utils import date_to_aware_datetime, process_occupancy_events
 from django.http import HttpResponseRedirect
 
 def available_rooms(request):
-    
     # get and order rooms for sensible display later
     rooms = Room.objects.select_related('section__building').order_by('section__building__name', 'section__name', 'number')
+
     
     # handle form submission
     if request.method == 'POST':
+        print('POST')
         form = DateRangeForm(request.POST)
         if form.is_valid():
             start_date = form.cleaned_data.get('start_date')
@@ -45,6 +46,8 @@ def available_rooms(request):
     else:
         # Retrieve data from session if available
         start_date = request.session.get('start_date', timezone.localtime(timezone.now()).date())
+        print("start date from session or default")
+        print(start_date)
         end_date = request.session.get('end_date', timezone.localtime(timezone.now()).date() + timedelta(days=1))
         guest_type = int(request.session.get('guest_type', 2))
 
@@ -81,7 +84,7 @@ def available_rooms(request):
 
     available_rooms_info = []
     for room in rooms:
-        
+        print(room.id)
         if room.is_available(start_date, end_date) and (not room.owner or int(guest_type) >= int(room.owner.preference)):
           potential_end_date = room.get_last_available_date(start_date)
           if room.image:
@@ -100,6 +103,8 @@ def available_rooms(request):
         'form': form,
         'guest_type': guest_type
     }
+    print("after context")
+    print(start_date)
     return render(request, 'catalog/available_rooms.html', context)
 
 

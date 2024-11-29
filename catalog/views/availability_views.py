@@ -30,6 +30,7 @@ def create_availability(request, room_id = None, section_id = None):
             start_date = date_to_aware_datetime(start_date, 11,59)
             end_date = date_to_aware_datetime(end_date, 12,1)
 
+            # make the event
             availability_event = CustomEvent(
                     calendar=room.calendar,
                     event_type='availability',
@@ -39,9 +40,11 @@ def create_availability(request, room_id = None, section_id = None):
                     description = "Meaningful Description",
                     creator = request.user
                 )
+            # save it to the calendar and consolidate
             availability_event.save()
-            merge_overlapping_availabilities(room.calendar)  # Call the function to handle overlaps
+            merge_overlapping_availabilities(room.calendar)
 
+            # for redirects whne using rooms master page
             if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
             elif source_page == 'rooms_master' and room_id:
@@ -111,31 +114,41 @@ def edit_availability(request, room_id = None, section_id = None):
               if occ_event.calendar.room.owner:
                 owner_name = occ_event.calendar.room.owner
               room = occ_event.calendar.room
+ 
               full_reassign = False
 
               #Deal with new end date, new start date, completely delete original occupancy if needed
+              
+              # truncate tail end of occupancy if needed
               if occ_event.end > new_avail_end_date:
                   occ_event.end = new_avail_end_date
                   occ_event.save()
               
+                  # attempt to reassign the tail end of the occupancy
                   if new_avail_end_date > occ_event.start:
                     handle_reassign(occ_event, new_avail_end_date, end_date,owner_name,room )
+                  # attempt to reassign the whole occupancy because new window's end date is before occupation start
                   else:
                     handle_reassign(occ_event, start_date,end_date,owner_name,room)
                     full_reassign = True
 
+              # if we're not done, handle the front end as we did for the tail end above
               if not full_reassign and occ_event.start < new_avail_start_date: 
                   occ_event.start = new_avail_start_date
                   occ_event.save()                
 
+                  # partial reassign attempt
                   if new_avail_start_date < occ_event.end:
                       handle_reassign(occ_event, start_date, new_avail_start_date, owner_name,room)
+                  # full reassign attempt
                   else:
                       handle_reassign(occ_event, start_date, end_date,owner_name,room)
 
-              if occ_event.start >= occ_event.end:
+              # delete old occupancy if now completely outside of new availability window
+              if occ_event.start >= occ_event.end: # happens via logic above in the 'else' branches
                   occ_event.delete()
 
+            # rooms master redirects
             if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
             elif source_page == 'rooms_master' and room_id:
@@ -143,6 +156,8 @@ def edit_availability(request, room_id = None, section_id = None):
 
             
             return redirect('my_room')  # Redirect to a relevant page after saving
+        
+
         # Handle form invalid case
         if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
@@ -181,7 +196,6 @@ def delete_availability(request, room_id = None, section_id = None):
                 start_date = event.start
                 end_date = event.end
                 room = event.calendar.room
-
                 owner = 'Twin Oaks'
                 if room.owner:
                   owner = room.owner
@@ -226,7 +240,6 @@ def edit_guest_preferences(request, room_id, person_id, section_id = None):
               return redirect('rooms_master_with_room', room_id = room_id)
             return redirect('my_room') 
         
-    # FIXME unsure if what is below here ever happens
     else:
         form = GuestPreferencesForm(instance=person)
     

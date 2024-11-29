@@ -108,7 +108,7 @@
           type="submit"
           onclick="showBookingForm(event, '{{ room.id }}', '{{ room.number }}', '{{ room.section.building.name }}',
           '{{ room.section.name }}', '{{ start_date }}', '{{ end_date }}',
-          '{{ room_image_url }}', {{guest_type}}
+          '{{ room_image_url }}', '{{guest_type}}'
           )"
         >
           Book Room
@@ -160,7 +160,6 @@
   // gathering date information
   var startDateInput = document.getElementById("start_date");
   var endDateInput = document.getElementById("end_date");
-
   var startDateObj = new Date(startDateInput.value);
   var endDateObj = new Date(endDateInput.value);
   var guestTypeInput = document.getElementById("guest-type")
@@ -258,7 +257,12 @@ if (isNaN(startDateObj.getTime())) {
     guestType
   ) {
     event.preventDefault();
-  
+
+    // Set to noon so spooky behind the scenes time zone conversions don't roll over into a different day
+    var startDateObj = new Date(startDate + "T12:00:00Z");
+    var endDateObj = new Date(endDate + "T12:00:00Z");
+
+    
     // Set the form values
     $("#create-booking-start-date-hidden").val(startDate);
     $("#create-booking-end-date-hidden").val(endDate);
@@ -279,21 +283,23 @@ if (isNaN(startDateObj.getTime())) {
     $("#create-booking-modal").modal("show");
   }
 
-  {% comment %} function submitBookingForm() {
-    let guestName = document.getElementById("guest-name").value.trim()
+  //{% comment %} function submitBookingForm() {
+   // let guestName = document.getElementById("guest-name").value.trim()
    
       // Simulate form submission and failure
       // Check if the value is empty or whitespace
-      if (guestName === "") {
-        alert("Guest Name cannot be empty or just whitespace.");
-        return;
-    }
-     else {
-      alert("Submitted booking.")
-     }
-    $("#booking-form").submit();
-    }
-   {% endcomment %}
+     // if (guestName === "") {
+       // alert("Guest Name cannot be empty or just whitespace.");
+        //return;
+    //}
+     //else {
+      //alert("Submitted booking.")
+     //}
+    //$("#booking-form").submit();
+    //}
+   //{% endcomment %}
+
+
    function submitCreateBookingForm() {
     let guestName = document.getElementById("create-booking-guest-name").value.trim()
    

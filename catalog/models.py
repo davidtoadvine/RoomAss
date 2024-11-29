@@ -8,10 +8,15 @@ from django.utils import timezone
 
 from schedule.models import Calendar, Event
 
-
 class Person(models.Model):
-  name = models.CharField(max_length=255)
+  name = models.CharField(max_length=30)
+
+  # person can be created in the system without creating a related user account (as you might want for young children)
+  # however, deleting a user account will delete the associated person
   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='person', null=True, blank=True)
+
+  # person may have a single parent responsible for management of their room
+  # this could be used to make one spouse a 'child' of a more reliable spouse
   parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
 
   class Preference(models.IntegerChoices):
@@ -27,6 +32,11 @@ class Person(models.Model):
   
   def __str__(self):
     return self.name
+  
+  def save(self, *args, **kwargs):
+        if self.parent == self:
+            raise ValueError("A person cannot be their own parent.")
+        super().save(*args, **kwargs)
 
 # Create your models here.
 class Building(models.Model):
