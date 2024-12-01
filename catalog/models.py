@@ -93,16 +93,20 @@ class Room(models.Model):
     owner = models.OneToOneField(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='room')
     image = models.ImageField(upload_to='room_images/', null=True, blank=True)
     is_offline = models.BooleanField(default=False)
+
   
     def __str__(self):
         return f"{self.section.building.name} / {self.section.name} / {self.number}"
 
     def is_available(self, start_date, end_date):
+        if not isinstance(start_date, datetime) or not isinstance(end_date, datetime):
+            raise ValueError("start_date and end_date must be valid datetime objects.")       
+        
         if self.is_offline:
             return False
         
         if not self.calendar:
-            return True
+            return False
 
         # Ensure dates are timezone aware
         if timezone.is_naive(start_date):
@@ -131,6 +135,9 @@ class Room(models.Model):
         return availability_events.exists()
   
     def get_last_available_date(self, start_date):
+        if not isinstance(start_date, datetime):
+            raise ValueError("start_date must be valid datetime object.")       
+        
         if not self.calendar:
             return None
 
@@ -142,8 +149,8 @@ class Room(models.Model):
             calendar=self.calendar,
             event_type='availability',
             start__lte=start_date,
-            end__gte=start_date
-        ).first()
+            end__gte=start_date # there should only be one event to grab here
+        ).order_by('created_on').first() # but order it in case for consistency
 
         if not current_availability:
             return None
@@ -161,61 +168,7 @@ class Room(models.Model):
         else:
             return current_availability.end
 
-   # def save(self, *args, **kwargs):
-        # old_owner = None
-
-        # if self.pk:  # If the room already exists
-        #     old_owner = Room.objects.get(pk=self.pk).owner
-        
-        # # so this is a save in order to establish room and work with calendars
-        # super().save(*args, **kwargs)
-
-        # # Ensure the room has a calendar
-        # if not self.calendar:
-        #     self.calendar = Calendar.objects.create()
-        #     print('Creating calendar because there isn\'t one (ROOM SAVE)')
-        #     self.save(update_fields=['calendar'])
-
-        # # Update the calendar name
-        # if self.owner:
-        #     self.calendar.name = f"{self.owner.name}'s Calendar"  # Customize as needed
-        #     print('Naming calendar after owner (ROOM SAVE)')
-        # else:
-        #     self.calendar.name = f"Room {self.number} in {self.section}"
-        #     print("Naming calendar after room because no owner (ROOM SAVE)")
-
-        # # obv saving calendar, is this needed here?
-        # self.calendar.save()
-
-        # # Create a specific datetime object far in the future
-        # never_date = datetime(2999, 12, 31, 12, 0, 0)  # December 31, 2999 at noon
-        # # Make it timezone-aware
-        # never_date = timezone.make_aware(never_date, timezone.get_current_timezone())
-
-
-        # if not self.owner:
-        #     # Create or update a permanent availability event
-        #     CustomEvent.objects.update_or_create(
-        #         calendar=self.calendar,
-        #         event_type='availability',
-        #         defaults={
-        #             'start': timezone.now(),
-        #             'end': never_date,
-        #             'title': "Permanent Availability"
-        #         }
-        #     )
-        # else:
-        #     if old_owner != self.owner:
-        #         # Owner has changed, delete availability events
-        #         CustomEvent.objects.filter(
-        #             calendar=self.calendar,
-        #             event_type='availability'
-        #         ).delete()
-
-        # super().save(*args, **kwargs)
   
-
-
 
 # CustomEvent model is for events that make a room available (Availability type)
 # AND events that make it unavailable (Occupancy type)
@@ -277,9 +230,8 @@ def set_rooms_offline(sender, instance, **kwargs):
             room.is_offline = instance.is_offline
             room.save()
 
-
+# handles calendars on room creation and owner changes
 @receiver(post_save, sender=Room)
-
 def handle_room_calendar(sender,instance,created, **kwargs):
     
     if created:  # If it's a new Room instance
@@ -304,7 +256,6 @@ def handle_room_calendar(sender,instance,created, **kwargs):
                 event_type='availability'
             ).delete()
 
-            # Optionally, you can create a new permanent availability event for the new owner if needed.
             if instance.owner:
                 instance.calendar.name = f"{instance.owner.name}'s Calendar"
             else:
@@ -326,57 +277,3 @@ def handle_room_calendar(sender,instance,created, **kwargs):
                     'title': "Permanent Availability"
                 }
             )
-
-
-
-#  old_owner = None
-
-#         if self.pk:  # If the room already exists
-#             old_owner = Room.objects.get(pk=self.pk).owner
-        
-#         # so this is a save in order to establish room and work with calendars
-#         super().save(*args, **kwargs)
-
-#         # Ensure the room has a calendar
-#         if not self.calendar:
-#             self.calendar = Calendar.objects.create()
-#             print('Creating calendar because there isn\'t one (ROOM SAVE)')
-#             self.save(update_fields=['calendar'])
-
-#         # Update the calendar name
-#         if self.owner:
-#             self.calendar.name = f"{self.owner.name}'s Calendar"  # Customize as needed
-#             print('Naming calendar after owner (ROOM SAVE)')
-#         else:
-#             self.calendar.name = f"Room {self.number} in {self.section}"
-#             print("Naming calendar after room because no owner (ROOM SAVE)")
-
-#         # obv saving calendar, is this needed here?
-#         self.calendar.save()
-
-#         # Create a specific datetime object far in the future
-#         never_date = datetime(2999, 12, 31, 12, 0, 0)  # December 31, 2999 at noon
-#         # Make it timezone-aware
-#         never_date = timezone.make_aware(never_date, timezone.get_current_timezone())
-
-
-#         if not self.owner:
-#             # Create or update a permanent availability event
-#             CustomEvent.objects.update_or_create(
-#                 calendar=self.calendar,
-#                 event_type='availability',
-#                 defaults={
-#                     'start': timezone.now(),
-#                     'end': never_date,
-#                     'title': "Permanent Availability"
-#                 }
-#             )
-#         else:
-#             if old_owner != self.owner:
-#                 # Owner has changed, delete availability events
-#                 CustomEvent.objects.filter(
-#                     calendar=self.calendar,
-#                     event_type='availability'
-#                 ).delete()
-
-#         super().save(*args, **kwargs)
