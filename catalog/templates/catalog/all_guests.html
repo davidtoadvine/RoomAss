@@ -38,10 +38,8 @@
 
                     {% if request.user.is_superuser%}
                 <td>
-                    <button class="btn"
-                    onclick="window.location.href='{% url 'rooms_master_with_room' event.room_id %}'">
-                Link to Rooms Master
-            </button>
+                    <!-- This line below has red squiggles but appears to work properly -->
+                    <button class="btn" onclick="window.location.href='{% url 'rooms_master_with_room' event.room_id %}'">Link to Rooms Master</button>
           </td>
                   
                   

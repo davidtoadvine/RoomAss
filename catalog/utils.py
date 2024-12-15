@@ -12,7 +12,8 @@ from catalog.models import CustomEvent, Room, Building
 
 
 # Merge overlapping availability events on a single calendar
-# I guess this could have been part of calendar model
+# I guess this could have been part of Calendar model
+#  but that model is imported so I didn't want to mess with it
 def merge_overlapping_availabilities(calendar):
     
     # get availability events from calendar ordered by start date
@@ -82,10 +83,10 @@ def date_to_aware_datetime(date, hour, minute ):
 def ensure_timezone_aware(date, tz_name='America/New_York'):
     if timezone.is_naive(date):
         aware_date = timezone.make_aware(date, timezone.get_current_timezone())
-        print(f"Converted Naive Date: {aware_date} to Timezone: {timezone.get_current_timezone()}")
+        #print(f"Converted Naive Date: {aware_date} to Timezone: {timezone.get_current_timezone()}")
     else:
         aware_date = date
-        print(f"Date is already aware: {aware_date}")
+        #print(f"Date is already aware: {aware_date}")
 
     # Convert to specified timezone
     target_timezone = pytz.timezone(tz_name)

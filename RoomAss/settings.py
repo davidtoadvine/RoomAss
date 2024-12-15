@@ -48,10 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_celery_beat', # for scheduling background tasks
-    'schedule', # used with celery
+    'schedule',
     'catalog.apps.CatalogConfig', # This object was created for use in /catalog/apps.py
-    'corsheaders', # security headers, more important when app open to internet 
 ]
  
 MIDDLEWARE = [
@@ -62,8 +60,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     
 
@@ -154,52 +150,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-
-CORS_ALLOWED_ORIGINS = [
-      'http://localhost:8000',
-    'http://127.0.0.1:8000',
-]
-
-# Optional: Allow credentials
-CORS_ALLOW_CREDENTIALS = True
-
-# FIXME DELETE THIS
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Optional: Allow specific headers
-CORS_ALLOW_HEADERS = [
-    'content-type',
-    'authorization',
-    'x-csrftoken',
-    'accept',
-    'origin',
-    'x-requested-with',
-]
-
-# Optional: Allow specific methods
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
-]
-
-CELERY_BROKER_URL = 'amqp://localhost'  # RabbitMQ URL (localhost means it's on the same machine)
-CELERY_ACCEPT_CONTENT = ['json']  # Celery will accept only JSON-encoded messages
-CELERY_TASK_SERIALIZER = 'json'  # Task data will be serialized to JSON
-CELERY_RESULT_BACKEND = 'rpc://'  # You can use RabbitMQ's RPC feature for result storage
-
-# Optionally configure the timezone and task serializer
-CELERY_TIMEZONE ='UTC'
-
-
-# Celery Beat Configuration (if using Django Celery Beat)
-#CELERY_BEAT_SCHEDULE = {
- #   'delete-ended-events-every-midnight': {
-  #      'task': 'catalog.tasks.delete_ended_events',
-   #     'schedule': crontab(hour=13, minute=45),
-    #},
-#}

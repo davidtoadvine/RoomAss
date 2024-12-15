@@ -2,11 +2,11 @@
 # Views for assigning and removing room owners
 #
 
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect
 
-from catalog.models import CustomEvent, Room, Person, Building, Section
+from catalog.models import Room, Person
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)

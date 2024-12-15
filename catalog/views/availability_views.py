@@ -10,8 +10,11 @@ from catalog.models import Room, CustomEvent, Person
 from catalog.forms import CreateAvailabilityForm, EditAvailabilityForm, DeleteAvailabilityForm, GuestPreferencesForm
 from catalog.utils import date_to_aware_datetime, merge_overlapping_availabilities, handle_reassign
 
+###################################################################################################################################
 @login_required
 def create_availability(request, room_id = None, section_id = None):
+      
+      # Submission request
       if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_room')
         form = CreateAvailabilityForm(request.POST)
@@ -30,7 +33,7 @@ def create_availability(request, room_id = None, section_id = None):
             start_date = date_to_aware_datetime(start_date, 11,59)
             end_date = date_to_aware_datetime(end_date, 12,1)
 
-            # make the event
+            # Make the event
             availability_event = CustomEvent(
                     calendar=room.calendar,
                     event_type='availability',
@@ -40,17 +43,16 @@ def create_availability(request, room_id = None, section_id = None):
                     description = "Meaningful Description",
                     creator = request.user
                 )
-            # save it to the calendar and consolidate
+            # Save it to the calendar and consolidate
             availability_event.save()
             merge_overlapping_availabilities(room.calendar)
 
-            # for redirects whne using rooms master page
+            # For redirects when using rooms master page
             if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
             elif source_page == 'rooms_master' and room_id:
               return redirect('rooms_master_with_room', room_id = room_id)
         
-            
             return redirect('my_room')
         
         # Handle form invalid case
@@ -59,17 +61,19 @@ def create_availability(request, room_id = None, section_id = None):
         elif source_page == 'rooms_master' and room_id:
               return redirect('rooms_master_with_room', room_id = room_id)
         return redirect('my_room')
-        
+      
+      # Bad request method
+      return HttpResponse("Invalid request method", status=405)
+
+###################################################################################################################################
 @login_required
 def edit_availability(request, room_id = None, section_id = None):
     
     if request.method == 'POST':
-        #print('method is post')
         source_page = request.session.get('source_page', 'my_room')
         form = EditAvailabilityForm(request.POST)
         
         if form.is_valid():
-            #print('edit for is valid')
             # Process the form data
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
@@ -119,36 +123,36 @@ def edit_availability(request, room_id = None, section_id = None):
 
               #Deal with new end date, new start date, completely delete original occupancy if needed
               
-              # truncate tail end of occupancy if needed
+              # Truncate tail end of occupancy if needed
               if occ_event.end > new_avail_end_date:
                   occ_event.end = new_avail_end_date
                   occ_event.save()
               
-                  # attempt to reassign the tail end of the occupancy
+                  # Attempt to reassign the tail end of the occupancy
                   if new_avail_end_date > occ_event.start:
                     handle_reassign(occ_event, new_avail_end_date, end_date,owner_name,room )
-                  # attempt to reassign the whole occupancy because new window's end date is before occupation start
+                  # Attempt to reassign the whole occupancy because new window's end date is before occupation start
                   else:
                     handle_reassign(occ_event, start_date,end_date,owner_name,room)
                     full_reassign = True
 
-              # if we're not done, handle the front end as we did for the tail end above
+              # If we're not done, handle the front end as we did for the tail end above
               if not full_reassign and occ_event.start < new_avail_start_date: 
                   occ_event.start = new_avail_start_date
                   occ_event.save()                
 
-                  # partial reassign attempt
+                  # Partial reassign attempt
                   if new_avail_start_date < occ_event.end:
                       handle_reassign(occ_event, start_date, new_avail_start_date, owner_name,room)
-                  # full reassign attempt
+                  # Full reassign attempt
                   else:
                       handle_reassign(occ_event, start_date, end_date,owner_name,room)
 
-              # delete old occupancy if now completely outside of new availability window
+              # Delete old occupancy if now completely outside of new availability window
               if occ_event.start >= occ_event.end: # happens via logic above in the 'else' branches
                   occ_event.delete()
 
-            # rooms master redirects
+            # Rooms master redirects
             if source_page == 'rooms_master' and section_id:
               return redirect('rooms_master_with_section', section_id = section_id)
             elif source_page == 'rooms_master' and room_id:
@@ -169,8 +173,11 @@ def edit_availability(request, room_id = None, section_id = None):
     
     return HttpResponse("Invalid request method", status=405)
 
+###################################################################################################################################
 @login_required
 def delete_availability(request, room_id = None, section_id = None):
+    
+    # Form submission
     if request.method == 'POST':
         source_page = request.session.get('source_page', 'my_room')
         form = DeleteAvailabilityForm(request.POST)
@@ -200,7 +207,8 @@ def delete_availability(request, room_id = None, section_id = None):
                 if room.owner:
                   owner = room.owner
 
-                handle_reassign(event, start_date, end_date, owner, room)
+                # Attempt to reassign the events
+                handle_reassign(event, start_date, end_date, owner, room) # Function in utils.py
                 event.delete()
 
             avail_event.delete()
@@ -219,9 +227,10 @@ def delete_availability(request, room_id = None, section_id = None):
               return redirect('rooms_master_with_room', room_id = room_id)
         return redirect('my_room') 
 
-    return redirect('my_room')
+    # Bad request method
+    return HttpResponse("Invalid request method", status=405)
 
-
+###################################################################################################################################
 @login_required
 def edit_guest_preferences(request, room_id, person_id, section_id = None):
     

@@ -6,7 +6,7 @@ import django
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Set the Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'RoomAss.settings')  # Replace 'your_project' with your project name
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'RoomAss.settings')  
 
 # Initialize Django
 django.setup()
