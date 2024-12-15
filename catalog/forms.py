@@ -78,8 +78,8 @@ class CreateBookingForm(forms.Form):
   
 # for front page input when searching for available guest rooms
 class DateRangeForm(forms.Form):
-    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}),required=True)
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}),required = True)
 
     GUEST_TYPE_CHOICES = [
         (1, 'Relatively new to Twin Oaks'),

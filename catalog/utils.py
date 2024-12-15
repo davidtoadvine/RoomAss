@@ -8,10 +8,11 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 
-from catalog.models import CustomEvent, Room, Building, Person
+from catalog.models import CustomEvent, Room, Building
 
 
 # Merge overlapping availability events on a single calendar
+# I guess this could have been part of calendar model
 def merge_overlapping_availabilities(calendar):
     
     # get availability events from calendar ordered by start date
@@ -89,7 +90,7 @@ def ensure_timezone_aware(date, tz_name='America/New_York'):
     # Convert to specified timezone
     target_timezone = pytz.timezone(tz_name)
     converted_date = aware_date.astimezone(target_timezone)
-    print(f"Converted Date to {tz_name} Timezone: {converted_date}")
+    #print(f"Converted Date to {tz_name} Timezone: {converted_date}")
 
     return converted_date
 
@@ -142,7 +143,7 @@ def handle_reassign(occ_event, start_date, end_date, owner, room):
                           
                               
     if not event_assigned:
-          print('event not reassigned')
+          #print('event not reassigned')
           send_mail(
                           "Your room booking has changed",
                           f"{owner} has had an availability change. Your guest {guest_name} could not be automatically assigned to a different room. Contact the room assigner for help. ",

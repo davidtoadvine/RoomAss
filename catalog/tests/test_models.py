@@ -4,7 +4,7 @@ from catalog.models import Person, Building, Section, CustomEvent, Room
 from schedule.models import Calendar, Event
 from django.core.exceptions import ValidationError
 from datetime import timedelta, datetime
-from django.utils.timezone import now, is_aware,get_current_timezone
+from django.utils.timezone import now, is_aware, get_current_timezone, make_aware, make_naive
 from unittest.mock import patch
 from django.utils import timezone
 
@@ -20,7 +20,7 @@ class PersonModelTest(TestCase):
         person = Person.objects.create(name="Testperson", user=None)
         self.assertIsNone(person.user)
 
-    def test_user_del_cascades(self):
+    def test_user_delete_cascades(self):
         user = User.objects.create(username='testuser')
         person = Person.objects.create(name="Testperson", user=user)
         self.assertEqual(person.user,user)
@@ -165,7 +165,7 @@ class RoomModelTest(TestCase):
             self.room.refresh_from_db()
     
     def test_room_owner_and_calendar_delete(self):
-        # don't want deletion of owner or calendar to delete the room
+        # don't want the deletion of owner or calendar to delete the room
         self.owner = Person.objects.create(name="Testperson")
         self.room.owner = self.owner
         self.room.owner.delete()
@@ -175,7 +175,7 @@ class RoomModelTest(TestCase):
 
 
     def test_creation_and_default_values(self):
-        # starts off line
+        # starts on line
         self.assertFalse(self.room.is_offline)
         # no room number fails
         self.room = Room(section = self.section)
@@ -229,27 +229,27 @@ class RoomModelTest(TestCase):
          end_date = datetime(3000, 1, 10, 12, 0)
          CustomEvent.objects.create(calendar = self.room.calendar , event_type = 'availability', start = start_date, end = end_date)
 
-         naive_start = datetime(3000, 1, 5, 12, 0)
-         naive_end = datetime(3000, 1, 6, 12, 0)
+         requested_start = datetime(3000, 1, 5, 12, 0)
+         requested_end = datetime(3000, 1, 6, 12, 0)
         
         # this creates a mock version of make_aware that keeps track of whether or not it has been called
          with patch('django.utils.timezone.make_aware',side_effect=timezone.make_aware) as mocked_make_aware:
         
             # Call the function that should invoke make_aware
-            result = self.room.is_available(naive_start,naive_end)
+            result = self.room.is_available(requested_start,requested_end)
 
             # Check if make_aware was called with the correct datetime and timezone
-            mocked_make_aware.assert_any_call(naive_start, get_current_timezone())
-            mocked_make_aware.assert_any_call(naive_end, get_current_timezone())
+            mocked_make_aware.assert_any_call(requested_start, get_current_timezone())
+            mocked_make_aware.assert_any_call(requested_end, get_current_timezone())
             
             self.assertEqual(mocked_make_aware.call_count, 2)
             self.assertTrue(result)
 
     def test_is_avail_no_availability(self):
  
-         naive_start = datetime(3000, 1, 5, 12, 0)
-         naive_end = datetime(3000, 1, 6, 12, 0)
-         self.assertFalse(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 5, 12, 0)
+         requested_end = datetime(3000, 1, 6, 12, 0)
+         self.assertFalse(self.room.is_available(requested_start, requested_end))
    
     def test_is_avail_basic_dates(self):
 
@@ -258,19 +258,19 @@ class RoomModelTest(TestCase):
          self.event = CustomEvent.objects.create(calendar = self.room.calendar, event_type = 'availability', start = start_date, end = end_date)
          
          # requested start is too early
-         naive_start = datetime(3000, 1, 1, 12, 0)
-         naive_end = datetime(3000, 1, 9, 12, 0)
-         self.assertFalse(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 1, 12, 0)
+         requested_end = datetime(3000, 1, 9, 12, 0)
+         self.assertFalse(self.room.is_available(requested_start, requested_end))
 
          # requested end is too late
-         naive_start = datetime(3000, 1, 3, 12, 0)
-         naive_end = datetime(3000, 1, 11, 12, 0)
-         self.assertFalse(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 3, 12, 0)
+         requested_end = datetime(3000, 1, 11, 12, 0)
+         self.assertFalse(self.room.is_available(requested_start, requested_end))
 
         # requested dates within range
-         naive_start = datetime(3000, 1, 3, 12, 0)
-         naive_end = datetime(3000, 1, 5, 12, 0)
-         self.assertTrue(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 3, 12, 0)
+         requested_end = datetime(3000, 1, 5, 12, 0)
+         self.assertTrue(self.room.is_available(requested_start, requested_end))
     
     def test_is_avail_exact_dates(self):
 
@@ -278,9 +278,9 @@ class RoomModelTest(TestCase):
          end_date = datetime(3000, 1, 10, 12, 0)
          self.event = CustomEvent.objects.create(calendar = self.room.calendar, event_type = 'availability', start = start_date, end = end_date)
          
-         naive_start = datetime(3000, 1, 1, 12, 0)
-         naive_end = datetime(3000, 1, 10, 12, 0)
-         self.assertTrue(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 1, 12, 0)
+         requested_end = datetime(3000, 1, 10, 12, 0)
+         self.assertTrue(self.room.is_available(requested_start, requested_end))
     
 
     def test_is_avail_avails_and_occs(self):
@@ -296,21 +296,21 @@ class RoomModelTest(TestCase):
          self.event = CustomEvent.objects.create(calendar = self.room.calendar, event_type = 'occupancy', start = start_date, end = end_date)
          
          # should be unavailable for full range
-         naive_start = datetime(3000, 1, 1, 12, 0)
-         naive_end = datetime(3000, 1, 10, 12, 0)
-         self.assertFalse(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 1, 12, 0)
+         requested_end = datetime(3000, 1, 10, 12, 0)
+         self.assertFalse(self.room.is_available(requested_start, requested_end))
 
          # redefine occupation at end of availability
          start_date = datetime(3000, 1, 8, 12, 0)
          end_date = datetime(3000, 1, 10, 12, 0)
          self.event = CustomEvent.objects.create(calendar = self.room.calendar, event_type = 'occupation', start = start_date, end = end_date)
          # should be unavailable for full range
-         self.assertFalse(self.room.is_available(naive_start, naive_end))
+         self.assertFalse(self.room.is_available(requested_start, requested_end))
 
          # request for this shorter span should work
-         naive_start = datetime(3000, 1, 4, 12, 0)
-         naive_end = datetime(3000, 1, 6, 12, 0)
-         self.assertTrue(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 4, 12, 0)
+         requested_end = datetime(3000, 1, 6, 12, 0)
+         self.assertTrue(self.room.is_available(requested_start, requested_end))
 
 
     def test_is_avail_mult_avails(self):
@@ -327,11 +327,20 @@ class RoomModelTest(TestCase):
          
          # overlapping availabilities shouldn't exist but
          # if one works it should return True
-         naive_start = datetime(3000, 1, 2, 12, 0)
-         naive_end = datetime(3000, 1, 8, 12, 0)
-         self.assertTrue(self.room.is_available(naive_start, naive_end))
+         requested_start = datetime(3000, 1, 2, 12, 0)
+         requested_end = datetime(3000, 1, 8, 12, 0)
+         self.assertTrue(self.room.is_available(requested_start, requested_end))
+
+    def test_is_avail_room_offline(self):
+         start_date = datetime(3000, 1, 2, 12, 0)
+         end_date = datetime(3000, 1, 10, 12, 0)
+         self.event = CustomEvent.objects.create(calendar = self.room.calendar, event_type = 'availability', start = start_date, end = end_date)
+         self.room.is_offline = True
 
 
+         requested_start = datetime(3000, 1, 3, 12, 0)
+         requested_end = datetime(3000, 1, 8, 12, 0)
+         self.assertFalse(self.room.is_available(requested_start, requested_end))
 
     
     ###
@@ -368,10 +377,11 @@ class RoomModelTest(TestCase):
 
     
     def test_get_last_avail_no_availabilities(self):
-        naive_start = datetime(3000, 1, 5, 12, 0)
-        result = self.room.get_last_available_date(naive_start)
+        requested_start = datetime(3000, 1, 5, 12, 0)
+        result = self.room.get_last_available_date(requested_start)
         self.assertIsNone(result)
 
+    # this shouldn't ever occur due to event merging, but prioritize the older event if it does for consistency
     def test_get_last_avail_doubled_availabilities(self):
 
         start_date_1 = timezone.make_aware(datetime(3000, 1, 1, 12, 0))
@@ -383,10 +393,9 @@ class RoomModelTest(TestCase):
         CustomEvent.objects.create(calendar = self.room.calendar , event_type = 'availability', start = start_date_2, end = end_date_2)
 
 
-        naive_start = datetime(3000, 1, 5, 12, 0)
-        result = self.room.get_last_available_date(naive_start)
+        requested_start = datetime(3000, 1, 5, 12, 0)
+        result = self.room.get_last_available_date(requested_start)
 
-        # Make sure the actual function return value is end date
         self.assertEqual(result, end_date_1)
 
 
@@ -400,10 +409,9 @@ class RoomModelTest(TestCase):
         end_date_2 = timezone.make_aware(datetime(3000, 1, 10, 12, 0))
         CustomEvent.objects.create(calendar = self.room.calendar , event_type = 'occupancy', start = start_date_2, end = end_date_2)
 
-        naive_start = datetime(3000, 1, 5, 12, 0)
-        result = self.room.get_last_available_date(naive_start)
+        requested_start = datetime(3000, 1, 5, 12, 0)
+        result = self.room.get_last_available_date(requested_start)
 
-        # Make sure the actual function return value is end date
         self.assertEqual(result, start_date_2)
 
 
@@ -412,7 +420,108 @@ class RoomModelTest(TestCase):
 
 
         
-
 class CustomEventModelTest(TestCase):
-    def test_test(self):
-        self.assertTrue(True)
+    def setUp(self):
+        self.start = now()
+        self.end = now() + timedelta(hours=1)
+        self.calendar = Calendar.objects.create()
+
+    def test_default_guest_type(self):
+        event = CustomEvent.objects.create(
+            title = "Test Event",
+            start = self.start,
+            end = self.end,
+            event_type = 'occupancy',
+            calendar_id = self.calendar.id
+        )
+        self.assertEqual(event.guest_type, CustomEvent.GuestType.STRANGER)
+    
+    def test_guest_type_choices(self):
+        event = CustomEvent.objects.create(
+            title = "Test Event",
+            start = self.start,
+            end = self.end,
+            event_type = 'occupancy',
+            calendar_id = self.calendar.id,
+            guest_type = CustomEvent.GuestType.KNOWN
+
+        )
+        event.save()
+        self.assertEqual(event.guest_type, CustomEvent.GuestType.KNOWN)
+
+    def test_event_type_validation(self):
+            event = CustomEvent.objects.create(
+                title="Invalid Event",
+                start=self.start,
+                end=self.end,
+                calendar_id = self.calendar.id,
+                event_type='invalid_type'  # Invalid event type
+            )
+             # Assert that ValidationError is raised
+            with self.assertRaises(ValidationError) as context:
+                event.full_clean()
+
+            # Check the specific field that caused the error
+            self.assertIn('event_type', context.exception.message_dict)
+            self.assertEqual(
+                context.exception.message_dict['event_type'],
+                ["Value 'invalid_type' is not a valid choice."]
+            )
+
+    def test_guest_name_optional(self):
+        event = CustomEvent.objects.create(
+            title="No Guest Name",
+            start=self.start,
+            end=self.end,
+            event_type='availability',
+            calendar_id = self.calendar.id,
+        )
+        self.assertIsNone(event.guest_name)
+
+    def test_timezone_aware_save(self):
+        naive_start = make_naive(self.start)
+        naive_end = make_naive(self.end)
+
+        event = CustomEvent(
+            title="Timezone Test Event",
+            start=naive_start,
+            end=naive_end,
+            event_type='occupancy',
+            calendar_id = self.calendar.id,
+        )
+        event.save()
+        self.assertTrue(timezone.is_aware(event.start))
+        self.assertTrue(timezone.is_aware(event.end))
+
+    def test_blank_and_null_fields(self):
+        event = CustomEvent.objects.create(
+            title="Test Blank/Null",
+            start=self.start,
+            end=self.end,
+            event_type='availability',
+            guest_type=None,  # Explicitly set to null
+            guest_name=None,
+            calendar_id = self.calendar.id,
+        )
+        self.assertIsNone(event.guest_type)
+        self.assertIsNone(event.guest_name)
+
+    def test_invalid_guest_type(self):
+        
+            event = CustomEvent.objects.create(
+                title="Invalid Guest Type",
+                start=self.start,
+                end=self.end,
+                event_type='occupancy',
+                calendar_id = self.calendar.id,
+                guest_type=99  # Invalid choice
+            )
+            with self.assertRaises(ValidationError) as context:
+                event.full_clean()
+
+            self.assertIn('guest_type', context.exception.message_dict)
+            self.assertEqual(
+                context.exception.message_dict['guest_type'],
+                ['Value 99 is not a valid choice.']
+            )
+            

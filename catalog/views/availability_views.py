@@ -64,12 +64,12 @@ def create_availability(request, room_id = None, section_id = None):
 def edit_availability(request, room_id = None, section_id = None):
     
     if request.method == 'POST':
-        print('method is post')
+        #print('method is post')
         source_page = request.session.get('source_page', 'my_room')
         form = EditAvailabilityForm(request.POST)
         
         if form.is_valid():
-            print('edit for is valid')
+            #print('edit for is valid')
             # Process the form data
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']

@@ -23,13 +23,13 @@ def available_rooms(request):
     
     # handle form submission
     if request.method == 'POST':
-        print('POST')
+
         form = DateRangeForm(request.POST)
         if form.is_valid():
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
             guest_type = form.cleaned_data.get('guest_type')
-            print(f"Valid data: {form.cleaned_data}")
+            #print(f"Valid data: {form.cleaned_data}")
             # Save the session variables
             request.session['start_date'] = str(start_date)
             request.session['end_date'] = str(end_date)
@@ -44,10 +44,8 @@ def available_rooms(request):
 
     # retrieve prior session values if not a form submisison
     else:
-        # Retrieve data from session if available
+        # Retrieve data from session if available, otherwise default to second arg (today for start, tomorrow for end)
         start_date = request.session.get('start_date', timezone.localtime(timezone.now()).date())
-        print("start date from session or default")
-        print(start_date)
         end_date = request.session.get('end_date', timezone.localtime(timezone.now()).date() + timedelta(days=1))
         guest_type = int(request.session.get('guest_type', 2))
 
@@ -57,34 +55,17 @@ def available_rooms(request):
             'guest_type': guest_type
         })
 
-    # Get the current local date and the next day's date
-    local_now = timezone.localtime(timezone.now())
-    today = local_now.date()
-    tomorrow = today + timedelta(days=1)
-    
-
-    default_start_date = today
-    default_end_date = tomorrow
-
-    # Convert the start and end date strings to timezone-aware datetime objects
-    if start_date and end_date:
-        if isinstance(start_date, str):
+    if isinstance(start_date, str):
             start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        if isinstance(end_date, str):
+    if isinstance(end_date, str):
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
 
-        # Convert to aware datetime objects with specific times
-        start_date = date_to_aware_datetime(start_date, 23, 59)
-        end_date = date_to_aware_datetime(end_date, 11, 59)
-    else:
-        # Use default dates if not provided
-        start_date = date_to_aware_datetime(default_start_date, 23, 59)
-        end_date = date_to_aware_datetime(default_end_date, 11, 59)
-
+    start_date = date_to_aware_datetime(start_date, 23, 59)
+    end_date = date_to_aware_datetime(end_date, 11, 59)
 
     available_rooms_info = []
     for room in rooms:
-        print(room.id)
+        # check if dates are good and (room has no owner or guest fits within owner's preferences)
         if room.is_available(start_date, end_date) and (not room.owner or int(guest_type) >= int(room.owner.preference)):
           potential_end_date = room.get_last_available_date(start_date)
           if room.image:
@@ -96,15 +77,12 @@ def available_rooms(request):
 
     context = {
         'available_rooms_info': available_rooms_info,
-        'start_date': start_date.strftime('%Y-%m-%d') if start_date else today.strftime('%Y-%m-%d'),
-        'end_date': end_date.strftime('%Y-%m-%d') if end_date else tomorrow.strftime('%Y-%m-%d'),
-        'today': today,
-        'tomorrow': tomorrow,
+        'start_date': start_date.strftime('%Y-%m-%d') ,
+        'end_date': end_date.strftime('%Y-%m-%d'),
         'form': form,
         'guest_type': guest_type
     }
-    print("after context")
-    print(start_date)
+
     return render(request, 'catalog/available_rooms.html', context)
 
 
@@ -117,8 +95,9 @@ def all_guests(request):
     for event in occupancy_events:
         room_owner = "Unassigned"
 
-        if event.calendar.room.owner:
-            room_owner = event.calendar.room.owner
+        room = getattr(event.calendar, 'room', None)  # Safely get the room attribute
+        if room and room.owner:
+            room_owner = room.owner
 
         event_info = {
             'guest_name': event.guest_name,
@@ -212,7 +191,7 @@ def my_guests(request):
     processed_events = []
 
     for event in occupancy_events:
-        print(event.id)
+        #print(event.id)
         room_owner = "Unassigned"
         if event.calendar.room.owner:
             room_owner = event.calendar.room.owner

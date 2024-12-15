@@ -192,13 +192,13 @@ class CustomEvent(Event):
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
     
     def save(self, *args, **kwargs):
-        print("Custom event is saving...")
+        # print("Custom event is saving...")
         # Ensure start and end are timezone-aware
         if timezone.is_naive(self.start):
             self.start = timezone.make_aware(self.start, timezone.get_current_timezone())
         if timezone.is_naive(self.end):
             self.end = timezone.make_aware(self.end, timezone.get_current_timezone())
-        print(f"Saving CustomEvent: {self.title}")
+        # print(f"Saving CustomEvent: {self.title}")
         super(CustomEvent, self).save(*args, **kwargs)
     
 
